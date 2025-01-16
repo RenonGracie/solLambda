@@ -9,7 +9,9 @@ custom:
 
 provider:
   name: aws
+  stage: dev
   runtime: python3.12
+  region: us-east-2
 
 functions:
   api:
