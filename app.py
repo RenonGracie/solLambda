@@ -1,5 +1,5 @@
 from flask import jsonify, request, make_response
-from flask_pydantic_spec import Request, Response
+from flask_pydantic_spec import Response
 
 from models.clients import Client
 from routes.clients import client_route
@@ -40,6 +40,7 @@ def typeform_webhook():
         }
     client = get_intake_client(json)
     result = save_update_client(client)
+    print(result)
     return jsonify(result.json()), result.status_code
 
 
