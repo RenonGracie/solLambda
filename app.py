@@ -1,28 +1,24 @@
-from flask import jsonify, request, make_response
-from flask_pydantic_spec import Response
+from flask import jsonify, request
+from flask_openapi3 import Tag, Info, OpenAPI
 
 from models.clients import Client
-from routes.clients import client_route
-from utils.flask_utils import app, api
+from routes.clients import client_api
 from utils.request_utils import save_update_client
 from utils.typeform_utils import get_intake_client
 
-app.register_blueprint(client_route, url_prefix="/clients")
+__jwt = {
+    "type": "http",
+    "scheme": "bearer",
+    "bearerFormat": "JWT"
+}
+__security_schemes = {"jwt": __jwt}
 
-@app.route("/")
-def hello_from_root():
-    return jsonify(message='Hello from root!')
+info = Info(title="SolHealth API", version="1.0.0")
+app = OpenAPI(__name__, info=info, security_schemes=__security_schemes)
 
+app.register_api(client_api)
 
-@app.errorhandler(404)
-def resource_not_found(e):
-    return make_response(jsonify(error='Not found!'), 404)
-
-@app.route('/hook', methods=['POST'])
-@api.validate(
-    tags=['Webhook'],
-    resp=Response(HTTP_200=Client),
-)
+@app.post('/hook', tags=[Tag(name="Webhook")], responses={200: Client},)
 def typeform_webhook():
     print(request)
     response_json = request.get_json()

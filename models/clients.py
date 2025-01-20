@@ -61,14 +61,15 @@ class Clients(BaseModel):
 
 
 class ClientTag(BaseModel):
-    ClientId: str = Field(default=None, example='123')
-    Tag: str = Field(default=None, example='text')
+    ClientId: str | None = Field(..., example='123')
+    Tag: str | None = Field(..., example='text')
 
 class ClientTagQuery(BaseModel):
     clientId: str = Field(default=None, example='123')
     tag: str = Field(default=None, example='text')
 
-
+class ClientPath(BaseModel):
+    client_id: int = Field(..., description='client id')
 
 class ClientDiagnose(BaseModel):
     Code: str = Field(default=None, example='1')

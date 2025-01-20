@@ -1,67 +1,37 @@
-from flask import Blueprint, jsonify, request
+from flask import jsonify
+from flask_openapi3 import Tag, APIBlueprint
 
 from models.clients import *
-from utils.flask_utils import api
-
-from flask_pydantic_spec import Request, Response
-
 from utils.request_utils import save_update_client, search_clients as search, add_client_tag, delete_client_tag, client_diagnoses
 
-client_route = Blueprint("clients", __name__)
+__tag = Tag(name="Clients")
+client_api = APIBlueprint("clients", __name__, abp_tags=[__tag], abp_security=[{"jwt": []}], url_prefix="/clients")
 
-@client_route.route("", methods=["PATCH"])
-@api.validate(
-    body=Request(Client),
-    tags=['Clients'],
-    resp=Response(HTTP_200=Client),
-)
-def update_client():
-    request_json = request.get_json()
-    client = Client(**request_json)
-    result = save_update_client(client)
+@client_api.patch("", responses={200: Client})
+def update_client(body: Client):
+    result = save_update_client(body)
     return jsonify(result.json()), result.status_code
 
 
-@client_route.route("search", methods=["GET"])
-@api.validate(
-    query=ClientQueryModel,
-    tags=['Clients'],
-    resp=Response(HTTP_200=Clients),
-)
-def search_clients():
-    args = request.args
-    result = search(args)
+@client_api.get("search", responses={200: Clients})
+def search_clients(query: ClientQueryModel):
+    result = search(query.model_dump())
     return jsonify({"clients": result.json()}), result.status_code
 
 
-@client_route.route("clientTags", methods=["POST"])
-@api.validate(
-    query=ClientTagQuery,
-    body=Request(ClientTag),
-    tags=['Clients'],
-    resp=Response(HTTP_204=None),
-)
-def add_tag():
-    result = add_client_tag(request.get_json())
+@client_api.post("clientTags", responses={204: None})
+def add_tag(body: ClientTag):
+    result = add_client_tag(body.model_dump())
     return '', result.status_code
 
 
-@client_route.route("clientTags", methods=["DELETE"])
-@api.validate(
-    query=ClientTagQuery,
-    tags=['Clients'],
-    resp=Response(HTTP_204=None),
-)
-def delete_tag():
-    result = delete_client_tag(request.args)
+@client_api.delete("clientTags", responses={204: None})
+def delete_tag(query: ClientTagQuery):
+    result = delete_client_tag(query.model_dump())
     return '', result.status_code
 
 
-@client_route.route("/client/<int:client_id>/diagnoses", methods=["GET"])
-@api.validate(
-    tags=['Clients'],
-    resp=Response(HTTP_200=ClientDiagnoses),
-)
-def get_client_diagnoses(client_id):
-    result = client_diagnoses(client_id)
+@client_api.delete("/client/<int:client_id>/diagnoses", responses={200: ClientDiagnoses})
+def get_client_diagnoses(path: ClientPath):
+    result = client_diagnoses(path.client_id)
     return jsonify({"diagnoses": result.json()}), result.status_code
