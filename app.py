@@ -2,6 +2,7 @@ from flask import jsonify, request
 from flask_openapi3 import Tag, Info, OpenAPI
 
 from models.clients import Client
+from routes.airtable import therapist_api
 from routes.appointments import appointment_api
 from routes.clients import client_api
 from utils.request_utils import save_update_client
@@ -19,6 +20,7 @@ app = OpenAPI(__name__, info=info, security_schemes=__security_schemes)
 
 app.register_api(client_api)
 app.register_api(appointment_api)
+app.register_api(therapist_api)
 
 @app.post('/hook', tags=[Tag(name="Webhook")], responses={200: Client}, summary="Webhook for typeform")
 def typeform_webhook():
