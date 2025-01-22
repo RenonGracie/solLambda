@@ -2,6 +2,7 @@ from flask import jsonify, request
 from flask_openapi3 import Tag, Info, OpenAPI
 
 from models.clients import Client
+from routes.appointments import appointment_api
 from routes.clients import client_api
 from utils.request_utils import save_update_client
 from utils.typeform_utils import get_intake_client
@@ -17,8 +18,9 @@ info = Info(title="SolHealth API", version="1.0.0")
 app = OpenAPI(__name__, info=info, security_schemes=__security_schemes)
 
 app.register_api(client_api)
+app.register_api(appointment_api)
 
-@app.post('/hook', tags=[Tag(name="Webhook")], responses={200: Client},)
+@app.post('/hook', tags=[Tag(name="Webhook")], responses={200: Client}, summary="Webhook for typeform")
 def typeform_webhook():
     print(request)
     response_json = request.get_json()
