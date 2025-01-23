@@ -1,8 +1,8 @@
 name: be deploy
 on:
-  push:
-    branches:
-      - develop
+#  push:
+#    branches:
+#      - develop
 
 jobs:
   deploy:
@@ -29,7 +29,7 @@ jobs:
         uses: astral-sh/setup-uv@v5
 
       - name: Install the project
-        run: uv sync --all-extras --dev
+        run: uv sync
 
       - name: Check Python version # checking the python version to see if 3.x is installed.
         run: python --version
