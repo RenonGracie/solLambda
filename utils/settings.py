@@ -15,4 +15,6 @@ class Settings(Singleton):
 
         self.AIRTABLE_API_KEY = os.getenv("AIRTABLE_API_KEY")
 
+        self.GOOGLE_CALENDAR_CREDENTIALS = os.getenv("GOOGLE_CALENDAR_CREDENTIALS")
+
 settings = Settings()
