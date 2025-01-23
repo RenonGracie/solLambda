@@ -28,7 +28,7 @@ jobs:
 
       - name: serverless install plugins
         uses: serverless/github-action@v3.2
-        run:
+      - run:
           - serverless plugin install -n serverless-python-requirements
           - serverless plugin install -n serverless-wsgi
 
