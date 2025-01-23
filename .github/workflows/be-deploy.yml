@@ -4,13 +4,6 @@ on:
     branches:
       - develop
 
-env:
-  AWS_REGION : "us-east-1"
-  
-permissions:
-      id-token: write
-      contents: read
-
 jobs:
   deploy:
     name: deploy
@@ -28,9 +21,9 @@ jobs:
 
       - name: serverless install plugins
         uses: serverless/github-action@v3.2
-      - run:
-          - serverless plugin install -n serverless-python-requirements
-          - serverless plugin install -n serverless-wsgi
+      - run: |
+          serverless plugin install -n serverless-python-requirements
+          serverless plugin install -n serverless-wsgi
 
       - name: serverless deploy
         uses: serverless/github-action@v3.2
