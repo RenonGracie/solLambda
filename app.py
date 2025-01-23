@@ -2,7 +2,7 @@ from flask import jsonify, request
 from flask_openapi3 import Tag, Info, OpenAPI
 
 from models.clients import Client
-from routes.airtable import therapist_api
+from routes.therapists import therapist_api
 from routes.appointments import appointment_api
 from routes.clients import client_api
 from utils.request_utils import save_update_client

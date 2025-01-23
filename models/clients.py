@@ -57,22 +57,22 @@ class Clients(BaseModel):
 
 
 class ClientTag(BaseModel):
-    ClientId: str | None = Field(..., ge='123')
-    Tag: str | None = Field(..., ge='text')
+    ClientId: str | None = Field(...)
+    Tag: str | None = Field(...)
 
 class ClientTagQuery(BaseModel):
-    clientId: str = Field(default=None, ge='123')
-    tag: str = Field(default=None, ge='text')
+    clientId: str = Field(default=None)
+    tag: str = Field(default=None)
 
 class ClientPath(BaseModel):
-    client_id: str = Field(..., description='client id')
+    client_id: str = Field(...)
 
 class ClientDiagnose(BaseModel):
-    Code: str = Field(default=None, ge='1')
-    Description: str = Field(default=None, ge='Alcohol Disorder')
-    Date: str = Field(default=None, ge='2021-12-08T23:00:00Z')
-    EndDate: str = Field(default=None, ge=None)
-    NoteId: str = Field(default=None, ge='82328bc2-3ff8-4ea8...')
+    Code: str = Field(default=None)
+    Description: str = Field(default=None)
+    Date: str = Field(default=None)
+    EndDate: str = Field(default=None)
+    NoteId: str = Field(default=None)
 
 class ClientDiagnoses(BaseModel):
     diagnoses: List[ClientDiagnose] | None = None
