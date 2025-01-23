@@ -20,12 +20,14 @@ jobs:
           node-version: ${{ matrix.node-version }}
       - run: npm ci
 
-      - name: Install Plugin and deploy
-        uses: |
-          actions/setup-python@v5
-          serverless/github-action@v3.2
+      - name: Checkout Python
+        uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+
+      - name: Install Plugin and deploy
+        uses: serverless/github-action@v3.2
+        with:
           args: -c "serverless plugin install --name serverless-python-requirements && serverless plugin install --name serverless-wsgi && serverless deploy --stage dev"
           entrypoint: /bin/sh
         env:
