@@ -24,6 +24,8 @@ jobs:
         with:
           args: -c "serverless plugin install --name serverless-python-requirements && "serverless plugin install --name serverless-wsgi"
           entrypoint: /bin/sh
+        env:
+          SLS_INTERACTIVE_SETUP_ENABLE: 1
 
       - name: serverless deploy
         uses: serverless/github-action@v3.2
