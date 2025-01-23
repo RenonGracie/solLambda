@@ -28,13 +28,13 @@ jobs:
       - name: Check Python version # checking the python version to see if 3.x is installed.
         run: python --version
 
-      - name: Install Plugin and deploy
-        uses: serverless/github-action@v3.2
-        with:
-          args: -c "python3 --version && serverless plugin install --name serverless-python-requirements && serverless plugin install --name serverless-wsgi && serverless deploy --stage dev"
-          entrypoint: /bin/sh
-        env:
-          SLS_INTERACTIVE_SETUP_ENABLE: 1
-          SERVERLESS_ACCESS_KEY: ${{ secrets.SERVERLESS_ACCESS_KEY }}
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+#      - name: Install Plugin and deploy
+#        uses: serverless/github-action@v3.2
+#        with:
+#          args: -c "python3 --version && serverless plugin install --name serverless-python-requirements && serverless plugin install --name serverless-wsgi && serverless deploy --stage dev"
+#          entrypoint: /bin/sh
+#        env:
+#          SLS_INTERACTIVE_SETUP_ENABLE: 1
+#          SERVERLESS_ACCESS_KEY: ${{ secrets.SERVERLESS_ACCESS_KEY }}
+#          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+#          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
