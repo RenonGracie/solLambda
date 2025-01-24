@@ -17,4 +17,5 @@ class Settings(Singleton):
 
         self.GOOGLE_CALENDAR_CREDENTIALS = os.getenv("GOOGLE_CALENDAR_CREDENTIALS")
 
+
 settings = Settings()

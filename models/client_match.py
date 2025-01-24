@@ -2,24 +2,12 @@ from pydantic import BaseModel, Field
 
 
 class ClientMatchData(BaseModel):
-    first_name: str
-    last_name: str
-    state: str
-    gender: str
-    lived_experiences: str
-    likely_therapists: str
-
-    class Config:
-        json_schema_extra = {
-            "example": {
-                "first_name": "Your first name",
-                "last_name": "Your last name",
-                "state": "What state are you currently based in?",
-                "gender": "Please enter your gender",
-                "lived_experiences": "Are there any lived experiences you identify with that you feel are important to your match?",
-                "likely_therapists": "I would like a therapist that"
-            }
-        }
+    first_name: str = Field(example = "Your first name")
+    last_name: str = Field(example = "Your last name")
+    state: str = Field(example = "What state are you currently based in?")
+    gender: str = Field(example = "Please enter your gender")
+    lived_experiences: str = Field(example = "Are there any lived experiences you identify with that you feel are important to your match?")
+    likely_therapists: str = Field(example = "I would like a therapist that")
 
 class ClientMatch(BaseModel):
     client_name: str

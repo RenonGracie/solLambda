@@ -12,6 +12,14 @@ provider:
   stage: dev
   runtime: python3.12
   region: us-east-2
+  architecture: x86_64
+
+package:
+  exclude:
+    - node_modules/**
+    - .venv/**
+    - .github/**
+    - .idea/**
 
 functions:
   api:

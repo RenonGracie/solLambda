@@ -22,7 +22,7 @@ def get_therapists():
 
 @therapist_api.post("/match", responses={200: MatchedTherapists}, summary="Match client with therapists")
 def match(body: ClientMatchData, query: MatchQuery):
-    matched = match_client_with_therapists(body.model_dump(), table.all(), query.limit)
+    matched = match_client_with_therapists(body.dict(), table.all(), query.limit)
     return jsonify({"matched" : matched}), 200
 
 

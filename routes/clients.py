@@ -15,7 +15,7 @@ def update_client(body: Client):
 
 @client_api.get("search", responses={200: Clients}, summary="Search clients")
 def search_clients(query: ClientQueryModel):
-    result = search(query.model_dump())
+    result = search(query.dict())
     if result.status_code != 200:
         return jsonify(result.json()), result.status_code
     return jsonify({"clients": result.json()}), result.status_code
@@ -23,13 +23,13 @@ def search_clients(query: ClientQueryModel):
 
 @client_api.post("clientTags", responses={204: None}, summary="Add client tag")
 def add_tag(body: ClientTag):
-    result = add_client_tag(body.model_dump())
+    result = add_client_tag(body.dict())
     return '', result.status_code
 
 
 @client_api.delete("clientTags", responses={204: None}, summary="Delete client tag")
 def delete_tag(query: ClientTagQuery):
-    result = delete_client_tag(query.model_dump())
+    result = delete_client_tag(query.dict())
     return '', result.status_code
 
 

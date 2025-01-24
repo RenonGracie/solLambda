@@ -17,7 +17,7 @@ def get_settings():
 
 @appointment_api.get("", responses={200: Appointments}, summary="Search for existing appointments")
 def search_appointments(query: AppointmentQuery):
-    result = search_appointments(query.model_dump())
+    result = search_appointments(query.dict())
     if result.status_code == 200:
         return jsonify({"appointments": result.json()}), result.status_code
     return jsonify(result.json()), result.status_code
@@ -31,17 +31,17 @@ def appointment(path: AppointmentPath):
 
 @appointment_api.post("", responses={200: Appointment}, summary="Create a new appointment")
 def new_appointment(body: AppointmentsShort):
-    result = create_appointment(body.model_dump())
+    result = create_appointment(body.dict())
     return jsonify(result.json()), result.status_code
 
 
 @appointment_api.put("", responses={200: Appointment}, summary="Update an existing appointment")
 def update_existing_appointment(body: AppointmentsShort):
-    result = update_appointment(body.model_dump())
+    result = update_appointment(body.dict())
     return jsonify(result.json()), result.status_code
 
 
 @appointment_api.post("", responses={200: Appointment}, summary="Cancel an existing appointment")
 def cancel_appointment(body: CancelAppointment):
-    result = appointment_cancellation(body.model_dump())
+    result = appointment_cancellation(body.dict())
     return jsonify(result.json()), result.status_code
