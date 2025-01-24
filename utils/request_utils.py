@@ -20,7 +20,7 @@ def save_update_client(client: Client):
         client.ClientId = settings.TEST_USER_ID
     if settings.TEST_PRACTITIONER_ID:
         client.PractitionerId = settings.TEST_PRACTITIONER_ID
-    return __post("/clients", data=client.model_dump())
+    return __post("/clients", data=client.dict())
 
 def search_clients(args: dict):
     return __get("/clients", params=args)
