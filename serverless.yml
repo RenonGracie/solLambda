@@ -6,6 +6,8 @@ service: SolHealth-BE
 custom:
   wsgi:
     app: app.app
+  dotenv:
+    logging: false
 
 provider:
   name: aws
@@ -45,3 +47,4 @@ functions:
 plugins:
   - serverless-wsgi
   - serverless-python-requirements
+  - serverless-dotenv-plugin
