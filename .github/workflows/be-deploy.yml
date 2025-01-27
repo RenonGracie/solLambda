@@ -25,14 +25,18 @@ jobs:
         with:
           python-version: '3.12'
 
+#      - name: Create .env file
+#        run: |
+#          touch .env
+#          echo INTAKEQ_BASE_URL=${{ secrets.INTAKEQ_BASE_URL }} >> .env
+#          echo INTAKEQ_AUTH_KEY=${{ secrets.INTAKEQ_AUTH_KEY }} >> .env
+#          echo AIRTABLE_API_KEY=${{ secrets.AIRTABLE_API_KEY }} >> .env
+#          echo GOOGLE_CALENDAR_CREDENTIALS=${{ secrets.GOOGLE_CALENDAR_CREDENTIALS }} >> .env
+#          cat .env
+
       - name: Create .env file
         run: |
-          touch .env
-          echo INTAKEQ_BASE_URL=${{ secrets.INTAKEQ_BASE_URL }} >> .env
-          echo INTAKEQ_AUTH_KEY=${{ secrets.INTAKEQ_AUTH_KEY }} >> .env
-          echo AIRTABLE_API_KEY=${{ secrets.AIRTABLE_API_KEY }} >> .env
-          echo GOOGLE_CALENDAR_CREDENTIALS=${{ secrets.GOOGLE_CALENDAR_CREDENTIALS }} >> .env  
-          cat .env
+          eval "echo \"$(cat .github.env)\"" > .env
 
       - name: Install uv
         uses: astral-sh/setup-uv@v5
