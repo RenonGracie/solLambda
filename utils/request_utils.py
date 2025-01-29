@@ -51,3 +51,6 @@ def update_appointment(data: dict):
 
 def appointment_cancellation(data: dict):
     return __post("/appointments/cancellation", data)
+
+def intakeq():
+    return requests.get(url="intakeq-bot-g5xg5czqfa-uc.a.run.app",headers={"X-Auth-Key": settings.INTAKEQ_AUTH_KEY}, params=params)

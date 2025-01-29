@@ -6,6 +6,7 @@ readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
     "boto3>=1.36.5",
+    "drissionpage>=4.1.0.17",
     "flask-openapi3==2.5.5",
     "fuzzywuzzy>=0.18.0",
     "google-api-python-client>=2.159.0",

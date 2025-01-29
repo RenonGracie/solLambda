@@ -1,36 +1,69 @@
-from models.clients import Client
-
-class __TypeformIds:
+class TypeformIds:
     FIRST_NAME = "Bcd3yhtVV8qA"
     LAST_NAME = "91kMGKU8j2CH"
     PHONE = "b9DkubXQl2D3"
     EMAIL = "0aZPHNSS2AEa"
     GENDER = "clAn8i6OQOI3"
+    AGE = "NFyGjLRsvOQb"
     STATE = "3AQyhzE0XBx5"
+    UNIVERSITY = "sHR59ObUeLCw"
 
-def __get_value(data: dict):
-    match data['type']:
-        case 'multiple_choice':
-            if data['answer'].get('labels'):
-                return data['answer'].get('labels')
-            else:
+    I_WOULD_LIKE_THERAPIST = "B443qff2ZRvs"
+    LIVED_EXPERIENCES = "pTMOjbjkbSWL"
+
+    ALCOHOL = "DxXG5npFnjPd"
+    DRUGS = "DEC8S8r60O1U"
+
+    PLEASURE_DOING_THINGS = "7kQjFzstcJts"
+    FEELING_DOWN = "uUQMfw2xRiQ4"
+    TROUBLE_FALLING = "G9LdjqKeO7f4"
+    FEELING_TIRED = "YFkgwTszPtMN"
+    POOR_APPETITE = "TKA1j8lE6SSd"
+    FEELING_BAD_ABOUT_YOURSELF = "TsZ80LFOtbCq"
+    TROUBLE_CONCENTRATING = "3SCH6BP1SZWt"
+    MOVING_OR_SPEAKING_SO_SLOWLY = "eca2CSO04vLl"
+    SUICIDAL_THOUGHTS = "chxgOkME9qj4"
+
+    FEELING_NERVOUS = "B3cxNBp1tpIq"
+    NOT_CONTROL_WORRYING = "bvL83C6M9nb1"
+    WORRYING_TOO_MUCH = "RdiG8vKXrbVB"
+    TROUBLE_RELAXING = "98pYB4y1REbK"
+    BEING_SO_RESTLESS = "yVJsRQvXsi1T"
+    EASILY_ANNOYED = "QtDBqAbfBRAR"
+    FEELING_AFRAID = "1l3TD4JycX7a"
+
+    WHAT_BRINGS_YOU_TO_THERAPY = "RngVovIqApk0"
+    BEST_TIME_FOR_FIRST_SESSION = "V7DQU2HoEvfK"
+    HOW_DID_YOU_HEAR_ABOUT_US = "ntVzKN7vWQhO"
+
+    REFER = "2mfjCdPxfxVN"
+    PROMO_CODE = "gnL63lnuTFLu"
+
+
+class TypeformData:
+    __data: dict = {}
+
+    def __init__(self, data: dict) -> None:
+        self.__data = data
+
+    @staticmethod
+    def __get_value_from_typeform(data: dict):
+        if not data.get('answer'):
+            return None
+
+        match data['type']:
+            case 'multiple_choice':
+                if data['answer'].get('labels'):
+                    return data['answer'].get('labels')
+                else:
+                    return data['answer'].get('label')
+            case 'dropdown':
                 return data['answer'].get('label')
-        case 'dropdown':
-            return data['answer']['label']
-        case _:
-            return data['answer']
+            case _:
+                return data.get('answer')
 
-def get_intake_client(data: dict) -> Client:
-    client = Client()
-    phone = __get_value(data.get(__TypeformIds.PHONE))
-    if phone:
-        phone = phone[1:]
-    client.FirstName = __get_value(data.get(__TypeformIds.FIRST_NAME))
-    client.LastName = __get_value(data.get(__TypeformIds.LAST_NAME))
-    client.Name = f"{client.FirstName} {client.LastName}"
-    client.Phone = phone
-    client.MobilePhone = phone
-    client.Email = __get_value(data.get(__TypeformIds.EMAIL))
-    client.Gender = __get_value(data.get(__TypeformIds.GENDER))
-    client.StateShort = __get_value(data.get(__TypeformIds.STATE))
-    return client
+    def get_value(self, field_name: str):
+        answer = self.__data.get(field_name)
+        if not answer:
+            return None
+        return self.__get_value_from_typeform(self.__data.get(field_name))
