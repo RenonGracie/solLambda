@@ -49,7 +49,7 @@ class TypeformData:
     @staticmethod
     def __get_value_from_typeform(data: dict):
         if not data.get('answer'):
-            return None
+            return ""
 
         match data['type']:
             case 'multiple_choice':
@@ -65,5 +65,6 @@ class TypeformData:
     def get_value(self, field_name: str):
         answer = self.__data.get(field_name)
         if not answer:
-            return None
-        return self.__get_value_from_typeform(self.__data.get(field_name))
+            return ""
+        value = self.__get_value_from_typeform(self.__data.get(field_name))
+        return ", ".join(value) if isinstance(value, list) else value

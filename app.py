@@ -6,6 +6,7 @@ from routes.therapists import therapist_api
 from routes.appointments import appointment_api
 from routes.clients import client_api
 from utils.intakeq_bot.bot import create_new_form
+from utils.request_utils import intakeq
 
 response_json = {
     "event_id": "01JHT5Y038XAE3DDGVW59SH78Y",
@@ -1415,9 +1416,17 @@ def typeform_webhook():
             'title': question['title'],
             'type': question['type']
         }
-    result = create_new_form(json)
-    print(result)
-    return jsonify({"success": result}), 200 if result else 417
+    data = {
+        "user": create_new_form(json),
+        "sheetURL": f"{request.base_url}_bot"
+    }
+    response = intakeq(data)
+    success = str(response[0]).lower().__eq__("success")
+    return jsonify({"success": success}), 200 if success else 417
+
+@app.post('/hook_bot', tags=[Tag(name="Webhook")], summary="Webhook for bot")
+def bot_hook():
+    return "", 200
 
 if __name__ == "__main__":
     app.run(host='127.0.0.1', port=5000, debug=True)

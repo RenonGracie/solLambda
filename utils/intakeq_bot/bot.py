@@ -1,5 +1,8 @@
 import datetime
 from time import sleep
+
+from lxml import etree
+
 from utils.intakeq_bot.const import *
 from utils.settings import settings
 from utils.typeform_utils import *
@@ -22,6 +25,8 @@ def __bot(data: TypeformData, first_name: str = None, last_name: str = None):
     web.click(Xpath.Button.submit)
     # ===============================
     sleep(1)
+
+    print(etree.HTML(web.web.html))
 
     try:
         # 1. Please state your university and (anticipated or past) graduation year.
@@ -242,19 +247,60 @@ def __bot(data: TypeformData, first_name: str = None, last_name: str = None):
     web.quit()
 
 
-def create_new_form(payload: dict) -> bool:
+def create_new_form(payload: dict) -> list:
     if not payload:
-        return False
+        return []
 
     data = TypeformData(payload)
-    first_name = data.get_value(TypeformIds.FIRST_NAME)
-    last_name = data.get_value(TypeformIds.LAST_NAME)
-    print("START", f"{first_name} {last_name}", datetime.datetime.now())
-
-    try:
-        __bot(data, first_name, last_name)
-        print("END", f"{first_name} {last_name}", datetime.datetime.now())
-        return True
-    except Exception as error:
-        print("ERROR", str(error))
-        return False
+    return [
+        True,
+        data.get_value(TypeformIds.FIRST_NAME),  #1
+        data.get_value(TypeformIds.LAST_NAME),  #2
+        data.get_value(TypeformIds.PHONE),  #3
+        data.get_value(TypeformIds.EMAIL),  #4
+        data.get_value(TypeformIds.I_WOULD_LIKE_THERAPIST),  #5
+        data.get_value(TypeformIds.ALCOHOL),  #6
+        data.get_value(TypeformIds.DRUGS),  #7
+        data.get_value(TypeformIds.PLEASURE_DOING_THINGS),  #8
+        data.get_value(TypeformIds.FEELING_DOWN),  #9
+        data.get_value(TypeformIds.TROUBLE_FALLING),  #10
+        data.get_value(TypeformIds.FEELING_TIRED),  #11
+        data.get_value(TypeformIds.POOR_APPETITE),  #12
+        data.get_value(TypeformIds.FEELING_BAD_ABOUT_YOURSELF),  #13
+        data.get_value(TypeformIds.TROUBLE_CONCENTRATING),  #14
+        data.get_value(TypeformIds.MOVING_OR_SPEAKING_SO_SLOWLY),  #15
+        data.get_value(TypeformIds.SUICIDAL_THOUGHTS),  #16
+        '', #17
+        data.get_value(TypeformIds.FEELING_NERVOUS),  #18
+        data.get_value(TypeformIds.NOT_CONTROL_WORRYING),  #19
+        data.get_value(TypeformIds.WORRYING_TOO_MUCH),  #20
+        data.get_value(TypeformIds.TROUBLE_RELAXING),  #21
+        data.get_value(TypeformIds.BEING_SO_RESTLESS),  #22
+        data.get_value(TypeformIds.EASILY_ANNOYED),  #23
+        data.get_value(TypeformIds.FEELING_AFRAID),  #24
+        data.get_value(TypeformIds.FEELING_AFRAID),  #24
+        '', #25
+        data.get_value(TypeformIds.WHAT_BRINGS_YOU_TO_THERAPY),  #26
+        data.get_value(TypeformIds.AGE),  #27
+        data.get_value(TypeformIds.GENDER),  #28
+        data.get_value(TypeformIds.STATE),  #29
+        data.get_value(TypeformIds.UNIVERSITY),  #30
+        '', #31
+        data.get_value(TypeformIds.PROMO_CODE),  #32
+        data.get_value(TypeformIds.HOW_DID_YOU_HEAR_ABOUT_US),  #33
+        data.get_value(TypeformIds.REFER),  #34
+        '',  #35
+        '',  #36
+        '',  #37
+        '',  #38
+        '',  #39
+        '',  #40
+        '',  #41
+        '',  #42
+        '',  #43
+        '',  #44
+        data.get_value(TypeformIds.BEST_TIME_FOR_FIRST_SESSION),  #45
+        '',  #46
+        '',  #47
+        data.get_value(TypeformIds.LIVED_EXPERIENCES),  #48
+    ]
