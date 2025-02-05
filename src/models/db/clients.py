@@ -1,31 +1,22 @@
-import enum
 from uuid import uuid4
 
 import emoji
-from sqlalchemy import Column, String, UUID, ARRAY, Enum
-from sqlalchemy.orm import mapped_column
+from sqlalchemy import Column, String, UUID, ARRAY
 
 from src.utils.typeform_utils import TypeformData, TypeformIds
 from src.models.db.base import Base
 
 
-class QuestionAnswer(str, enum.Enum):
-    not_at_all = "Not at all"
-    several_days = "Several days"
-    more_than_half_the_days = "More than half the days"
-    nearly_every_day = "Nearly every day"
-
-    @property
-    def points(self):
-        match self:
-            case QuestionAnswer.not_at_all:
-                return 0
-            case QuestionAnswer.several_days:
-                return 1
-            case QuestionAnswer.more_than_half_the_days:
-                return 2
-            case QuestionAnswer.nearly_every_day:
-                return 3
+def _calc_points(value: str):
+    match value:
+        case "Not at all":
+            return 0
+        case "Several days":
+            return 1
+        case "More than half the days":
+            return 2
+        case "Nearly every day":
+            return 3
 
 
 class ClientSignup(Base):
@@ -44,62 +35,26 @@ class ClientSignup(Base):
     state = Column(String)
 
     i_would_like_therapist = Column(ARRAY(String))
-    alcohol = mapped_column(
-        Enum(QuestionAnswer), default=QuestionAnswer.not_at_all, nullable=False
-    )
-    drugs = mapped_column(
-        Enum(QuestionAnswer), default=QuestionAnswer.not_at_all, nullable=False
-    )
+    alcohol = Column(String)
+    drugs = Column(String)
 
-    pleasure_doing_things = mapped_column(
-        Enum(QuestionAnswer), default=QuestionAnswer.not_at_all, nullable=False
-    )
-    feeling_down = mapped_column(
-        Enum(QuestionAnswer), default=QuestionAnswer.not_at_all, nullable=False
-    )
-    trouble_falling = mapped_column(
-        Enum(QuestionAnswer), default=QuestionAnswer.not_at_all, nullable=False
-    )
-    feeling_tired = mapped_column(
-        Enum(QuestionAnswer), default=QuestionAnswer.not_at_all, nullable=False
-    )
-    poor_appetite = mapped_column(
-        Enum(QuestionAnswer), default=QuestionAnswer.not_at_all, nullable=False
-    )
-    feeling_bad_about_yourself = mapped_column(
-        Enum(QuestionAnswer), default=QuestionAnswer.not_at_all, nullable=False
-    )
-    trouble_concentrating = mapped_column(
-        Enum(QuestionAnswer), default=QuestionAnswer.not_at_all, nullable=False
-    )
-    moving_or_speaking_so_slowly = mapped_column(
-        Enum(QuestionAnswer), default=QuestionAnswer.not_at_all, nullable=False
-    )
-    suicidal_thoughts = mapped_column(
-        Enum(QuestionAnswer), default=QuestionAnswer.not_at_all, nullable=False
-    )
+    pleasure_doing_things = Column(String)
+    feeling_down = Column(String)
+    trouble_falling = Column(String)
+    feeling_tired = Column(String)
+    poor_appetite = Column(String)
+    feeling_bad_about_yourself = Column(String)
+    trouble_concentrating = Column(String)
+    moving_or_speaking_so_slowly = Column(String)
+    suicidal_thoughts = Column(String)
 
-    feeling_nervous = mapped_column(
-        Enum(QuestionAnswer), default=QuestionAnswer.not_at_all, nullable=False
-    )
-    not_control_worrying = mapped_column(
-        Enum(QuestionAnswer), default=QuestionAnswer.not_at_all, nullable=False
-    )
-    worrying_too_much = mapped_column(
-        Enum(QuestionAnswer), default=QuestionAnswer.not_at_all, nullable=False
-    )
-    trouble_relaxing = mapped_column(
-        Enum(QuestionAnswer), default=QuestionAnswer.not_at_all, nullable=False
-    )
-    being_so_restless = mapped_column(
-        Enum(QuestionAnswer), default=QuestionAnswer.not_at_all, nullable=False
-    )
-    easily_annoyed = mapped_column(
-        Enum(QuestionAnswer), default=QuestionAnswer.not_at_all, nullable=False
-    )
-    feeling_afraid = mapped_column(
-        Enum(QuestionAnswer), default=QuestionAnswer.not_at_all, nullable=False
-    )
+    feeling_nervous = Column(String)
+    not_control_worrying = Column(String)
+    worrying_too_much = Column(String)
+    trouble_relaxing = Column(String)
+    being_so_restless = Column(String)
+    easily_annoyed = Column(String)
+    feeling_afraid = Column(String)
 
     university = Column(String)
 
@@ -115,14 +70,14 @@ class ClientSignup(Base):
     def ph9_sum(self):
         return sum(
             [
-                self.pleasure_doing_things.points,
-                self.feeling_down.points,
-                self.trouble_falling.points,
-                self.feeling_tired.points,
-                self.poor_appetite.points,
-                self.feeling_bad_about_yourself.points,
-                self.trouble_concentrating.points,
-                self.moving_or_speaking_so_slowly.points,
+                _calc_points(self.pleasure_doing_things),
+                _calc_points(self.feeling_down),
+                _calc_points(self.trouble_falling),
+                _calc_points(self.feeling_tired),
+                _calc_points(self.poor_appetite),
+                _calc_points(self.feeling_bad_about_yourself),
+                _calc_points(self.trouble_concentrating),
+                _calc_points(self.moving_or_speaking_so_slowly),
             ]
         )
 
@@ -130,13 +85,13 @@ class ClientSignup(Base):
     def gad7_sum(self):
         return sum(
             [
-                self.feeling_nervous.points,
-                self.not_control_worrying.points,
-                self.worrying_too_much.points,
-                self.trouble_relaxing.points,
-                self.being_so_restless.points,
-                self.easily_annoyed.points,
-                self.feeling_afraid.points,
+                _calc_points(self.feeling_nervous),
+                _calc_points(self.not_control_worrying),
+                _calc_points(self.worrying_too_much),
+                _calc_points(self.trouble_relaxing),
+                _calc_points(self.being_so_restless),
+                _calc_points(self.easily_annoyed),
+                _calc_points(self.feeling_afraid),
             ]
         )
 
