@@ -1,7 +1,8 @@
+import json
 from uuid import uuid4
 
 import emoji
-from sqlalchemy import Column, String
+from sqlalchemy import Column, String, Text
 from sqlalchemy.dialects.postgresql import UUID, JSONB
 
 from src.utils.typeform_utils import TypeformData, TypeformIds
@@ -35,7 +36,7 @@ class ClientSignup(Base):
     age = Column("age", String(20))
     state = Column("state", String(5))
 
-    i_would_like_therapist = Column("i_would_like_therapist", JSONB)
+    _i_would_like_therapist = Column("i_would_like_therapist", Text)
     alcohol = Column("alcohol", String(50))
     drugs = Column("drugs", String(50))
 
@@ -60,12 +61,36 @@ class ClientSignup(Base):
     university = Column("university", String(150))
 
     what_brings_you = Column("what_brings_you", String(255))
-    lived_experiences = Column("lived_experiences", JSONB)
+    _lived_experiences = Column("lived_experiences", Text)
     best_time_for_first_session = Column("best_time_for_first_session", String(250))
 
-    how_did_you_hear_about_us = Column("how_did_you_hear_about_us", JSONB)
+    _how_did_you_hear_about_us = Column("how_did_you_hear_about_us", Text)
     promo_code = Column("promo_code", String(100))
     referred_by = Column("referred_by", String(255))
+
+    @property
+    def i_would_like_therapist(self):
+        return json.loads(self._i_would_like_therapist or "[]")
+
+    @i_would_like_therapist.setter
+    def i_would_like_therapist(self, preferences):
+        self._i_would_like_therapist = json.dumps(preferences)
+
+    @property
+    def lived_experiences(self):
+        return json.loads(self._lived_experiences or "[]")
+
+    @lived_experiences.setter
+    def lived_experiences(self, experiences):
+        self._lived_experiences = json.dumps(experiences)
+
+    @property
+    def how_did_you_hear(self):
+        return json.loads(self._how_did_you_hear_about_us or "[]")
+
+    @how_did_you_hear.setter
+    def how_did_you_hear(self, sources):
+        self._how_did_you_hear_about_us = json.dumps(sources)
 
     @property
     def ph9_sum(self):
