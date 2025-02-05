@@ -144,7 +144,7 @@ def update_from_typeform_data(
     client.what_brings_you = data.get_value(TypeformIds.WHAT_BRINGS_YOU_TO_THERAPY)
     client.lived_experiences = list(
         map(
-            lambda VARCHAR(255): emoji.replace_emoji(VARCHAR(255)),
+            lambda text: emoji.replace_emoji(text),
             data.get_value(TypeformIds.LIVED_EXPERIENCES),
         )
     )
