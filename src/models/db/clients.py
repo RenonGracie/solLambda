@@ -2,7 +2,7 @@ from uuid import uuid4
 
 import emoji
 from sqlalchemy import Column, String
-from sqlalchemy.dialects.postgresql import UUID, ARRAY
+from sqlalchemy.dialects.postgresql import UUID, ARRAY, TEXT
 
 from src.utils.typeform_utils import TypeformData, TypeformIds
 from src.models.db.base import Base
@@ -35,7 +35,7 @@ class ClientSignup(Base):
     age = Column("age", String(20))
     state = Column("state", String(5))
 
-    i_would_like_therapist = Column("i_would_like_therapist", ARRAY(String(255)))
+    i_would_like_therapist = Column("i_would_like_therapist", ARRAY(TEXT))
     alcohol = Column("alcohol", String(50))
     drugs = Column("drugs", String(50))
 
@@ -60,10 +60,10 @@ class ClientSignup(Base):
     university = Column("university", String(150))
 
     what_brings_you = Column("what_brings_you", String(255))
-    lived_experiences = Column("lived_experiences", ARRAY(String(250)))
+    lived_experiences = Column("lived_experiences", ARRAY(TEXT))
     best_time_for_first_session = Column("best_time_for_first_session", String(250))
 
-    how_did_you_hear_about_us = Column("how_did_you_hear_about_us", ARRAY(String(100)))
+    how_did_you_hear_about_us = Column("how_did_you_hear_about_us", ARRAY(TEXT))
     promo_code = Column("promo_code", String(100))
     referred_by = Column("referred_by", String(255))
 
