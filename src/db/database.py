@@ -43,7 +43,6 @@ class _Database(Singleton):
 
         session_maker = sessionmaker(bind=engine)
         self.session = session_maker()
-        Base.metadata.create_all(bind=engine)
 
 
 db = _Database().session
