@@ -41,6 +41,9 @@ class _Database(Singleton):
 
         engine = create_engine(url, connect_args=args)
 
+        for table in Base.metadata.tables.values():
+            table.create(engine, checkfirst=True)
+
         session_maker = sessionmaker(bind=engine)
         self.session = session_maker()
 
