@@ -31,7 +31,7 @@ class _Database(Singleton):
             args = {"sslmode": "prefer"}
 
         url = URL.create(
-            "postgresql+psycopg2",
+            "postgresql",
             username=rds_username,
             password=password,
             host=rds_host,
