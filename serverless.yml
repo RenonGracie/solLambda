@@ -26,7 +26,7 @@ provider:
         # Allow functions to connect to DB
         - Effect: Allow
           Action:
-            - 'dsql:DbConnect'
+            - 'dsql:DbConnectAdmin'
           Resource:
             - 'arn:aws:dsql:us-east-2:762233746762:cluster/s4abt2gmvgate3uokdmhw2l7by'
         # Allow functions to read/write objects in a bucket
