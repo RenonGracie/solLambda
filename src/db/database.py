@@ -22,7 +22,7 @@ class _Database(Singleton):
         if settings.IS_AURORA_RDS is True:
             region = "us-east-2"
             client = boto3.client("dsql", region_name=region)
-            password = client.generate_db_connect_auth_token(
+            password = client.generate_db_connect_admin_auth_token(
                 Hostname=rds_host,
                 Region=region,
             )
