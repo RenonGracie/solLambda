@@ -1,7 +1,8 @@
 from uuid import uuid4
 
 import emoji
-from sqlalchemy import Column, UUID, ARRAY, VARCHAR
+from sqlalchemy import Column
+from sqlalchemy.dialects.postgresql import UUID, ARRAY, VARCHAR
 
 from src.utils.typeform_utils import TypeformData, TypeformIds
 from src.models.db.base import Base
@@ -22,49 +23,49 @@ def _calc_points(value: str):
 class ClientSignup(Base):
     __tablename__ = "clients"
 
-    id = Column(UUID, primary_key=True, index=True, default=uuid4)
+    id = Column("id", UUID, primary_key=True, default=uuid4)
 
-    response_id = Column(VARCHAR(50), index=True)
+    response_id = Column("response_id", VARCHAR(50))
 
-    first_name = Column(VARCHAR(50), index=True)
-    last_name = Column(VARCHAR(50), index=True)
-    email = Column(VARCHAR(100), unique=True, index=True)
-    phone = Column(VARCHAR(20))
-    gender = Column(VARCHAR(20))
-    age = Column(VARCHAR(20))
-    state = Column(VARCHAR(5))
+    first_name = Column("first_name", VARCHAR(50))
+    last_name = Column("last_name", VARCHAR(50))
+    email = Column("email", VARCHAR(100), unique=True)
+    phone = Column("phone", VARCHAR(20))
+    gender = Column("gender", VARCHAR(20))
+    age = Column("age", VARCHAR(20))
+    state = Column("state", VARCHAR(5))
 
-    i_would_like_therapist = Column(ARRAY(VARCHAR(255)))
-    alcohol = Column(VARCHAR(50))
-    drugs = Column(VARCHAR(50))
+    i_would_like_therapist = Column("i_would_like_therapist", ARRAY(VARCHAR(255)))
+    alcohol = Column("alcohol", VARCHAR(50))
+    drugs = Column("drugs", VARCHAR(50))
 
-    pleasure_doing_things = Column(VARCHAR(50))
-    feeling_down = Column(VARCHAR(50))
-    trouble_falling = Column(VARCHAR(50))
-    feeling_tired = Column(VARCHAR(50))
-    poor_appetite = Column(VARCHAR(50))
-    feeling_bad_about_yourself = Column(VARCHAR(50))
-    trouble_concentrating = Column(VARCHAR(50))
-    moving_or_speaking_so_slowly = Column(VARCHAR(50))
-    suicidal_thoughts = Column(VARCHAR(50))
+    pleasure_doing_things = Column("pleasure_doing_things", VARCHAR(50))
+    feeling_down = Column("feeling_down", VARCHAR(50))
+    trouble_falling = Column("trouble_falling", VARCHAR(50))
+    feeling_tired = Column("feeling_tired", VARCHAR(50))
+    poor_appetite = Column("poor_appetite", VARCHAR(50))
+    feeling_bad_about_yourself = Column("feeling_bad_about_yourself", VARCHAR(50))
+    trouble_concentrating = Column("trouble_concentrating", VARCHAR(50))
+    moving_or_speaking_so_slowly = Column("moving_or_speaking_so_slowly", VARCHAR(50))
+    suicidal_thoughts = Column("suicidal_thoughts", VARCHAR(50))
 
-    feeling_nervous = Column(VARCHAR(50))
-    not_control_worrying = Column(VARCHAR(50))
-    worrying_too_much = Column(VARCHAR(50))
-    trouble_relaxing = Column(VARCHAR(50))
-    being_so_restless = Column(VARCHAR(50))
-    easily_annoyed = Column(VARCHAR(50))
-    feeling_afraid = Column(VARCHAR(50))
+    feeling_nervous = Column("feeling_nervous", VARCHAR(50))
+    not_control_worrying = Column("not_control_worrying", VARCHAR(50))
+    worrying_too_much = Column("worrying_too_much", VARCHAR(50))
+    trouble_relaxing = Column("trouble_relaxing", VARCHAR(50))
+    being_so_restless = Column("being_so_restless", VARCHAR(50))
+    easily_annoyed = Column("easily_annoyed", VARCHAR(50))
+    feeling_afraid = Column("feeling_afraid", VARCHAR(50))
 
-    university = Column(VARCHAR(150))
+    university = Column("university", VARCHAR(150))
 
-    what_brings_you = Column(VARCHAR(255))
-    lived_experiences = Column(ARRAY(VARCHAR(250)))
-    best_time_for_first_session = Column(VARCHAR(250))
+    what_brings_you = Column("what_brings_you", VARCHAR(255))
+    lived_experiences = Column("lived_experiences", ARRAY(VARCHAR(250)))
+    best_time_for_first_session = Column("best_time_for_first_session", VARCHAR(250))
 
-    how_did_you_hear_about_us = Column(ARRAY(VARCHAR(100)))
-    promo_code = Column(VARCHAR(100))
-    referred_by = Column(VARCHAR(255))
+    how_did_you_hear_about_us = Column("how_did_you_hear_about_us", ARRAY(VARCHAR(100)))
+    promo_code = Column("promo_code", VARCHAR(100))
+    referred_by = Column("referred_by", VARCHAR(255))
 
     @property
     def ph9_sum(self):
