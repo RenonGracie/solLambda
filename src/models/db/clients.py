@@ -1,7 +1,7 @@
 from uuid import uuid4
 
 import emoji
-from sqlalchemy import Column, String, UUID, ARRAY
+from sqlalchemy import Column, UUID, ARRAY, TEXT, VARCHAR
 
 from src.utils.typeform_utils import TypeformData, TypeformIds
 from src.models.db.base import Base
@@ -24,47 +24,47 @@ class ClientSignup(Base):
 
     id = Column(UUID, primary_key=True, index=True, default=uuid4)
 
-    response_id = Column(String(50), index=True)
+    response_id = Column(VARCHAR(50), index=True)
 
-    first_name = Column(String(50), index=True)
-    last_name = Column(String(50), index=True)
-    email = Column(String(100), unique=True, index=True)
-    phone = Column(String(20))
-    gender = Column(String(20))
-    age = Column(String(20))
-    state = Column(String(5))
+    first_name = Column(VARCHAR(50), index=True)
+    last_name = Column(VARCHAR(50), index=True)
+    email = Column(VARCHAR(100), unique=True, index=True)
+    phone = Column(VARCHAR(20))
+    gender = Column(VARCHAR(20))
+    age = Column(VARCHAR(20))
+    state = Column(VARCHAR(5))
 
-    i_would_like_therapist = Column(ARRAY(String(250)))
-    alcohol = Column(String(50))
-    drugs = Column(String(50))
+    i_would_like_therapist = Column(ARRAY(TEXT))
+    alcohol = Column(VARCHAR(50))
+    drugs = Column(VARCHAR(50))
 
-    pleasure_doing_things = Column(String(50))
-    feeling_down = Column(String(50))
-    trouble_falling = Column(String(50))
-    feeling_tired = Column(String(50))
-    poor_appetite = Column(String(50))
-    feeling_bad_about_yourself = Column(String(50))
-    trouble_concentrating = Column(String(50))
-    moving_or_speaking_so_slowly = Column(String(50))
-    suicidal_thoughts = Column(String(50))
+    pleasure_doing_things = Column(VARCHAR(50))
+    feeling_down = Column(VARCHAR(50))
+    trouble_falling = Column(VARCHAR(50))
+    feeling_tired = Column(VARCHAR(50))
+    poor_appetite = Column(VARCHAR(50))
+    feeling_bad_about_yourself = Column(VARCHAR(50))
+    trouble_concentrating = Column(VARCHAR(50))
+    moving_or_speaking_so_slowly = Column(VARCHAR(50))
+    suicidal_thoughts = Column(VARCHAR(50))
 
-    feeling_nervous = Column(String(50))
-    not_control_worrying = Column(String(50))
-    worrying_too_much = Column(String(50))
-    trouble_relaxing = Column(String(50))
-    being_so_restless = Column(String(50))
-    easily_annoyed = Column(String(50))
-    feeling_afraid = Column(String(50))
+    feeling_nervous = Column(VARCHAR(50))
+    not_control_worrying = Column(VARCHAR(50))
+    worrying_too_much = Column(VARCHAR(50))
+    trouble_relaxing = Column(VARCHAR(50))
+    being_so_restless = Column(VARCHAR(50))
+    easily_annoyed = Column(VARCHAR(50))
+    feeling_afraid = Column(VARCHAR(50))
 
-    university = Column(String(150))
+    university = Column(VARCHAR(150))
 
-    what_brings_you = Column(String(250))
-    lived_experiences = Column(ARRAY(String(250)))
-    best_time_for_first_session = Column(String(250))
+    what_brings_you = Column(TEXT)
+    lived_experiences = Column(ARRAY(VARCHAR(250)))
+    best_time_for_first_session = Column(VARCHAR(250))
 
-    how_did_you_hear_about_us = Column(ARRAY(String(100)))
-    promo_code = Column(String(100))
-    referred_by = Column(String(250))
+    how_did_you_hear_about_us = Column(ARRAY(VARCHAR(100)))
+    promo_code = Column(VARCHAR(100))
+    referred_by = Column(TEXT)
 
     @property
     def ph9_sum(self):
