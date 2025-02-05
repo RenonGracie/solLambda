@@ -1,8 +1,8 @@
 from uuid import uuid4
 
 import emoji
-from sqlalchemy import Column
-from sqlalchemy.dialects.postgresql import UUID, ARRAY, VARCHAR
+from sqlalchemy import Column, String
+from sqlalchemy.dialects.postgresql import UUID, ARRAY
 
 from src.utils.typeform_utils import TypeformData, TypeformIds
 from src.models.db.base import Base
@@ -25,47 +25,47 @@ class ClientSignup(Base):
 
     id = Column("id", UUID, primary_key=True, default=uuid4)
 
-    response_id = Column("response_id", VARCHAR(50))
+    response_id = Column("response_id", String(50))
 
-    first_name = Column("first_name", VARCHAR(50))
-    last_name = Column("last_name", VARCHAR(50))
-    email = Column("email", VARCHAR(100), unique=True)
-    phone = Column("phone", VARCHAR(20))
-    gender = Column("gender", VARCHAR(20))
-    age = Column("age", VARCHAR(20))
-    state = Column("state", VARCHAR(5))
+    first_name = Column("first_name", String(50))
+    last_name = Column("last_name", String(50))
+    email = Column("email", String(100), unique=True)
+    phone = Column("phone", String(20))
+    gender = Column("gender", String(20))
+    age = Column("age", String(20))
+    state = Column("state", String(5))
 
-    i_would_like_therapist = Column("i_would_like_therapist", ARRAY(VARCHAR(255)))
-    alcohol = Column("alcohol", VARCHAR(50))
-    drugs = Column("drugs", VARCHAR(50))
+    i_would_like_therapist = Column("i_would_like_therapist", ARRAY(String(255)))
+    alcohol = Column("alcohol", String(50))
+    drugs = Column("drugs", String(50))
 
-    pleasure_doing_things = Column("pleasure_doing_things", VARCHAR(50))
-    feeling_down = Column("feeling_down", VARCHAR(50))
-    trouble_falling = Column("trouble_falling", VARCHAR(50))
-    feeling_tired = Column("feeling_tired", VARCHAR(50))
-    poor_appetite = Column("poor_appetite", VARCHAR(50))
-    feeling_bad_about_yourself = Column("feeling_bad_about_yourself", VARCHAR(50))
-    trouble_concentrating = Column("trouble_concentrating", VARCHAR(50))
-    moving_or_speaking_so_slowly = Column("moving_or_speaking_so_slowly", VARCHAR(50))
-    suicidal_thoughts = Column("suicidal_thoughts", VARCHAR(50))
+    pleasure_doing_things = Column("pleasure_doing_things", String(50))
+    feeling_down = Column("feeling_down", String(50))
+    trouble_falling = Column("trouble_falling", String(50))
+    feeling_tired = Column("feeling_tired", String(50))
+    poor_appetite = Column("poor_appetite", String(50))
+    feeling_bad_about_yourself = Column("feeling_bad_about_yourself", String(50))
+    trouble_concentrating = Column("trouble_concentrating", String(50))
+    moving_or_speaking_so_slowly = Column("moving_or_speaking_so_slowly", String(50))
+    suicidal_thoughts = Column("suicidal_thoughts", String(50))
 
-    feeling_nervous = Column("feeling_nervous", VARCHAR(50))
-    not_control_worrying = Column("not_control_worrying", VARCHAR(50))
-    worrying_too_much = Column("worrying_too_much", VARCHAR(50))
-    trouble_relaxing = Column("trouble_relaxing", VARCHAR(50))
-    being_so_restless = Column("being_so_restless", VARCHAR(50))
-    easily_annoyed = Column("easily_annoyed", VARCHAR(50))
-    feeling_afraid = Column("feeling_afraid", VARCHAR(50))
+    feeling_nervous = Column("feeling_nervous", String(50))
+    not_control_worrying = Column("not_control_worrying", String(50))
+    worrying_too_much = Column("worrying_too_much", String(50))
+    trouble_relaxing = Column("trouble_relaxing", String(50))
+    being_so_restless = Column("being_so_restless", String(50))
+    easily_annoyed = Column("easily_annoyed", String(50))
+    feeling_afraid = Column("feeling_afraid", String(50))
 
-    university = Column("university", VARCHAR(150))
+    university = Column("university", String(150))
 
-    what_brings_you = Column("what_brings_you", VARCHAR(255))
-    lived_experiences = Column("lived_experiences", ARRAY(VARCHAR(250)))
-    best_time_for_first_session = Column("best_time_for_first_session", VARCHAR(250))
+    what_brings_you = Column("what_brings_you", String(255))
+    lived_experiences = Column("lived_experiences", ARRAY(String(250)))
+    best_time_for_first_session = Column("best_time_for_first_session", String(250))
 
-    how_did_you_hear_about_us = Column("how_did_you_hear_about_us", ARRAY(VARCHAR(100)))
-    promo_code = Column("promo_code", VARCHAR(100))
-    referred_by = Column("referred_by", VARCHAR(255))
+    how_did_you_hear_about_us = Column("how_did_you_hear_about_us", ARRAY(String(100)))
+    promo_code = Column("promo_code", String(100))
+    referred_by = Column("referred_by", String(255))
 
     @property
     def ph9_sum(self):
