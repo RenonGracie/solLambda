@@ -8,6 +8,11 @@ custom:
     app: app.app
   dotenv:
     logging: false
+  pythonRequirements:
+    slim: true
+    noDeploy:
+      - pip
+      - bin
 
 provider:
   name: aws
@@ -39,6 +44,7 @@ package:
     - .venv/**
     - .github/**
     - .idea/**
+    - .serverless/requirements/bin/**
 
 functions:
   api:
