@@ -9,7 +9,6 @@ custom:
   dotenv:
     logging: false
   pythonRequirements:
-    slim: true
     noDeploy:
       - pip
       - bin
