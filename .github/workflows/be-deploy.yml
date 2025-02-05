@@ -19,6 +19,7 @@ jobs:
       - name: Install node dependencies
         run: |
           npm ci
+          npm install -g serverless-dotenv-plugin
           npm install -g serverless
 
       - uses: actions/setup-python@v5
