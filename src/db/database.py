@@ -1,6 +1,5 @@
 from sqlalchemy import create_engine, URL
 from sqlalchemy.orm import sessionmaker
-from sqlalchemy_utils import database_exists, create_database
 
 from src.utils.settings import settings
 from src.utils.singletone import Singleton
@@ -40,8 +39,6 @@ class _Database(Singleton):
             port=rds_port,
         )
 
-        if not database_exists(url):
-            create_database(url)
         engine = create_engine(url, connect_args=args)
 
         session_maker = sessionmaker(bind=engine)
