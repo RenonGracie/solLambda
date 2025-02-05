@@ -2,7 +2,8 @@ import os
 
 from dotenv import load_dotenv
 
-from utils.singletone import Singleton
+from src.utils.singletone import Singleton
+
 
 class Settings(Singleton):
     def __init__(self):
@@ -17,6 +18,14 @@ class Settings(Singleton):
         self.AIRTABLE_API_KEY = os.getenv("AIRTABLE_API_KEY")
 
         self.GOOGLE_CALENDAR_CREDENTIALS = os.getenv("GOOGLE_CALENDAR_CREDENTIALS")
+
+        self.RDS_HOST = os.getenv("RDS_HOST")
+        self.RDS_PORT = os.getenv("RDS_PORT")
+        self.RDS_USER = os.getenv("RDS_USER")
+        self.RDS_PASSWORD = os.getenv("RDS_PASSWORD")
+        self.RDS_DATABASE = os.getenv("RDS_DATABASE")
+
+        self.IS_AURORA_RDS = os.getenv("IS_AURORA_RDS").lower() == "true"
 
 
 settings = Settings()

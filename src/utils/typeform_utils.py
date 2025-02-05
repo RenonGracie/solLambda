@@ -41,30 +41,46 @@ class TypeformIds:
 
 
 class TypeformData:
-    __data: dict = {}
+    _data: dict = {}
+    _use_join = False
+
+    @property
+    def first_name(self):
+        return self.get_value(TypeformIds.FIRST_NAME)
+
+    @property
+    def last_name(self):
+        return self.get_value(TypeformIds.LAST_NAME)
+
+    @property
+    def email(self):
+        return self.get_value(TypeformIds.EMAIL)
 
     def __init__(self, data: dict) -> None:
-        self.__data = data
+        self._data = data
+
+    def enable_join(self):
+        self._use_join = True
 
     @staticmethod
-    def __get_value_from_typeform(data: dict):
-        if not data.get('answer'):
+    def _get_value_from_typeform(data: dict):
+        if not data.get("answer"):
             return ""
 
-        match data['type']:
-            case 'multiple_choice':
-                if data['answer'].get('labels'):
-                    return data['answer'].get('labels')
+        match data["type"]:
+            case "multiple_choice":
+                if data["answer"].get("labels"):
+                    return data["answer"].get("labels")
                 else:
-                    return data['answer'].get('label')
-            case 'dropdown':
-                return data['answer'].get('label')
+                    return data["answer"].get("label")
+            case "dropdown":
+                return data["answer"].get("label")
             case _:
-                return data.get('answer')
+                return data.get("answer")
 
     def get_value(self, field_name: str):
-        answer = self.__data.get(field_name)
+        answer = self._data.get(field_name)
         if not answer:
             return ""
-        value = self.__get_value_from_typeform(self.__data.get(field_name))
-        return ", ".join(value) if isinstance(value, list) else value
+        value = self._get_value_from_typeform(self._data.get(field_name))
+        return ", ".join(value) if self._use_join and isinstance(value, list) else value

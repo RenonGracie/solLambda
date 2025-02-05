@@ -1,7 +1,17 @@
+from uuid import UUID
+
 from pydantic import BaseModel, Field
 from typing import List, Any
 
-from models.base import CustomField
+
+from src.models.api.base import CustomField
+
+
+class ClientShort(BaseModel):
+    id: UUID
+    first_name: str | None
+    last_name: str | None
+    email: str | None
 
 
 class Client(BaseModel):
@@ -16,7 +26,7 @@ class Client(BaseModel):
     StateShort: str | None = Field(default=None)
 
     DateOfBirth: int | None = Field(default=None)
-    Country: str | None = Field(default='US')
+    Country: str | None = Field(default="US")
 
     AdditionalInformation: str | None = Field(default=None)
     CustomFields: List[CustomField] | None = Field(default=None)
@@ -35,8 +45,8 @@ class Client(BaseModel):
     LastUpdateDate: int | None = Field(default=None)
 
     def __init__(self, **data: Any):
-        if data.get('ClientNumber'):
-            data['ClientId'] = data['ClientNumber']
+        if data.get("ClientNumber"):
+            data["ClientId"] = data["ClientNumber"]
         super().__init__(**data)
 
 
@@ -60,12 +70,15 @@ class ClientTag(BaseModel):
     ClientId: str | None = Field(...)
     Tag: str | None = Field(...)
 
+
 class ClientTagQuery(BaseModel):
     clientId: str = Field(default=None)
     tag: str = Field(default=None)
 
+
 class ClientPath(BaseModel):
     client_id: str = Field(...)
+
 
 class ClientDiagnose(BaseModel):
     Code: str = Field(default=None)
@@ -73,6 +86,7 @@ class ClientDiagnose(BaseModel):
     Date: str = Field(default=None)
     EndDate: str = Field(default=None)
     NoteId: str = Field(default=None)
+
 
 class ClientDiagnoses(BaseModel):
     diagnoses: List[ClientDiagnose] | None = None

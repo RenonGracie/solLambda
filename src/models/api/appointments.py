@@ -2,7 +2,7 @@ from typing import List
 
 from pydantic import BaseModel
 
-from models.base import CustomField
+from src.models.api.base import CustomField
 
 
 class Location(BaseModel):

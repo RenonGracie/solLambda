@@ -1,0 +1,54 @@
+from sqlalchemy import create_engine, URL
+from sqlalchemy.orm import sessionmaker
+from sqlalchemy_utils import database_exists, create_database
+
+from src.utils.settings import settings
+from src.utils.singletone import Singleton
+from src.models.db.base import Base
+
+import boto3
+
+
+class _Database(Singleton):
+    def __init__(self):
+        rds_host = settings.RDS_HOST
+        rds_port = settings.RDS_PORT
+        rds_username = settings.RDS_USER
+        database = settings.RDS_DATABASE
+
+        if not rds_host:
+            raise ValueError("RDS_HOST environment variable is not set")
+
+        if settings.IS_AURORA_RDS is True:
+            region = "us-east-2"
+            client = boto3.client("rds", region_name=region)
+            password = client.generate_db_auth_token(
+                DBHostname=rds_host,
+                Region=region,
+                Port=rds_port,
+                DBUsername=rds_username,
+            )
+            args = {"sslmode": "require"}
+        else:
+            password = settings.RDS_PASSWORD
+            args = {"sslmode": "prefer"}
+
+        url = URL.create(
+            "postgresql+psycopg2",
+            username=rds_username,
+            password=password,
+            host=rds_host,
+            database=database,
+            port=rds_port,
+        )
+
+        if not database_exists(url):
+            create_database(url)
+        engine = create_engine(url, connect_args=args)
+
+        session_maker = sessionmaker(bind=engine)
+        self.session = session_maker()
+        Base.metadata.create_all(bind=engine)
+
+
+db = _Database().session
