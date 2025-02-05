@@ -23,10 +23,8 @@ class _Database(Singleton):
             region = "us-east-2"
             client = boto3.client("dsql", region_name=region)
             password = client.generate_db_connect_auth_token(
-                DBHostname=rds_host,
+                Hostname=rds_host,
                 Region=region,
-                Port=rds_port,
-                DBUsername=rds_username,
             )
             args = {"sslmode": "require"}
         else:
