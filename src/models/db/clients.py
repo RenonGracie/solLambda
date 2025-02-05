@@ -1,7 +1,7 @@
 from uuid import uuid4
 
 import emoji
-from sqlalchemy import Column, UUID, ARRAY, TEXT, VARCHAR
+from sqlalchemy import Column, UUID, ARRAY, VARCHAR
 
 from src.utils.typeform_utils import TypeformData, TypeformIds
 from src.models.db.base import Base
@@ -34,7 +34,7 @@ class ClientSignup(Base):
     age = Column(VARCHAR(20))
     state = Column(VARCHAR(5))
 
-    i_would_like_therapist = Column(ARRAY(TEXT))
+    i_would_like_therapist = Column(ARRAY(VARCHAR(255)))
     alcohol = Column(VARCHAR(50))
     drugs = Column(VARCHAR(50))
 
@@ -58,13 +58,13 @@ class ClientSignup(Base):
 
     university = Column(VARCHAR(150))
 
-    what_brings_you = Column(TEXT)
+    what_brings_you = Column(VARCHAR(255))
     lived_experiences = Column(ARRAY(VARCHAR(250)))
     best_time_for_first_session = Column(VARCHAR(250))
 
     how_did_you_hear_about_us = Column(ARRAY(VARCHAR(100)))
     promo_code = Column(VARCHAR(100))
-    referred_by = Column(TEXT)
+    referred_by = Column(VARCHAR(255))
 
     @property
     def ph9_sum(self):
@@ -144,7 +144,7 @@ def update_from_typeform_data(
     client.what_brings_you = data.get_value(TypeformIds.WHAT_BRINGS_YOU_TO_THERAPY)
     client.lived_experiences = list(
         map(
-            lambda text: emoji.replace_emoji(text),
+            lambda VARCHAR(255): emoji.replace_emoji(VARCHAR(255)),
             data.get_value(TypeformIds.LIVED_EXPERIENCES),
         )
     )
