@@ -24,7 +24,7 @@ class ClientSignup(Base):
 
     id = Column(UUID, primary_key=True, index=True, default=uuid4)
 
-    response_id = Column(String, index=True)
+    response_id = Column(String(50), index=True)
 
     first_name = Column(String(50), index=True)
     last_name = Column(String(50), index=True)
