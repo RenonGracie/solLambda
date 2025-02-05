@@ -17,6 +17,9 @@
     },
     "serverless-python-requirements": {
       "serverless": "$serverless"
+    },
+    "serverless-dotenv-plugin": {
+      "serverless": "$serverless"
     }
   }
 }
