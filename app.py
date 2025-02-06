@@ -7,10 +7,7 @@ from src.models.db.clients import (
     create_from_typeform_data,
     update_from_typeform_data,
 )
-from src.routes.client_forms import client_form_api
-from src.routes.therapists import therapist_api
-from src.routes.appointments import appointment_api
-from src.routes.clients import client_api
+from src.routes import client_api, appointment_api, therapist_api
 from src.utils.intakeq_bot.bot import create_new_form
 from src.utils.request_utils import intakeq
 from src.utils.typeform_utils import TypeformData
@@ -23,7 +20,6 @@ info = Info(title="SolHealth API", version="1.0.0")
 app = OpenAPI(__name__, info=info, security_schemes=__security_schemes)
 
 app.register_api(client_api)
-app.register_api(client_form_api)
 app.register_api(appointment_api)
 app.register_api(therapist_api)
 

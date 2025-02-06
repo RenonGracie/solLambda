@@ -131,9 +131,11 @@ def test_calculate_match_score_full_match(sample_client, sample_therapist):
         "Experienced with Anxiety",
         "CBT-focused",
         "DBT skills based",
+        "Traumatic experience",
     ]
     sample_therapist.diagnoses = ["Anxiety", "Depression"]
-    sample_therapist.specialities = ["CBT", "DBT"]
+    sample_therapist.specialities = ["Trauma"]
+    sample_therapist.therapeutic_orientation = ["CBT", "DBT"]
     score, matches = calculate_match_score(sample_client, sample_therapist)
-    assert score == 15  # Adjust based on your scoring logic
-    assert matches == ["Anxiety", "CBT", "DBT"]
+    assert score == 18  # Adjust based on your scoring logic
+    assert matches == ["Anxiety", "Trauma"]
