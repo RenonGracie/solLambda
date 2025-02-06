@@ -8,14 +8,15 @@ from src.utils import s3
 from src.utils.matching_algorithm.algorithm import calculate_match_score
 
 
-def _load_therapist_media(therapist: Therapist):
-    therapist.welcome_video_link = s3.get_media_url(
-        user_id=therapist.email, s3_media_type=S3MediaType.WELCOME_VIDEO
+def _load_therapist_media(data: dict) -> dict:
+    email = data['therapist']['email']
+    data['therapist']['welcome_video_link'] = s3.get_media_url(
+        user_id=email, s3_media_type=S3MediaType.WELCOME_VIDEO
     )
-    therapist.image_link = s3.get_media_url(
-        user_id=therapist.email, s3_media_type=S3MediaType.IMAGE
+    data['therapist']['image_link'] = s3.get_media_url(
+        user_id=email, s3_media_type=S3MediaType.IMAGE
     )
-    return therapist
+    return data
 
 
 def sort(e: dict):
