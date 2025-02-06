@@ -16,6 +16,7 @@ dependencies = [
     "psycopg2-binary>=2.9.10",
     "pyairtable==2.3.7",
     "pydantic-core>=2.27.2",
+    "pytest>=8.3.4",
     "python-dotenv>=1.0.1",
     "python-levenshtein>=0.26.1",
     "requests>=2.32.3",
@@ -23,3 +24,6 @@ dependencies = [
     "sqlalchemy>=2.0.37",
     "sqlalchemy-utils>=0.41.2",
 ]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]

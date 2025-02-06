@@ -51,7 +51,6 @@ def typeform_webhook():
         }
     data = TypeformData(json)
 
-    print(data)
     response_id = response_json["form_response"]["token"]
     form = (
         db.query(ClientSignup)
@@ -60,7 +59,6 @@ def typeform_webhook():
         )
         .first()
     )
-    print(not form)
     if not form:
         db.add(create_from_typeform_data(response_id, data))
         db.commit()

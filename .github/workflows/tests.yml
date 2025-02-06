@@ -1,0 +1,25 @@
+name: Run tests
+
+on:
+  workflow_call:
+
+jobs:
+  lint:
+    name: Run tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+
+      - name: Install python dependencies
+        run: uv sync
+
+      - name: Run test
+        run: uv run pytest

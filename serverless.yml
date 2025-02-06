@@ -12,6 +12,7 @@ custom:
     noDeploy:
       - pip
       - bin
+      - pytest
 
 provider:
   name: aws
@@ -43,6 +44,7 @@ package:
     - .venv/**
     - .github/**
     - .idea/**
+    - tests/**
 
 functions:
   api:

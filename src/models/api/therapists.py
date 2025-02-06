@@ -3,45 +3,49 @@ from pydantic import BaseModel
 
 class Therapist(BaseModel):
     id: str
-    intern_name: str
-    age: str
-    email: str
+    intern_name: str | None
+    age: str | None
+    email: str | None
 
-    availability: list[str]
-    birth_order: str
+    description: str | None
+
+    availability: list[str] | None
+    birth_order: str | None
     caretaker_role: bool | None
-    caseload_tracker: str
+    caseload_tracker: str | None
     has_children: bool | None
-    cohort: str
-    diagnoses: list[str]
-    ethnicity: list[str]
-    gender: str
-    gender_interest: str
-    immigration_background: str
+    cohort: str | None
+    diagnoses: list[str] | None
+    ethnicity: list[str] | None
+    gender: str | None
+    gender_interest: str | None
+    immigration_background: str | None
     lgbtq_part: bool | None
-    culture: str
-    places: str
+    culture: str | None
+    places: str | None
     married: bool | None
-    max_caseload: str
-    neurodivergence: str
+    max_caseload: str | None
+    neurodivergence: str | None
     performing: bool | None
-    program: str
+    program: str | None
     religion: list[str] | None
-    experience_with_risk_clients: str
-    working_with_lgbtq_clients: str
+    experience_with_risk_clients: str | None
+    working_with_lgbtq_clients: str | None
     negative_affect_by_social_media: bool | None
-    specialities: list[str]
-    states: list[str]
-    therapeutic_orientation: list[str]
-    family_household: str
+    specialities: list[str] | None
+    states: list[str] | None
+    therapeutic_orientation: list[str] | None
+    family_household: str | None
 
-    video_link: str | None
+    welcome_video_link: str | None
     image_link: str | None
 
-    def __init__(self, json: dict, **data):
+    def __init__(self, json: dict):
         fields = json["fields"]
 
         def parce_bool(field: str) -> bool | None:
+            if not field:
+                return None
             if field.lower().__eq__("yes"):
                 return True
             elif field.lower().__eq__("no"):
@@ -51,64 +55,70 @@ class Therapist(BaseModel):
 
         super().__init__(
             id=json["id"],
-            intern_name=fields["Intern Name"],
-            age=fields["Age"],
-            email=fields["Email"],
-            availability=fields["Availability: When are you available to see clients?"],
-            birth_order=fields["Birth Order"],
+            intern_name=fields.get("Intern Name"),
+            age=fields.get("Age"),
+            email=fields.get("Email"),
+            availability=fields.get(
+                "Availability: When are you available to see clients?"
+            ),
+            birth_order=fields.get("Birth Order"),
             caretaker_role=parce_bool(
-                fields["Caretaker Role: Have you ever been in a caretaker role?"]
+                fields.get("Caretaker Role: Have you ever been in a caretaker role?")
             ),
-            caseload_tracker=fields["Caseload Tracker"],
-            has_children=parce_bool(fields["Children: Do you have children?"]),
-            cohort=fields["Cohort"],
-            diagnoses=fields[
+            caseload_tracker=fields.get("Caseload Tracker"),
+            has_children=parce_bool(fields.get("Children: Do you have children?")),
+            cohort=fields.get("Cohort"),
+            diagnoses=fields.get(
                 "Diagnoses: Please select the diagnoses you have experience and/or interest in working with"
-            ],
-            ethnicity=fields["Ethnicity"],
-            gender=fields["Gender"],
-            gender_interest=fields[
+            ),
+            ethnicity=fields.get("Ethnicity"),
+            gender=fields.get("Gender"),
+            gender_interest=fields.get(
                 "Gender: Do you have experience and/or interest in working with individuals who do not identify as cisgender? (i.e. transgender, gender fluid, etc.) "
-            ],
-            immigration_background=fields["Immigration Background"],
+            ),
+            immigration_background=fields.get("Immigration Background"),
             lgbtq_part=parce_bool(
-                fields["LGBTQ+: Are you a part of the LGBTQ+ community?"]
+                fields.get("LGBTQ+: Are you a part of the LGBTQ+ community?")
             ),
-            culture=fields["Individualist vs. Collectivist culture"],
-            places=fields["Many places or only one or two places?"],
-            married=parce_bool(fields["Marriage: Are you / have ever been married?"]),
-            max_caseload=fields["Max Caseload"],
-            neurodivergence=fields[
+            culture=fields.get("Individualist vs. Collectivist culture"),
+            places=fields.get("Many places or only one or two places?"),
+            married=parce_bool(
+                fields.get("Marriage: Are you / have ever been married?")
+            ),
+            max_caseload=fields.get("Max Caseload"),
+            neurodivergence=fields.get(
                 "Neurodivergence: Do you have experience and/or interest in working with individuals who are neurodivergent? "
-            ],
-            performing=parce_bool(
-                fields[
-                    "Performing/Visual Arts: Do you currently participate / have participated in any performing or visual art activities?"
-                ]
             ),
-            program=fields["Program"],
+            performing=parce_bool(
+                fields.get(
+                    "Performing/Visual Arts: Do you currently participate / have participated in any performing or visual art activities?"
+                )
+            ),
+            program=fields.get("Program"),
             religion=fields.get(
                 "Religion: Please select the religions you have experience working with and/or understanding of. "
             ),
-            experience_with_risk_clients=fields[
+            experience_with_risk_clients=fields.get(
                 "Risk: Do you have experience and/or interest in working with higher-risk clients? "
-            ],
-            working_with_lgbtq_clients=fields[
-                "Sexual Orientation: Do you have experience and/or interest in working with individuals who are part of the LGBTQ+ community?"
-            ],
-            negative_affect_by_social_media=parce_bool(
-                fields[
-                    "Social Media: Have you ever been negatively affected by social media?"
-                ]
             ),
-            specialities=fields[
+            working_with_lgbtq_clients=fields.get(
+                "Sexual Orientation: Do you have experience and/or interest in working with individuals who are part of the LGBTQ+ community?"
+            ),
+            negative_affect_by_social_media=parce_bool(
+                fields.get(
+                    "Social Media: Have you ever been negatively affected by social media?"
+                )
+            ),
+            specialities=fields.get(
                 "Specialities: Please select any specialities you have experience and/or interest in working with. "
-            ],
-            states=fields["States"],
-            therapeutic_orientation=fields[
+            ),
+            states=fields.get("States"),
+            therapeutic_orientation=fields.get(
                 "Therapeutic Orientation: Please select the modalities you most frequently utilize. "
-            ],
-            family_household=fields["Traditional vs. Non-traditional family household"],
+            ),
+            family_household=fields.get(
+                "Traditional vs. Non-traditional family household"
+            ),
         )
 
 

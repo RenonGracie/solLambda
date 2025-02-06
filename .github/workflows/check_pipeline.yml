@@ -11,3 +11,7 @@ jobs:
     name: Lint code
     secrets: inherit
     uses: ./.github/workflows/lint.yml
+  tests:
+    name: Run tests
+    secrets: inherit
+    uses: ./.github/workflows/tests.yml

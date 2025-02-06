@@ -3,7 +3,7 @@ from uuid import uuid4
 
 import emoji
 from sqlalchemy import Column, String, Text
-from sqlalchemy.dialects.postgresql import UUID, JSONB
+from sqlalchemy.dialects.postgresql import UUID
 
 from src.utils.typeform_utils import TypeformData, TypeformIds
 from src.models.db.base import Base
@@ -120,6 +120,10 @@ class ClientSignup(Base):
                 _calc_points(self.feeling_afraid),
             ]
         )
+
+    @property
+    def suicidal_thoughts_points(self):
+        return _calc_points(self.suicidal_thoughts)
 
 
 def create_from_typeform_data(response_id: str, data: TypeformData) -> ClientSignup:

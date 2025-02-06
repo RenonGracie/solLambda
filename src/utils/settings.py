@@ -25,7 +25,7 @@ class Settings(Singleton):
         self.RDS_PASSWORD = os.getenv("RDS_PASSWORD")
         self.RDS_DATABASE = os.getenv("RDS_DATABASE")
 
-        self.IS_AURORA_RDS = os.getenv("IS_AURORA_RDS").lower() == "true"
+        self.IS_AWS = os.getenv("IS_AWS").lower() == "true"
 
 
 settings = Settings()

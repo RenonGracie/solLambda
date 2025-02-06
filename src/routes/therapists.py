@@ -5,12 +5,12 @@ from pyairtable import Api
 from src.models.api.calendar import CalendarEvents, EventQuery
 from src.models.api.client_match import MatchedTherapists, MatchQuery
 from src.models.api.clients import ClientShort
-from src.models.api.therapist_s3 import VideoQuery, VideoLink
+from src.models.api.therapist_s3 import MediaQuery, MediaLink
 from src.models.api.therapists import Therapists, Therapist
 from src.utils.google_calendar import get_events_from_gcalendar
-from src.utils.matching_algorithm import match_client_with_therapists
+from src.utils.matching_algorithm.match import match_client_with_therapists
 from src.utils.settings import settings
-from src.utils.s3 import get_video_url
+from src.utils.s3 import get_media_url
 
 __tag = Tag(name="Therapists")
 therapist_api = APIBlueprint(
@@ -57,7 +57,7 @@ def get_events(query: EventQuery):
     return jsonify({"events": events}), 200
 
 
-@therapist_api.get("/video", responses={200: VideoLink}, summary="Get the video link")
-def get_video_link(query: VideoQuery):
-    url = get_video_url(query.video_id)
+@therapist_api.get("/media", responses={200: MediaLink}, summary="Get the media link")
+def get_video_link(query: MediaQuery):
+    url = get_media_url(user_id=query.email, s3_media_type=query.type)
     return jsonify({"url": url}), 200

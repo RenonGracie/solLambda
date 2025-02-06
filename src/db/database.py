@@ -18,7 +18,7 @@ class _Database(Singleton):
         if not rds_host:
             raise ValueError("RDS_HOST environment variable is not set")
 
-        if settings.IS_AURORA_RDS is True:
+        if settings.IS_AWS is True:
             region = "us-east-2"
             client = boto3.client("dsql", region_name=region)
             password = client.generate_db_connect_admin_auth_token(
