@@ -8,10 +8,11 @@ from src.models.api.base import CustomField
 
 
 class ClientShort(BaseModel):
-    id: UUID
+    id: UUID | None
     first_name: str | None
     last_name: str | None
     email: str | None
+    response_id: str | None
 
 
 class Client(BaseModel):

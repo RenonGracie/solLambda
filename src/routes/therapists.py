@@ -39,6 +39,9 @@ def match(query: MatchQuery):
     client, matched = match_client_with_therapists(
         query.response_id, therapists, query.limit
     )
+    if client is None:
+        return jsonify({"client": None, "therapists": []}), 200
+
     return jsonify(
         {"client": ClientShort(**client.__dict__).dict(), "therapists": matched}
     ), 200
