@@ -13,16 +13,16 @@ custom:
       - pip
       - bin
       - pytest
-#  customDomain:
-#    domainName: 'dev.solhealth.co'
-#    hostedZoneId: 'Z0565774GWNT1OIQP463'
-#    createRoute53Record: true
-#    createRoute53IPv6Record: true
-#    certificateName: 'dev.solhealth.co'
-#  customCertificate:
-#    hostedZoneIds: 'Z0565774GWNT1OIQP463'
-#    certificateName: 'dev.solhealth.co'
-#    region: us-east-1
+  customDomain:
+    domainName: 'dev.solhealth.co'
+    hostedZoneId: 'Z0565774GWNT1OIQP463'
+    createRoute53Record: true
+    createRoute53IPv6Record: true
+    certificateName: 'dev.solhealth.co'
+  customCertificate:
+    hostedZoneIds: 'Z0565774GWNT1OIQP463'
+    certificateName: 'dev.solhealth.co'
+    region: us-east-1
 
 provider:
   name: aws
