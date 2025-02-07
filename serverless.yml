@@ -16,7 +16,6 @@ custom:
   customDomain:
     rest:
       domainName: dev.solhealth.co
-      hostedZoneId: dev.solhealth.co
       certificateName: '*.solhealth.co'
       createRoute53Record: false
       endpointType: EDGE
