@@ -18,17 +18,19 @@ custom:
     dev:
       domainName: dev.solhealth.co
       certificateName: dev.solhealth.co
-  customDomain:
-    domainName: ${self:custom.domains.${self:provider.stage}.domainName}
-    hostedZoneId: Z0565774GWNT1OIQP463
-    createRoute53Record: false
-    createRoute53IPv6Record: false
-    route53Region: us-east-2
-    certificateName: ${self:custom.domains.${self:provider.stage}.certificateName}
+#  customDomain:
+#    domainName: ${self:custom.domains.${self:provider.stage}.domainName}
+#    hostedZoneId: Z0565774GWNT1OIQP463
+#    createRoute53Record: false
+#    createRoute53IPv6Record: false
+#    route53Region: us-east-2
+#    certificateName: ${self:custom.domains.${self:provider.stage}.certificateName}
   customCertificate:
     hostedZoneNames: "dev.solhealth.co."
     certificateName: ${self:custom.domains.${self:provider.stage}.certificateName}
     region: us-east-2
+  hostedZone:
+    name: ${self:custom.domains.${self:provider.stage}.certificateName}.
 
 provider:
   name: aws
@@ -80,3 +82,4 @@ plugins:
   - serverless-dotenv-plugin
   - serverless-domain-manager
   - serverless-certificate-creator
+  - serverless-hosted-zone
