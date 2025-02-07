@@ -7,7 +7,7 @@ class Therapist(BaseModel):
     age: str | None
     email: str | None
 
-    description: str | None
+    biography: str | None
 
     availability: list[str] | None
     birth_order: str | None
@@ -58,6 +58,7 @@ class Therapist(BaseModel):
             intern_name=fields.get("Intern Name"),
             age=fields.get("Age"),
             email=fields.get("Email"),
+            biography=fields.get("Intro Bios (Shortened)"),
             availability=fields.get(
                 "Availability: When are you available to see clients?"
             ),
