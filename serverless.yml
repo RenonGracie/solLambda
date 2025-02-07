@@ -13,11 +13,22 @@ custom:
       - pip
       - bin
       - pytest
+  domains:
+    # References to 'dev' stage
+    dev:
+      domainName: dev.solhealth.co
+      certificateName: dev.solhealth.co
   customDomain:
+    domainName: ${self:custom.domains.${self:provider.stage}.domainName}
     hostedZoneId: Z0565774GWNT1OIQP463
-    certificateName: '*.solhealth.co'
     createRoute53Record: false
     createRoute53IPv6Record: false
+    route53Region: us-east-2
+    certificateName: ${self:custom.domains.${self:provider.stage}.certificateName}
+  customCertificate:
+    hostedZoneNames: "dev.solhealth.co."
+    certificateName: ${self:custom.domains.${self:provider.stage}.certificateName}
+    region: us-east-2
 
 provider:
   name: aws
@@ -68,3 +79,4 @@ plugins:
   - serverless-python-requirements
   - serverless-dotenv-plugin
   - serverless-domain-manager
+  - serverless-certificate-creator
