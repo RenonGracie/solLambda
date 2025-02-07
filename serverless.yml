@@ -15,13 +15,10 @@ custom:
       - pytest
   customDomain:
     domainName: dev.solhealth.co
+    hostedZoneId: Z0565774GWNT1OIQP463
     certificateName: 'dev.solhealth.co'
     createRoute53Record: false
-    endpointType: EDGE
-    securityPolicy: tls_1_2
-  customCertificate:
-    certificateName: '*.solhealth.co'
-    hostedZoneNames: 'dev.solhealth.co.'
+    createRoute53IPv6Record: false
 
 provider:
   name: aws
@@ -71,4 +68,4 @@ plugins:
   - serverless-wsgi
   - serverless-python-requirements
   - serverless-dotenv-plugin
-  - serverless-certificate-creator
+  - serverless-domain-manager
