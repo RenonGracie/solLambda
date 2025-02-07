@@ -7,7 +7,6 @@
     "serverless-certificate-creator": "^1.6.0",
     "serverless-domain-manager": "^8.0.0",
     "serverless-dotenv-plugin": "^6.0.0",
-    "serverless-hosted-zone": "^0.1.0",
     "serverless-python-requirements": "^6.1.1",
     "serverless-wsgi": "^3.0.5"
   },
