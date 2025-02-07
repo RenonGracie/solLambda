@@ -14,9 +14,8 @@ custom:
       - bin
       - pytest
   customDomain:
-    domainName: dev.solhealth.co
     hostedZoneId: Z0565774GWNT1OIQP463
-    certificateName: 'dev.solhealth.co'
+    certificateName: '*.solhealth.co'
     createRoute53Record: false
     createRoute53IPv6Record: false
 
