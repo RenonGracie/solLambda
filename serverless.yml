@@ -17,10 +17,15 @@ custom:
     domainName: 'dev.solhealth.co'
     createRoute53Record: true
     createRoute53IPv6Record: true
-    certificateName: 'dev.solhealth.co'
+#    certificateName: 'dev.solhealth.co'
+    apiType: rest
+    autoDomain: true
   customCertificate:
+    hostedZoneIds: 'Z0565774GWNT1OIQP463'
     certificateName: 'dev.solhealth.co'
     region: us-east-1
+    subjectAlternativeNames:
+      - '*.dev.solhealth.co'
 
 provider:
   name: aws
