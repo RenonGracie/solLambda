@@ -14,7 +14,7 @@ custom:
       - bin
       - pytest
   customDomain:
-    domainName: 'dev.solhealth.co'
+    domainName: 'api.dev.solhealth.co'
     createRoute53Record: true
     createRoute53IPv6Record: true
     certificateName: 'dev.solhealth.co'
