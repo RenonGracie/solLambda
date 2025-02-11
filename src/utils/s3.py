@@ -1,9 +1,10 @@
 import boto3
+from botocore.exceptions import ClientError
 
 from src.models.api.therapist_s3 import S3MediaType
 from src.utils.settings import settings
 
-__s3_client = boto3.client("s3")
+_s3_client = boto3.client("s3")
 
 S3_BUCKET_NAME = "therapists-personal-data"
 
@@ -21,8 +22,13 @@ def get_media_url(user_id: str, s3_media_type: S3MediaType, expiration=3600):
             link = f"videos/{user_id}_intro"
         case _:
             return None
-    return __s3_client.generate_presigned_url(
-        "get_object",
-        Params={"Bucket": S3_BUCKET_NAME, "Key": link},
-        ExpiresIn=expiration,
-    )
+
+    try:
+        _s3_client.head_object(Bucket=S3_BUCKET_NAME, Key=link)
+        return _s3_client.generate_presigned_url(
+            "get_object",
+            Params={"Bucket": S3_BUCKET_NAME, "Key": link},
+            ExpiresIn=expiration,
+        )
+    except ClientError:
+        return None
