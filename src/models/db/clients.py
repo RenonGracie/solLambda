@@ -5,6 +5,7 @@ import emoji
 from sqlalchemy import Column, String, Text
 from sqlalchemy.dialects.postgresql import UUID
 
+from src.utils.states_utils import statename_to_abbr
 from src.utils.typeform_utils import TypeformData, TypeformIds
 from src.models.db.base import Base
 
@@ -139,11 +140,11 @@ def update_from_typeform_data(
     client.last_name = data.get_value(TypeformIds.LAST_NAME)
     client.email = data.get_value(TypeformIds.EMAIL)
     client.phone = data.get_value(TypeformIds.PHONE)
-    client.gender = data.get_value(TypeformIds.GENDER)
+    client.gender = None
     client.age = data.get_value(TypeformIds.AGE)
-    client.state = data.get_value(TypeformIds.STATE)
+    client.state = statename_to_abbr.get(data.get_value(TypeformIds.STATE))
 
-    client.i_would_like_therapist = data.get_value(TypeformIds.I_WOULD_LIKE_THERAPIST)
+    client.i_would_like_therapist = data.i_would_like_therapist
 
     client.alcohol = data.get_value(TypeformIds.ALCOHOL)
     client.drugs = data.get_value(TypeformIds.DRUGS)
@@ -169,22 +170,12 @@ def update_from_typeform_data(
     client.easily_annoyed = data.get_value(TypeformIds.EASILY_ANNOYED)
     client.feeling_afraid = data.get_value(TypeformIds.FEELING_AFRAID)
 
-    client.university = data.get_value(TypeformIds.UNIVERSITY)
-
-    client.what_brings_you = data.get_value(TypeformIds.WHAT_BRINGS_YOU_TO_THERAPY)
     client.lived_experiences = list(
         map(
             lambda text: emoji.replace_emoji(text),
             data.get_value(TypeformIds.LIVED_EXPERIENCES),
         )
     )
-    client.best_time_for_first_session = data.get_value(
-        TypeformIds.BEST_TIME_FOR_FIRST_SESSION
-    )
 
-    client.how_did_you_hear_about_us = data.get_value(
-        TypeformIds.HOW_DID_YOU_HEAR_ABOUT_US
-    )
     client.promo_code = data.get_value(TypeformIds.PROMO_CODE)
-    client.referred_by = data.get_value(TypeformIds.REFER)
     return client

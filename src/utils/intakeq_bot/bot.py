@@ -1,3 +1,4 @@
+from src.utils.states_utils import statename_to_abbr
 from src.utils.typeform_utils import TypeformIds, TypeformData
 
 
@@ -9,7 +10,7 @@ def create_new_form(data: TypeformData) -> list:
         data.get_value(TypeformIds.LAST_NAME),  # 2
         data.get_value(TypeformIds.PHONE),  # 3
         data.get_value(TypeformIds.EMAIL),  # 4
-        data.get_value(TypeformIds.I_WOULD_LIKE_THERAPIST),  # 5
+        data.i_would_like_therapist,  # 5
         data.get_value(TypeformIds.ALCOHOL),  # 6
         data.get_value(TypeformIds.DRUGS),  # 7
         data.get_value(TypeformIds.PLEASURE_DOING_THINGS),  # 8
@@ -30,15 +31,15 @@ def create_new_form(data: TypeformData) -> list:
         data.get_value(TypeformIds.EASILY_ANNOYED),  # 23
         data.get_value(TypeformIds.FEELING_AFRAID),  # 24
         "",  # 25
-        data.get_value(TypeformIds.WHAT_BRINGS_YOU_TO_THERAPY),  # 26
-        data.get_value(TypeformIds.AGE),  # 27
-        data.get_value(TypeformIds.GENDER),  # 28
-        data.get_value(TypeformIds.STATE),  # 29
-        data.get_value(TypeformIds.UNIVERSITY),  # 30
+        "---",  # 26 WHAT_BRINGS_YOU_TO_THERAPY
+        data.get_value(TypeformIds.AGE),  # 27 AGE
+        "Other",  # 28 GENDER
+        statename_to_abbr.get(data.get_value(TypeformIds.STATE)),  # 29
+        "---",  # 30 UNIVERSITY
         "",  # 31
         data.get_value(TypeformIds.PROMO_CODE),  # 32
-        data.get_value(TypeformIds.HOW_DID_YOU_HEAR_ABOUT_US),  # 33
-        data.get_value(TypeformIds.REFER),  # 34
+        "Other",  # 33 HOW_DID_YOU_HEAR_ABOUT_US
+        "",  # 34 REFERRED BY
         "",  # 35
         "",  # 36
         "",  # 37
@@ -49,7 +50,7 @@ def create_new_form(data: TypeformData) -> list:
         "",  # 42
         "",  # 43
         "",  # 44
-        data.get_value(TypeformIds.BEST_TIME_FOR_FIRST_SESSION),  # 45
+        "---",  # 45 BEST_TIME_FIRST_SESSION
         "",  # 46
         "",  # 47
         data.get_value(TypeformIds.LIVED_EXPERIENCES),  # 48

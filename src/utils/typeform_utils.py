@@ -1,43 +1,39 @@
 class TypeformIds:
-    FIRST_NAME = "Bcd3yhtVV8qA"
-    LAST_NAME = "91kMGKU8j2CH"
-    PHONE = "b9DkubXQl2D3"
-    EMAIL = "0aZPHNSS2AEa"
-    GENDER = "clAn8i6OQOI3"
-    AGE = "NFyGjLRsvOQb"
-    STATE = "3AQyhzE0XBx5"
-    UNIVERSITY = "sHR59ObUeLCw"
+    FIRST_NAME = "bAU4PM5izLPw"
+    LAST_NAME = "QyQGh22FFp7C"
+    PHONE = "v9zXJ6bgbebE"
+    EMAIL = "mmy8ZN4ZsGBF"
 
-    I_WOULD_LIKE_THERAPIST = "B443qff2ZRvs"
-    LIVED_EXPERIENCES = "pTMOjbjkbSWL"
+    AGE = "DfxcVIryt3wc"
 
-    ALCOHOL = "DxXG5npFnjPd"
-    DRUGS = "DEC8S8r60O1U"
+    STATE = "fC8U7U3cJQFL"
 
-    PLEASURE_DOING_THINGS = "7kQjFzstcJts"
-    FEELING_DOWN = "uUQMfw2xRiQ4"
-    TROUBLE_FALLING = "G9LdjqKeO7f4"
-    FEELING_TIRED = "YFkgwTszPtMN"
-    POOR_APPETITE = "TKA1j8lE6SSd"
-    FEELING_BAD_ABOUT_YOURSELF = "TsZ80LFOtbCq"
-    TROUBLE_CONCENTRATING = "3SCH6BP1SZWt"
-    MOVING_OR_SPEAKING_SO_SLOWLY = "eca2CSO04vLl"
-    SUICIDAL_THOUGHTS = "chxgOkME9qj4"
+    I_WOULD_LIKE_THERAPIST_SPECIALIZES = "CVL5z059lufX"
+    I_WOULD_LIKE_THERAPIST_IDENTIFIES = "ecBOrzCGUhvJ"
+    LIVED_EXPERIENCES = "0167KDGBLslw"
 
-    FEELING_NERVOUS = "B3cxNBp1tpIq"
-    NOT_CONTROL_WORRYING = "bvL83C6M9nb1"
-    WORRYING_TOO_MUCH = "RdiG8vKXrbVB"
-    TROUBLE_RELAXING = "98pYB4y1REbK"
-    BEING_SO_RESTLESS = "yVJsRQvXsi1T"
-    EASILY_ANNOYED = "QtDBqAbfBRAR"
-    FEELING_AFRAID = "1l3TD4JycX7a"
+    ALCOHOL = "8WplwzBjKVSb"
+    DRUGS = "82oHc9iy7Pmh"
 
-    WHAT_BRINGS_YOU_TO_THERAPY = "RngVovIqApk0"
-    BEST_TIME_FOR_FIRST_SESSION = "V7DQU2HoEvfK"
-    HOW_DID_YOU_HEAR_ABOUT_US = "ntVzKN7vWQhO"
+    PLEASURE_DOING_THINGS = "M04nbKJncd9M"
+    FEELING_DOWN = "h0F37G0sqXxP"
+    TROUBLE_FALLING = "uRnwdU1H6ekJ"
+    FEELING_TIRED = "N7CIrE5K0M2L"
+    POOR_APPETITE = "g8IOdge0N8FB"
+    FEELING_BAD_ABOUT_YOURSELF = "kSKbsRYNPRxJ"
+    TROUBLE_CONCENTRATING = "3wj9XleHfoTG"
+    MOVING_OR_SPEAKING_SO_SLOWLY = "35kvZkl7kMLT"
+    SUICIDAL_THOUGHTS = "lzpnX6vNtaXw"
 
-    REFER = "2mfjCdPxfxVN"
-    PROMO_CODE = "gnL63lnuTFLu"
+    FEELING_NERVOUS = "ORbVCZxFbKGq"
+    NOT_CONTROL_WORRYING = "BbXZFZTqjqnA"
+    WORRYING_TOO_MUCH = "3pgnd68OOFd2"
+    TROUBLE_RELAXING = "r5g62WEJmTVc"
+    BEING_SO_RESTLESS = "PCGU4N2tP2VY"
+    EASILY_ANNOYED = "KiYOqFtfrD1m"
+    FEELING_AFRAID = "a8q7iIVHwp3P"
+
+    PROMO_CODE = "ktGmxlKsXqFI"
 
 
 class TypeformData:
@@ -61,6 +57,22 @@ class TypeformData:
 
     def enable_join(self):
         self._use_join = True
+
+    @property
+    def i_would_like_therapist(self):
+        specializes = self.get_value(TypeformIds.I_WOULD_LIKE_THERAPIST_SPECIALIZES)
+        identifies = self.get_value(TypeformIds.I_WOULD_LIKE_THERAPIST_IDENTIFIES)
+        if isinstance(specializes, str) and isinstance(identifies, str):
+            return f"{specializes}, {identifies.replace('Male', 'Is male').replace('Female', 'Is female')}"
+        elif isinstance(specializes, list) and isinstance(identifies, list):
+            return specializes + list(
+                map(
+                    lambda gender: f"Is {gender.lower()}",
+                    identifies,
+                )
+            )
+        else:
+            return None
 
     @staticmethod
     def _get_value_from_typeform(data: dict):
