@@ -37,7 +37,7 @@ def get_therapists():
 def match(query: MatchQuery):
     therapists = list(map(lambda therapist: Therapist(therapist), table.all()))
     client, matched = match_client_with_therapists(
-        query.response_id, therapists, query.limit
+        query.response_id, therapists, query.limit, query.last_index
     )
     if client is None:
         return jsonify({"client": None, "therapists": []}), 200

@@ -28,7 +28,7 @@ def sort(e: dict):
 
 
 def match_client_with_therapists(
-    response_id: str, therapists: list[Therapist], limit: int
+    response_id: str, therapists: list[Therapist], limit: int, last_index: int
 ) -> (ClientSignup | None, List[dict]):
     form = db.query(ClientSignup).filter_by(response_id=response_id).first()
     if not form:
@@ -44,4 +44,9 @@ def match_client_with_therapists(
             )
 
     matches.sort(key=sort, reverse=True)
-    return form, list(map(lambda item: _load_therapist_media(item), matches[:limit]))
+    return form, list(
+        map(
+            lambda item: _load_therapist_media(item),
+            matches[last_index : limit + last_index],
+        )
+    )

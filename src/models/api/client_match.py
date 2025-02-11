@@ -17,4 +17,5 @@ class MatchedTherapists(BaseModel):
 
 class MatchQuery(BaseModel):
     limit: int = Field(default=10)
+    last_index: int = Field(default=0)
     response_id: str = Field(example="Client response id")
