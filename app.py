@@ -73,5 +73,10 @@ def bot_hook():
     return "", 200
 
 
+@app.post("/intakeq_hook", tags=[Tag(name="Webhook")], summary="Webhook for IntakeQ Appointments")
+def intakeq_hook():
+    return "", 200
+
+
 if __name__ == "__main__":
     app.run(host="127.0.0.1", port=5000, debug=True)
