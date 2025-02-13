@@ -26,8 +26,10 @@ app.register_api(therapist_api)
 
 @app.after_request
 def set_cors_headers(response):
-    response.headers['Access-Control-Allow-Headers'] = 'Content-Type,Authorization'
-    response.headers['Access-Control-Allow-Origin'] = 'https://*.solhealth.co'
+    origin = request.headers.get('Origin')
+    if origin and origin.endswith("solhealth.co"):
+        response.headers['Access-Control-Allow-Headers'] = 'Content-Type,Authorization'
+        response.headers['Access-Control-Allow-Origin'] = origin
     return response
 
 
