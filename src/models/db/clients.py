@@ -140,9 +140,10 @@ def update_from_typeform_data(
     client.last_name = data.get_value(TypeformIds.LAST_NAME)
     client.email = data.get_value(TypeformIds.EMAIL)
     client.phone = data.get_value(TypeformIds.PHONE)
-    client.gender = None
+    client.gender = data.get_value(TypeformIds.GENDER)
     client.age = data.get_value(TypeformIds.AGE)
     client.state = statename_to_abbr.get(data.get_value(TypeformIds.STATE))
+    client.university = statename_to_abbr.get(data.get_value(TypeformIds.UNIVERSITY))
 
     client.i_would_like_therapist = data.i_would_like_therapist
 

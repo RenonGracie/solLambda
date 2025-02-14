@@ -33,9 +33,9 @@ def create_new_form(data: TypeformData) -> list:
         "",  # 25
         "---",  # 26 WHAT_BRINGS_YOU_TO_THERAPY
         data.get_value(TypeformIds.AGE),  # 27 AGE
-        "Other",  # 28 GENDER
+        data.get_value(TypeformIds.GENDER),  # 28 GENDER
         statename_to_abbr.get(data.get_value(TypeformIds.STATE)),  # 29
-        "---",  # 30 UNIVERSITY
+        data.get_value(TypeformIds.UNIVERSITY),  # 30 UNIVERSITY
         "",  # 31
         data.get_value(TypeformIds.PROMO_CODE),  # 32
         "Other",  # 33 HOW_DID_YOU_HEAR_ABOUT_US
