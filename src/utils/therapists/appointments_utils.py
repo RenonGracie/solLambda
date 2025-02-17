@@ -52,7 +52,6 @@ def get_appointments_for_therapist(
     events = get_events_from_gcalendar(
         calendar_id=therapist.email,
         time_max=f"{now_2_weeks_str}T00:00:00-00:00",
-        time_min=f"{now_str}T00:00:00-00:00",
     )
     for event in events:
         start = event["start"].get("dateTime")

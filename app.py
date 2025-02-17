@@ -10,6 +10,7 @@ from src.models.db.clients import (
 from src.routes import client_api, appointment_api, therapist_api
 from src.utils.intakeq_bot.bot import create_new_form
 from src.utils.request_utils import intakeq
+from src.utils.therapists.intakeq_webhook_appointment_utils import process_appointment
 from src.utils.typeform_utils import TypeformData
 from src.db.database import db
 
@@ -88,7 +89,7 @@ def bot_hook():
     summary="Webhook for IntakeQ Appointments",
 )
 def intakeq_hook():
-    print(request.get_json())
+    process_appointment(request.get_json())
     return "", 200
 
 
