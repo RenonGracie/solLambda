@@ -25,7 +25,7 @@ class Settings(Singleton):
         self.RDS_PASSWORD = os.getenv("RDS_PASSWORD")
         self.RDS_DATABASE = os.getenv("RDS_DATABASE")
 
-        self.TEST_S3_MEDIA_ID = os.getenv("TEST_S3_MEDIA_ID")
+        self.TEST_THERAPIST_EMAIL = os.getenv("TEST_THERAPIST_EMAIL")
         self.IS_AWS = os.getenv("IS_AWS").lower() == "true"
 
 

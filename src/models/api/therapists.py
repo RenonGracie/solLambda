@@ -1,4 +1,13 @@
+from datetime import datetime
+
 from pydantic import BaseModel
+
+
+class Appointment(BaseModel):
+    start_date: datetime | None
+    end_date: datetime | None
+
+    client_email: str | None
 
 
 class Therapist(BaseModel):
@@ -39,6 +48,9 @@ class Therapist(BaseModel):
 
     welcome_video_link: str | None
     image_link: str | None
+
+    appointments: list[Appointment] | None
+    free_slots: int | None
 
     def __init__(self, json: dict):
         fields = json["fields"]

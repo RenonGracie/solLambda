@@ -12,11 +12,13 @@ def calculate_match_score(data: ClientSignup, therapist: Therapist) -> (int, lis
     # Hard factor #2
     if (
         data.i_would_like_therapist.__contains__("Is male")
-        and not str(therapist.gender).lower().__eq__("male")
+        and str(therapist.gender).lower().__eq__("male")
     ) or (
         data.i_would_like_therapist.__contains__("Is female")
-        and not str(therapist.gender).lower().__eq__("female")
+        and str(therapist.gender).lower().__eq__("female")
     ):
+        pass
+    else:
         return -1, []
 
     # Hard factor #3

@@ -113,7 +113,7 @@ def test_no_matches(sample_client, sample_therapist):
     sample_client.i_would_like_therapist = []
     sample_client.lived_experiences = []
     score, matches = calculate_match_score(sample_client, sample_therapist)
-    assert score == 0
+    assert score == -1
     assert matches == []
 
 

@@ -82,7 +82,11 @@ def bot_hook():
     return "", 200
 
 
-@app.post("/intakeq_hook", tags=[Tag(name="Webhook")], summary="Webhook for IntakeQ Appointments")
+@app.post(
+    "/intakeq_hook",
+    tags=[Tag(name="Webhook")],
+    summary="Webhook for IntakeQ Appointments",
+)
 def intakeq_hook():
     print(request.get_json())
     return "", 200
