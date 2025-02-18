@@ -46,17 +46,19 @@ def match_client_with_therapists(
                         first_week_appointments is not None
                         or second_week_appointments is not None
                     ):
-                        matches.append(
-                            {
-                                "therapist": provide_therapist_slots(
-                                    therapist,
-                                    first_week_appointments,
-                                    second_week_appointments,
-                                ),
-                                "score": score,
-                                "matched": matched,
-                            }
+                        therapist = provide_therapist_slots(
+                            therapist,
+                            first_week_appointments,
+                            second_week_appointments,
                         )
+                        if len(therapist.available_slots) > 0:
+                            matches.append(
+                                {
+                                    "therapist": therapist,
+                                    "score": score,
+                                    "matched": matched,
+                                }
+                            )
 
     matches = sorted(
         matches,
