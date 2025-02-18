@@ -29,10 +29,10 @@ class ClientSignup(Base):
 
     response_id = Column("response_id", String(50))
 
-    first_name = Column("first_name", String(50))
-    last_name = Column("last_name", String(50))
-    email = Column("email", String(100), unique=True)
-    phone = Column("phone", String(20))
+    first_name = Column("first_name", Text)
+    last_name = Column("last_name", Text)
+    email = Column("email", Text, unique=True)
+    phone = Column("phone", String(50))
     gender = Column("gender", String(20))
     age = Column("age", String(20))
     state = Column("state", String(5))
@@ -61,13 +61,13 @@ class ClientSignup(Base):
 
     university = Column("university", String(150))
 
-    what_brings_you = Column("what_brings_you", String(255))
+    what_brings_you = Column("what_brings_you", Text)
     _lived_experiences = Column("lived_experiences", Text)
-    best_time_for_first_session = Column("best_time_for_first_session", String(250))
+    best_time_for_first_session = Column("best_time_for_first_session", Text)
 
     _how_did_you_hear_about_us = Column("how_did_you_hear_about_us", Text)
     promo_code = Column("promo_code", String(100))
-    referred_by = Column("referred_by", String(255))
+    referred_by = Column("referred_by", Text)
 
     @property
     def i_would_like_therapist(self):

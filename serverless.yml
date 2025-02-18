@@ -42,7 +42,7 @@ provider:
           Action:
             - 'dsql:DbConnectAdmin'
           Resource:
-            - 'arn:aws:dsql:us-east-2:762233746762:cluster/6aabt3jf4goovktb2ro2kidscm'
+            - 'arn:aws:dsql:us-east-2:762233746762:cluster/ruabt3jnya5bsmx6uz7g4wkuky'
         # Allow functions to read/write objects in a bucket
         - Effect: Allow
           Action:

@@ -13,13 +13,13 @@ class TherapistModel(Base):
 
     id = Column("id", UUID, primary_key=True, default=uuid4)
     name = Column("name", Text)
-    email = Column("email", String(100), unique=True)
+    email = Column("email", Text, unique=True)
 
 
 class AppointmentModel(Base):
     __tablename__ = "appointments"
 
-    id = Column("id", String(100), primary_key=True)
+    id = Column("id", UUID, primary_key=True, default=uuid4)
 
     intakeq_id = Column("intakeq_id", String(100))
 
