@@ -5,7 +5,6 @@ from src.models.db.clients import ClientSignup
 from src.models.db.therapists import AppointmentModel, TherapistModel
 from src.utils.settings import settings
 from src.utils.singletone import Singleton
-from src.models.db.base import Base
 
 import boto3
 
@@ -41,7 +40,7 @@ class _Database(Singleton):
             port=rds_port,
         )
 
-        engine = create_engine(url, connect_args=args)
+        engine = create_engine(url, connect_args=args, isolation_level="AUTOCOMMIT")
 
         ClientSignup.__table__.create(engine, checkfirst=True)
         TherapistModel.__table__.create(engine, checkfirst=True)
