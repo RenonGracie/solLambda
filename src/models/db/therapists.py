@@ -32,8 +32,8 @@ class AppointmentModel(Base):
 
     _recurrence = Column("recurrence", Text)
 
-    therapist_id = mapped_column(ForeignKey("therapists.id"))
-    therapist = relationship("TherapistModel", back_populates="appointments")
+    therapist_id = Column(UUID(as_uuid=True), index=True)  # Убрали FK
+    therapist = relationship("TherapistModel", primaryjoin="foreign(AppointmentModel.therapist_id) == TherapistModel.id", back_populates="appointments")
 
     @property
     def recurrence(self):
