@@ -1,9 +1,9 @@
 import json
 from uuid import uuid4
 
-from sqlalchemy import Column, String, DateTime, Text, ForeignKey
+from sqlalchemy import Column, String, DateTime, Text
 from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.orm import relationship, mapped_column
+from sqlalchemy.orm import relationship
 
 from src.models.db.base import Base
 
@@ -30,8 +30,12 @@ class AppointmentModel(Base):
 
     _recurrence = Column("recurrence", Text)
 
-    therapist_id = Column(UUID(as_uuid=True), index=True)  # Убрали FK
-    therapist = relationship("TherapistModel", primaryjoin="foreign(AppointmentModel.therapist_id) == TherapistModel.id", back_populates="appointments")
+    therapist_id = Column("therapist_id", UUID, nullable=True)
+    therapist = relationship(
+        "TherapistModel",
+        foreign_keys=[therapist_id],
+        primaryjoin="TherapistModel.id == AppointmentModel.therapist_id",
+    )
 
     @property
     def recurrence(self):
