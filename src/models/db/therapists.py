@@ -15,8 +15,6 @@ class TherapistModel(Base):
     name = Column("name", Text)
     email = Column("email", String(100), unique=True)
 
-    appointments = relationship("AppointmentModel", back_populates="therapist")
-
 
 class AppointmentModel(Base):
     __tablename__ = "appointments"
