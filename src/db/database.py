@@ -42,7 +42,6 @@ class _Database(Singleton):
 
         engine = create_engine(url, connect_args=args)
 
-        AppointmentModel.__table__.create(engine, checkfirst=True)
         Base.metadata.create_all(engine, checkfirst=True)
 
         session_maker = sessionmaker(bind=engine)
