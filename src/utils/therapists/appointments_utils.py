@@ -76,7 +76,7 @@ def get_appointments_for_therapist(
     for event in events:
         start = event["start"].get("dateTime")
         end = event["end"].get("dateTime")
-        appointment = AppointmentModel(id=event["id"])
+        appointment = AppointmentModel()
         if start:
             appointment.start_date = parser.parse(start)
         if end:
