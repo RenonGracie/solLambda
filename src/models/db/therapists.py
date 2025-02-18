@@ -1,3 +1,4 @@
+import json
 from uuid import uuid4
 
 from sqlalchemy import Column, String, DateTime, Text, ForeignKey
@@ -29,5 +30,15 @@ class AppointmentModel(Base):
 
     client_email = Column("client_emails", Text)
 
+    _recurrence = Column("recurrence", Text)
+
     therapist_id = mapped_column(ForeignKey("therapists.id"))
     therapist = relationship("TherapistModel", back_populates="appointments")
+
+    @property
+    def recurrence(self):
+        return json.loads(self._recurrence or "[]")
+
+    @recurrence.setter
+    def recurrence(self, sources):
+        self._recurrence = json.dumps(sources)

@@ -49,8 +49,7 @@ class Therapist(BaseModel):
     welcome_video_link: str | None
     image_link: str | None
 
-    appointments: list[Appointment] | None
-    free_slots: int | None
+    available_slots: list[datetime] | None
 
     def __init__(self, json: dict):
         fields = json["fields"]

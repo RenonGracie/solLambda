@@ -26,7 +26,7 @@ class Settings(Singleton):
         self.RDS_DATABASE = os.getenv("RDS_DATABASE")
 
         self.TEST_THERAPIST_EMAIL = os.getenv("TEST_THERAPIST_EMAIL")
-        self.IS_AWS = os.getenv("IS_AWS").lower() == "true"
+        self.IS_AWS = os.getenv("IS_AWS", "false").lower() == "true"
 
 
 settings = Settings()

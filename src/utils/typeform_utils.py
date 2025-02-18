@@ -66,17 +66,24 @@ class TypeformData:
     def i_would_like_therapist(self):
         specializes = self.get_value(TypeformIds.I_WOULD_LIKE_THERAPIST_SPECIALIZES)
         identifies = self.get_value(TypeformIds.I_WOULD_LIKE_THERAPIST_IDENTIFIES)
+        if specializes is None:
+            specializes = []
+        if identifies is None:
+            identifies = []
+
         if isinstance(specializes, str) and isinstance(identifies, str):
             return f"{specializes}, {identifies.replace('Male', 'Is male').replace('Female', 'Is female')}"
-        elif isinstance(specializes, list) and isinstance(identifies, list):
+        else:
+            if isinstance(specializes, str):
+                specializes = [specializes]
+            if isinstance(identifies, str):
+                identifies = [identifies]
             return specializes + list(
                 map(
                     lambda gender: f"Is {gender.lower()}",
                     identifies,
                 )
             )
-        else:
-            return None
 
     @staticmethod
     def _get_value_from_typeform(data: dict):

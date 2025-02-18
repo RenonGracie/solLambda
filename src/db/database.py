@@ -1,6 +1,7 @@
 from sqlalchemy import create_engine, URL
 from sqlalchemy.orm import sessionmaker
 
+from src.models.db.therapists import AppointmentModel
 from src.utils.settings import settings
 from src.utils.singletone import Singleton
 from src.models.db.base import Base
@@ -41,7 +42,8 @@ class _Database(Singleton):
 
         engine = create_engine(url, connect_args=args)
 
-        Base.metadata.create_all(engine)
+        AppointmentModel.__table__.create(engine, checkfirst=True)
+        Base.metadata.create_all(engine, checkfirst=True)
 
         session_maker = sessionmaker(bind=engine)
         self.session = session_maker()

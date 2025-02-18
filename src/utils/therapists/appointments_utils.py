@@ -2,11 +2,14 @@ import re
 from datetime import datetime, timedelta
 
 from dateutil import parser
+from dateutil.rrule import rrulestr
+from sqlalchemy import column
 
 from src.db.database import db
 from src.models.api.therapists import Therapist
 from src.models.db.therapists import TherapistModel, AppointmentModel
 from src.utils.google_calendar import get_events_from_gcalendar
+from src.utils.settings import settings
 
 _DATE_FORMAT = "%Y-%m-%d"
 
@@ -25,6 +28,14 @@ def get_appointments_for_therapist(
     second_week_appointments = []
 
     def _proceed_appointment(item: AppointmentModel):
+        if item.recurrence:
+            for rec in item.recurrence:
+                rrule = rrulestr(rec, dtstart=item.start_date)
+                if len(rrule.between(now, now_1_weeks)) > 0:
+                    first_week_appointments.append(item)
+                if len(rrule.between(now_1_weeks, now_2_weeks)) > 0:
+                    second_week_appointments.append(item)
+
         if now.astimezone() <= item.start_date.astimezone() < now_2_weeks.astimezone():
             if item.start_date.astimezone() < now_1_weeks.astimezone():
                 first_week_appointments.append(item)
@@ -39,19 +50,28 @@ def get_appointments_for_therapist(
             .filter(AppointmentModel.start_date.between(now_str, now_2_weeks_str))
             .all()
         )
+        appointments += (
+            db.query(AppointmentModel)
+            .filter_by(therapist_id=therapist_model.id)
+            .filter(column("recurrence").isnot(None))
+            .all()
+        )
 
-        for appointment in appointments:
-            _proceed_appointment(appointment)
-        return first_week_appointments, second_week_appointments
-
-    therapist_model = TherapistModel()
-    therapist_model.name = therapist.intern_name
-    therapist_model.email = therapist.email
-    db.add(therapist_model)
+        if len(appointments) != 0:
+            for appointment in appointments:
+                _proceed_appointment(appointment)
+            return first_week_appointments, second_week_appointments
+    else:
+        therapist_model = TherapistModel()
+        therapist_model.name = therapist.intern_name
+        therapist_model.email = therapist.email
+        db.add(therapist_model)
 
     events = get_events_from_gcalendar(
-        calendar_id=therapist.email,
-        time_max=f"{now_2_weeks_str}T00:00:00-00:00",
+        calendar_id=settings.TEST_THERAPIST_EMAIL
+        if settings.TEST_THERAPIST_EMAIL
+        else therapist.email,
+        time_min=f"{now_str}T00:00:00-00:00",
     )
     for event in events:
         start = event["start"].get("dateTime")
@@ -61,13 +81,15 @@ def get_appointments_for_therapist(
             appointment.start_date = parser.parse(start)
         if end:
             appointment.end_date = parser.parse(end)
-        if event["description"]:
+        if event.get("description"):
             match = re.search(r"[\w.+-]+@[\w-]+\.[\w.-]+", event["description"])
             if match:
                 email = str(match.group(0))
                 if email[-1] == ".":
                     email = email[:-1]
                 appointment.client_email = email
+        if event.get("recurrence"):
+            appointment.recurrence = event["recurrence"]
 
         appointment.therapist = therapist_model
         appointments.append(appointment)
