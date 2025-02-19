@@ -74,33 +74,34 @@ def get_appointments_for_therapist(
         time_min=f"{now_str}T00:00:00-00:00",
     )
     for event in events:
-        start = event["start"].get("dateTime")
-        end = event["end"].get("dateTime")
-        appointment = AppointmentModel()
-        if start:
-            appointment.start_date = parser.parse(start)
-        if end:
-            appointment.end_date = parser.parse(end)
-        if event.get("description"):
-            match = re.search(r"[\w.+-]+@[\w-]+\.[\w.-]+", event["description"])
-            if match:
-                email = str(match.group(0))
-                if email[-1] == ".":
-                    email = email[:-1]
-                appointment.client_email = email
-        if event.get("recurrence"):
-            appointment.recurrence = event["recurrence"]
+        if event.get("start") and event.get("end"):
+            start = event["start"].get("dateTime")
+            end = event["end"].get("dateTime")
+            appointment = AppointmentModel()
+            if start:
+                appointment.start_date = parser.parse(start)
+            if end:
+                appointment.end_date = parser.parse(end)
+            if event.get("description"):
+                match = re.search(r"[\w.+-]+@[\w-]+\.[\w.-]+", event["description"])
+                if match:
+                    email = str(match.group(0))
+                    if email[-1] == ".":
+                        email = email[:-1]
+                    appointment.client_email = email
+            if event.get("recurrence"):
+                appointment.recurrence = event["recurrence"]
 
-        appointment.therapist = therapist_model
-        appointments.append(appointment)
+            appointment.therapist = therapist_model
+            appointments.append(appointment)
 
-        if (
-            appointment.start_date
-            and now.astimezone()
-            <= appointment.start_date.astimezone()
-            < now_2_weeks.astimezone()
-        ):
-            _proceed_appointment(appointment)
+            if (
+                appointment.start_date
+                and now.astimezone()
+                <= appointment.start_date.astimezone()
+                < now_2_weeks.astimezone()
+            ):
+                _proceed_appointment(appointment)
 
     db.add_all(appointments)
     db.commit()
