@@ -16,25 +16,23 @@ def _create_appointment(therapist: TherapistModel, data: dict):
 
 
 def _update_appointment(therapist: TherapistModel, data: dict):
-    appointment_json = data["Appointment"]
     appointment = (
-        db.query(AppointmentModel).filter_by(intakeq_id=appointment_json["Id"]).first()
+        db.query(AppointmentModel).filter_by(intakeq_id=data["Id"]).first()
     )
     if appointment is None:
         _create_appointment(therapist, data)
     else:
-        appointment.start_date = parser.parse(appointment_json["StartDateIso"])
-        appointment.end_date = parser.parse(appointment_json["EndDateIso"])
+        appointment.start_date = parser.parse(data["StartDateIso"])
+        appointment.end_date = parser.parse(data["EndDateIso"])
 
 
 def _delete_appointment(data: dict):
-    appointment_json = data["Appointment"]
     appointment = (
-        db.query(AppointmentModel).filter_by(intakeq_id=appointment_json["Id"]).first()
+        db.query(AppointmentModel).filter_by(intakeq_id=data["Id"]).first()
     )
     if appointment is None:
-        start_date = parser.parse(appointment_json["StartDateIso"])
-        end_date = parser.parse(appointment_json["EndDateIso"])
+        start_date = parser.parse(data["StartDateIso"])
+        end_date = parser.parse(data["EndDateIso"])
         appointment = (
             db.query(AppointmentModel)
             .filter(
@@ -66,10 +64,10 @@ def process_appointment(data: dict):
 
     match data["EventType"]:
         case "AppointmentCreated":
-            _create_appointment(therapist_model, data)
+            _create_appointment(therapist_model, appointment)
         case "AppointmentRescheduled":
-            _update_appointment(therapist_model, data)
+            _update_appointment(therapist_model, appointment)
         case "AppointmentDeleted":
-            _delete_appointment(data)
+            _delete_appointment(appointment)
 
     db.commit()
