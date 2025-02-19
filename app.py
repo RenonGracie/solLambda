@@ -60,21 +60,22 @@ def typeform_webhook():
     data = TypeformData(json)
 
     response_id = response_json["form_response"]["token"]
-    form = (
-        db.query(ClientSignup)
-        .filter_by(
-            first_name=data.first_name, last_name=data.last_name, email=data.email
-        )
-        .first()
-    )
+    form = db.query(ClientSignup).filter_by(email=data.email).first()
+    create_on_intakeq = False
     if not form:
         db.add(create_from_typeform_data(response_id, data))
         db.commit()
-        user_data = create_new_form(data)
-        intakeq({"user": user_data, "sheetURL": f"{request.base_url}_bot"})
+        create_on_intakeq = True
     else:
         update_from_typeform_data(response_id, form, data)
         db.commit()
+        if not form.first_name.__eq__(data.first_name) or not form.last_name.__eq__(
+            data.last_name
+        ):
+            create_on_intakeq = True
+    if create_on_intakeq:
+        user_data = create_new_form(data)
+        intakeq({"user": user_data, "sheetURL": f"{request.base_url}_bot"})
     return jsonify({"success": True}), 200
 
 
