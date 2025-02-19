@@ -5,7 +5,11 @@ from src.db.database import db
 from src.models.api.therapists import Therapist
 from src.models.db.clients import ClientSignup
 from src.utils.matching_algorithm.algorithm import calculate_match_score
-from src.utils.therapist_data_utils import provide_therapist_slots, load_therapist_media
+from src.utils.therapist_data_utils import (
+    provide_therapist_slots,
+    load_therapist_media,
+    implement_age_factor,
+)
 from src.utils.therapists.appointments_utils import get_appointments_for_therapist
 
 
@@ -60,10 +64,13 @@ def match_client_with_therapists(
                                 }
                             )
 
-    matches = sorted(
-        matches,
-        key=lambda i: (i.get("score"), len(i["therapist"].available_slots)),
-        reverse=True,
+    matches = implement_age_factor(
+        form.age,
+        sorted(
+            matches,
+            key=lambda i: (i.get("score"), len(i["therapist"].available_slots)),
+            reverse=True,
+        ),
     )
     return form, list(
         map(

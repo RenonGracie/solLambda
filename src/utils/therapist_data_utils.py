@@ -9,6 +9,51 @@ from src.utils import s3
 from src.utils.settings import settings
 
 
+def _rearrange_elements(elements, indices):
+    selected_elements = [elements[i] for i in indices if i < len(elements)]
+    remaining_elements = [
+        elem for idx, elem in enumerate(elements) if idx not in indices
+    ]
+    rearranged_elements = selected_elements + remaining_elements
+    return rearranged_elements
+
+
+def _find_client_age_group(client_age):
+    if 20 <= client_age <= 26:
+        return "Early/Mid 20s"
+    elif 27 <= client_age <= 29:
+        return "Late 20s"
+    elif 30 <= client_age <= 39:
+        return "30s"
+    elif 40 <= client_age <= 49:
+        return "40s"
+    elif 50 <= client_age <= 59:
+        return "50s"
+    elif client_age >= 60:
+        return "60+"
+    else:
+        return "Age out of range"
+
+
+def implement_age_factor(age_str: str, matched: list[dict]) -> list[dict]:
+    try:
+        age = int(age_str)
+        suitable = []
+        for i in range(len(matched)):
+            data = matched[i]
+            if str(data["therapist"].age).__eq__(_find_client_age_group(age)):
+                suitable.append(i)
+                if len(suitable) >= 3:
+                    break
+
+        if len(suitable):
+            matched = _rearrange_elements(matched, suitable)
+
+        return matched
+    except ValueError:
+        return matched
+
+
 def load_therapist_media(data: dict) -> dict:
     therapist = data["therapist"]
     email = (

@@ -17,7 +17,7 @@ _DATE_FORMAT = "%Y-%m-%d"
 def get_appointments_for_therapist(
     therapist: Therapist,
 ) -> (list[AppointmentModel], list[AppointmentModel]):
-    now = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
+    now = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0).astimezone()
     now_str = now.strftime(_DATE_FORMAT)
     now_1_weeks = now + timedelta(weeks=1)
     now_2_weeks = now + timedelta(weeks=2)
@@ -30,14 +30,14 @@ def get_appointments_for_therapist(
     def _proceed_appointment(item: AppointmentModel):
         if item.recurrence:
             for rec in item.recurrence:
-                rrule = rrulestr(rec, dtstart=item.start_date)
+                rrule = rrulestr(rec, dtstart=item.start_date.astimezone())
                 if len(rrule.between(now, now_1_weeks)) > 0:
                     first_week_appointments.append(item)
                 if len(rrule.between(now_1_weeks, now_2_weeks)) > 0:
                     second_week_appointments.append(item)
 
-        if now.astimezone() <= item.start_date.astimezone() < now_2_weeks.astimezone():
-            if item.start_date.astimezone() < now_1_weeks.astimezone():
+        if now <= item.start_date.astimezone() < now_2_weeks:
+            if item.start_date.astimezone() < now_1_weeks:
                 first_week_appointments.append(item)
             else:
                 second_week_appointments.append(item)
