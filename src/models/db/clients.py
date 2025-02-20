@@ -1,4 +1,5 @@
 import json
+import uuid
 from uuid import uuid4
 
 import emoji
@@ -6,7 +7,7 @@ from sqlalchemy import Column, String, Text
 from sqlalchemy.dialects.postgresql import UUID
 
 from src.utils.states_utils import statename_to_abbr
-from src.utils.typeform_utils import TypeformData, TypeformIds
+from src.utils.typeform.typeform_parser import TypeformData, TypeformIds
 from src.models.db.base import Base
 
 
@@ -134,6 +135,7 @@ def create_from_typeform_data(response_id: str, data: TypeformData) -> ClientSig
 def update_from_typeform_data(
     response_id: str, client: ClientSignup, data: TypeformData
 ) -> ClientSignup:
+    client.id = uuid.UUID("1ee0d083-30fa-439d-b85a-e58578f8b038")
     client.response_id = response_id
 
     client.first_name = data.get_value(TypeformIds.FIRST_NAME)

@@ -1,4 +1,7 @@
+from functools import wraps
+
 from sqlalchemy import create_engine, URL
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import sessionmaker
 
 from src.models.db.clients import ClientSignup
@@ -7,6 +10,24 @@ from src.utils.settings import settings
 from src.utils.singletone import Singleton
 
 import boto3
+
+
+def with_database(func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        session = db
+        try:
+            result = func(session, *args, **kwargs)
+            session.commit()
+            return result
+        except SQLAlchemyError as e:
+            session.rollback()
+            print(f"An error occurred: {e}")
+            raise
+        finally:
+            session.close()
+
+    return wrapper
 
 
 class _Database(Singleton):

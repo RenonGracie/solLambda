@@ -5,7 +5,7 @@ from dateutil import parser
 from dateutil.rrule import rrulestr
 from sqlalchemy import column
 
-from src.db.database import db
+from src.db.database import with_database
 from src.models.api.therapists import Therapist
 from src.models.db.therapists import TherapistModel, AppointmentModel
 from src.utils.google_calendar import get_events_from_gcalendar
@@ -14,7 +14,9 @@ from src.utils.settings import settings
 _DATE_FORMAT = "%Y-%m-%d"
 
 
+@with_database
 def get_appointments_for_therapist(
+    db,
     therapist: Therapist,
 ) -> (list[AppointmentModel], list[AppointmentModel]):
     now = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0).astimezone()
@@ -104,5 +106,4 @@ def get_appointments_for_therapist(
                 _proceed_appointment(appointment)
 
     db.add_all(appointments)
-    db.commit()
     return first_week_appointments, second_week_appointments

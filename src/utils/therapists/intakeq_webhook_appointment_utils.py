@@ -16,9 +16,7 @@ def _create_appointment(therapist: TherapistModel, data: dict):
 
 
 def _update_appointment(therapist: TherapistModel, data: dict):
-    appointment = (
-        db.query(AppointmentModel).filter_by(intakeq_id=data["Id"]).first()
-    )
+    appointment = db.query(AppointmentModel).filter_by(intakeq_id=data["Id"]).first()
     if appointment is None:
         _create_appointment(therapist, data)
     else:
@@ -27,9 +25,7 @@ def _update_appointment(therapist: TherapistModel, data: dict):
 
 
 def _delete_appointment(data: dict):
-    appointment = (
-        db.query(AppointmentModel).filter_by(intakeq_id=data["Id"]).first()
-    )
+    appointment = db.query(AppointmentModel).filter_by(intakeq_id=data["Id"]).first()
     if appointment is None:
         start_date = parser.parse(data["StartDateIso"])
         end_date = parser.parse(data["EndDateIso"])

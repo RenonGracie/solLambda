@@ -1,5 +1,5 @@
 from src.utils.states_utils import statename_to_abbr
-from src.utils.typeform_utils import TypeformIds, TypeformData
+from src.utils.typeform.typeform_parser import TypeformIds, TypeformData
 
 
 def create_new_form(data: TypeformData) -> list:

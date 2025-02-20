@@ -2,17 +2,10 @@ from flask import jsonify, request
 from flask_openapi3 import Tag, Info, OpenAPI
 
 from src.models.api.base import SuccessResponse
-from src.models.db.clients import (
-    ClientSignup,
-    create_from_typeform_data,
-    update_from_typeform_data,
-)
 from src.routes import client_api, appointment_api, therapist_api
-from src.utils.intakeq_bot.bot import create_new_form
-from src.utils.request_utils import intakeq
+from src.routes.client_signup_forms import client_signup_api
 from src.utils.therapists.intakeq_webhook_appointment_utils import process_appointment
-from src.utils.typeform_utils import TypeformData
-from src.db.database import db
+from src.utils.typeform.typeform_utils import process_typeform_data
 
 __jwt = {"type": "http", "scheme": "bearer", "bearerFormat": "JWT"}
 __security_schemes = {"jwt": __jwt}
@@ -21,6 +14,7 @@ info = Info(title="SolHealth API", version="1.0.0")
 app = OpenAPI(__name__, info=info, security_schemes=__security_schemes)
 
 app.register_api(client_api)
+app.register_api(client_signup_api)
 app.register_api(appointment_api)
 app.register_api(therapist_api)
 
@@ -42,40 +36,7 @@ def set_cors_headers(response):
 )
 def typeform_webhook():
     print(request)
-    response_json = request.get_json()
-    questions_json = response_json["form_response"]["definition"]["fields"]
-    questions = dict(map(lambda item: (item["ref"], item), questions_json))
-    answers = response_json["form_response"]["answers"]
-    json: dict = {}
-    for answer in answers:
-        question = questions[answer["field"]["ref"]]
-        json[question["id"]] = {
-            "ref": answer["field"]["ref"],
-            "answer": answer[answer["type"]]
-            if answer["type"] != "multiple_choice"
-            else answer["choices"],
-            "title": question["title"],
-            "type": question["type"],
-        }
-    data = TypeformData(json)
-
-    response_id = response_json["form_response"]["token"]
-    form = db.query(ClientSignup).filter_by(email=data.email).first()
-    create_on_intakeq = False
-    if not form:
-        db.add(create_from_typeform_data(response_id, data))
-        db.commit()
-        create_on_intakeq = True
-    else:
-        update_from_typeform_data(response_id, form, data)
-        db.commit()
-        if not form.first_name.__eq__(data.first_name) or not form.last_name.__eq__(
-            data.last_name
-        ):
-            create_on_intakeq = True
-    if create_on_intakeq:
-        user_data = create_new_form(data)
-        intakeq({"user": user_data, "sheetURL": f"{request.base_url}_bot"})
+    process_typeform_data(request.get_json(), request.base_url)
     return jsonify({"success": True}), 200
 
 
