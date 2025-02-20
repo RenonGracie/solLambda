@@ -87,17 +87,15 @@ def provide_therapist_slots(
                 second_week_slots.append(now + timedelta(hours=i, days=7))
 
     def _filter_slots(slot: datetime, appointments: AppointmentModel, duration) -> bool:
+        slot_time = slot.astimezone()
         if appointments.recurrence:
             for rec in appointments.recurrence:
-                rrule = rrulestr(rec, dtstart=appointments.start_date)
+                rrule = rrulestr(rec, dtstart=appointments.start_date.astimezone())
                 for dt in rrule.between(
-                    slot + timedelta(days=-1), slot + duration + timedelta(days=1)
+                    slot_time + timedelta(days=-1),
+                    slot_time + duration + timedelta(days=1),
                 ):
-                    if (
-                        dt.astimezone()
-                        <= slot.astimezone()
-                        < dt.astimezone() + duration
-                    ):
+                    if dt.astimezone() <= slot_time < dt.astimezone() + duration:
                         return True
             return False
         else:
