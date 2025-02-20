@@ -1,7 +1,7 @@
 import re
 from typing import List
 
-from src.db.database import db, with_database
+from src.db.database import with_database
 from src.models.api.therapists import Therapist
 from src.models.db.clients import ClientSignup
 from src.utils.matching_algorithm.algorithm import calculate_match_score
@@ -15,7 +15,7 @@ from src.utils.therapists.appointments_utils import get_appointments_for_therapi
 
 @with_database
 def match_client_with_therapists(
-    response_id: str, therapists: list[Therapist], limit: int, last_index: int
+    db, response_id: str, therapists: list[Therapist], limit: int, last_index: int
 ) -> (ClientSignup | None, List[dict]):
     form = db.query(ClientSignup).filter_by(response_id=response_id).first()
     if not form:
