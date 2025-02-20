@@ -28,6 +28,8 @@ def get_appointments_for_therapist(
     second_week_appointments = []
 
     def _proceed_appointment(item: AppointmentModel):
+        if not item.start_date:
+            return
         if item.recurrence:
             for rec in item.recurrence:
                 rrule = rrulestr(rec, dtstart=item.start_date.astimezone())
@@ -95,9 +97,7 @@ def get_appointments_for_therapist(
             appointment.therapist = therapist_model
             appointments.append(appointment)
 
-            if not appointment.start_date:
-                pass
-            elif (
+            if (
                 now.astimezone()
                 <= appointment.start_date.astimezone()
                 < now_2_weeks.astimezone()
