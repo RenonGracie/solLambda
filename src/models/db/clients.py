@@ -129,7 +129,9 @@ class ClientSignup(Base):
 
 
 def create_from_typeform_data(response_id: str, data: TypeformData) -> ClientSignup:
-    return update_from_typeform_data(response_id, ClientSignup(), data)
+    form = update_from_typeform_data(response_id, ClientSignup(), data)
+    form.email = data.get_value(TypeformIds.EMAIL)
+    return form
 
 
 def update_from_typeform_data(
@@ -140,7 +142,6 @@ def update_from_typeform_data(
 
     client.first_name = data.get_value(TypeformIds.FIRST_NAME)
     client.last_name = data.get_value(TypeformIds.LAST_NAME)
-    client.email = data.get_value(TypeformIds.EMAIL)
     client.phone = data.get_value(TypeformIds.PHONE)
     client.gender = data.get_value(TypeformIds.GENDER)
     client.age = data.get_value(TypeformIds.AGE)
