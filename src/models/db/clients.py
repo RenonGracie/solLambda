@@ -1,5 +1,4 @@
 import json
-import uuid
 from uuid import uuid4
 
 import emoji
@@ -137,7 +136,6 @@ def create_from_typeform_data(response_id: str, data: TypeformData) -> ClientSig
 def update_from_typeform_data(
     response_id: str, client: ClientSignup, data: TypeformData
 ) -> ClientSignup:
-    client.id = uuid.UUID("1ee0d083-30fa-439d-b85a-e58578f8b038")
     client.response_id = response_id
 
     client.first_name = data.get_value(TypeformIds.FIRST_NAME)
