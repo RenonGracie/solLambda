@@ -5,7 +5,6 @@ from dateutil import parser
 from dateutil.rrule import rrulestr
 from sqlalchemy import column
 
-from src.db.database import with_database
 from src.models.api.therapists import Therapist
 from src.models.db.therapists import TherapistModel, AppointmentModel
 from src.utils.google_calendar import get_events_from_gcalendar
@@ -14,7 +13,6 @@ from src.utils.settings import settings
 _DATE_FORMAT = "%Y-%m-%d"
 
 
-@with_database
 def get_appointments_for_therapist(
     db,
     therapist: Therapist,

@@ -1,7 +1,7 @@
 import re
 from typing import List
 
-from src.db.database import db
+from src.db.database import db, with_database
 from src.models.api.therapists import Therapist
 from src.models.db.clients import ClientSignup
 from src.utils.matching_algorithm.algorithm import calculate_match_score
@@ -13,6 +13,7 @@ from src.utils.therapist_data_utils import (
 from src.utils.therapists.appointments_utils import get_appointments_for_therapist
 
 
+@with_database
 def match_client_with_therapists(
     response_id: str, therapists: list[Therapist], limit: int, last_index: int
 ) -> (ClientSignup | None, List[dict]):
@@ -30,7 +31,7 @@ def match_client_with_therapists(
                 max_caseload = int(caseload[-1])
                 if max_caseload > 0:
                     first_week_appointments, second_week_appointments = (
-                        get_appointments_for_therapist(therapist)
+                        get_appointments_for_therapist(db, therapist)
                     )
                     first_week_client_emails = {
                         appointment.client_email

@@ -6,16 +6,21 @@ from src.models.db.clients import ClientSignup
 
 def calculate_match_score(data: ClientSignup, therapist: Therapist) -> (int, list):
     # Hard factor #1
-    if data.state.lower() not in [state.lower() for state in therapist.states]:
+    if not therapist.states or data.state.lower() not in [
+        state.lower() for state in therapist.states
+    ]:
         return -1, []
 
     # Hard factor #2
-    if (
-        data.i_would_like_therapist.__contains__("Is male")
-        and str(therapist.gender).lower().__eq__("male")
-    ) or (
-        data.i_would_like_therapist.__contains__("Is female")
-        and str(therapist.gender).lower().__eq__("female")
+    if therapist.gender and (
+        (
+            data.i_would_like_therapist.__contains__("Is male")
+            and str(therapist.gender).lower().__eq__("male")
+        )
+        or (
+            data.i_would_like_therapist.__contains__("Is female")
+            and str(therapist.gender).lower().__eq__("female")
+        )
     ):
         pass
     else:
