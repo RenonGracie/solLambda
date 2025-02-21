@@ -5,6 +5,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import sessionmaker
 
 from src.models.db.clients import ClientSignup
+from src.models.db.therapist_videos import TherapistVideoModel
 from src.models.db.therapists import AppointmentModel, TherapistModel
 from src.utils.settings import settings
 from src.utils.singletone import Singleton
@@ -66,6 +67,7 @@ class _Database(Singleton):
         ClientSignup.__table__.create(engine, checkfirst=True)
         TherapistModel.__table__.create(engine, checkfirst=True)
         AppointmentModel.__table__.create(engine, checkfirst=True)
+        TherapistVideoModel.__table__.create(engine, checkfirst=True)
 
         session_maker = sessionmaker(bind=engine)
         self.session = session_maker()

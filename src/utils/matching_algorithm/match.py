@@ -75,7 +75,7 @@ def match_client_with_therapists(
     )
     return form, list(
         map(
-            lambda item: load_therapist_media(item),
+            lambda item: load_therapist_media(db, item),
             matches[last_index : limit + last_index],
         )
     )

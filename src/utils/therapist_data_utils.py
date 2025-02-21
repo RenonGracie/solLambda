@@ -4,6 +4,7 @@ from dateutil.rrule import rrulestr
 
 from src.models.api.therapist_s3 import S3MediaType
 from src.models.api.therapists import Therapist
+from src.models.db.therapist_videos import TherapistVideoModel
 from src.models.db.therapists import AppointmentModel
 from src.utils import s3
 from src.utils.settings import settings
@@ -54,16 +55,16 @@ def implement_age_factor(age_str: str, matched: list[dict]) -> list[dict]:
         return matched
 
 
-def load_therapist_media(data: dict) -> dict:
+def load_therapist_media(db, data: dict) -> dict:
     therapist = data["therapist"]
     email = (
         settings.TEST_THERAPIST_EMAIL
         if settings.TEST_THERAPIST_EMAIL
         else therapist.email
     )
-    therapist.welcome_video_link = s3.get_media_url(
-        user_id=email, s3_media_type=S3MediaType.WELCOME_VIDEO
-    )
+    video = db.query(TherapistVideoModel).filter_by(type="welcome").first()
+    if video:
+        therapist.welcome_video_link = video.video_link
     therapist.image_link = s3.get_media_url(
         user_id=email, s3_media_type=S3MediaType.IMAGE
     )
