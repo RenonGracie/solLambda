@@ -44,6 +44,7 @@ def typeform_webhook():
 
 @app.post("/hook_bot", tags=[Tag(name="Webhook")], summary="Webhook for bot")
 def bot_hook():
+    print(request.get_json())
     return "", 200
 
 

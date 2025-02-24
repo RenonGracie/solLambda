@@ -81,16 +81,21 @@ def new_appointment(body: CreateAppointment):
                 error=f"Signup form with id '{body.client_response_id}' not found"
             ).dict()
         ), 404
-    result = search_clients({"search": form.email})
+
+    name = f"{form.first_name} {form.last_name}"
+    result = search_clients({"search": name})
     if result.status_code != 200:
         return jsonify(result.json()), result.status_code
 
     clients = result.json()
-    client = next(
-        item
-        for item in clients
-        if item["Name"] == f"{form.first_name} {form.last_name}"
-    )
+    if len(clients) > 0:
+        client = next(
+            item
+            for item in clients
+            if item["Email"] == form.email and item["Name"] == name
+        )
+    else:
+        client = None
     if not client:
         print(
             f"Client with name '{form.first_name} {form.last_name}' not found on intakeQ"
