@@ -4,7 +4,6 @@ from pyairtable import Api
 
 from src.models.api.calendar import CalendarEvents, EventQuery
 from src.models.api.client_match import MatchedTherapists, MatchQuery
-from src.models.api.clients import ClientShort
 from src.models.api.therapist_s3 import MediaQuery, MediaLink
 from src.models.api.therapists import Therapists, Therapist
 from src.utils.google_calendar import get_events_from_gcalendar
@@ -42,9 +41,7 @@ def match(query: MatchQuery):
     if client is None:
         return jsonify({"client": None, "therapists": []}), 200
 
-    return jsonify(
-        {"client": ClientShort(**client.__dict__).dict(), "therapists": matched}
-    ), 200
+    return jsonify({"client": client, "therapists": matched}), 200
 
 
 @therapist_api.get(

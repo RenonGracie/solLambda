@@ -2,6 +2,7 @@ import re
 from typing import List
 
 from src.db.database import with_database
+from src.models.api.clients import ClientShort
 from src.models.api.therapists import Therapist
 from src.models.db.clients import ClientSignup
 from src.utils.matching_algorithm.algorithm import calculate_match_score
@@ -73,7 +74,7 @@ def match_client_with_therapists(
             reverse=True,
         ),
     )
-    return form, list(
+    return ClientShort(**form.__dict__).dict(), list(
         map(
             lambda item: load_therapist_media(db, item),
             matches[last_index : limit + last_index],

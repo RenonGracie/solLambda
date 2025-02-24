@@ -64,7 +64,7 @@ def load_therapist_media(db, data: dict) -> dict:
     )
     video = db.query(TherapistVideoModel).filter_by(type="welcome").first()
     if video:
-        therapist.welcome_video_link = video.video_link
+        therapist.welcome_video_link = video.video_url
     therapist.image_link = s3.get_media_url(
         user_id=email, s3_media_type=S3MediaType.IMAGE
     )

@@ -5,32 +5,6 @@ from pydantic import BaseModel
 from src.models.api.base import CustomField
 
 
-class Location(BaseModel):
-    Id: str | None
-    Name: str | None
-
-
-class Practitioner(BaseModel):
-    Email: str | None
-    FirstName: str | None
-    Id: str | None
-    LastName: str | None
-    CompleteName: str | None
-
-
-class Service(BaseModel):
-    Price: int | None
-    Duration: int | None
-    Id: str | None
-    Name: str | None
-
-
-class BookingSettings(BaseModel):
-    Practitioners: List[Practitioner] | None = None
-    Services: List[Service] | None = None
-    Locations: List[Location] | None = None
-
-
 class AdditionalClient(BaseModel):
     ClientId: str | None
     ClientName: str | None
@@ -104,3 +78,13 @@ class AppointmentsShort(BaseModel):
 class CancelAppointment(BaseModel):
     Reason: str | None
     AppointmentId: str | None
+
+
+class CreateAppointment(BaseModel):
+    client_response_id: str
+    therapist_email: str
+    is_promo: bool
+    datetime: str
+    send_client_email_notification: bool
+    reminder_type: str | None
+    status: str
