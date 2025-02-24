@@ -13,6 +13,7 @@ from src.models.api.appointments import (
     CancelAppointment,
     CreateAppointment,
 )
+from src.models.api.error import Error
 from src.models.db.clients import ClientSignup
 from src.utils.request_utils import (
     get_booking_settings,
@@ -55,26 +56,30 @@ def appointment(path: AppointmentPath):
 
 
 @appointment_api.post(
-    "", responses={200: Appointment}, summary="Create a new appointment"
+    "",
+    responses={200: Appointment, 400: Error, 404: Error},
+    summary="Create a new appointment",
 )
 def new_appointment(body: CreateAppointment):
     result = get_booking_settings()
     if not result:
         print("Unable to get booking settings")
-        return jsonify({"error": "Unable to get booking settings"}), 400
+        return jsonify(Error(error="Unable to get booking settings").dict()), 400
     practitioners = result.json()["Practitioners"]
     therapist = next(
         item for item in practitioners if item["Email"] == body.therapist_email
     )
     if not therapist:
         print("Therapist not found")
-        return jsonify({"error": "Therapist not found"}), 404
+        return jsonify(Error(error="Therapist not found").dict()), 404
 
     form = db.query(ClientSignup).filter_by(response_id=body.client_response_id).first()
     if not form:
         print(f"Signup form with id '{body.client_response_id}' not found")
         return jsonify(
-            {"error": f"Signup form with id '{body.client_response_id}' not found"}
+            Error(
+                error=f"Signup form with id '{body.client_response_id}' not found"
+            ).dict()
         ), 404
     result = search_clients({"search": form.email})
     if result.status_code != 200:
@@ -91,9 +96,9 @@ def new_appointment(body: CreateAppointment):
             f"Client with name '{form.first_name} {form.last_name}' not found on intakeQ"
         )
         return jsonify(
-            {
-                "error": f"Client with name '{form.first_name} {form.last_name}' not found on intakeQ"
-            }
+            Error(
+                error=f"Client with name '{form.first_name} {form.last_name}' not found on intakeQ"
+            ).dict()
         ), 404
 
     result = create_appointment(
