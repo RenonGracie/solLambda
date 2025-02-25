@@ -1,3 +1,4 @@
+from src.models.api.clients import Client
 from src.utils.states_utils import statename_to_abbr
 from src.utils.typeform.typeform_parser import TypeformIds, TypeformData
 
@@ -55,3 +56,20 @@ def create_new_form(data: TypeformData) -> list:
         "",  # 47
         data.get_value(TypeformIds.LIVED_EXPERIENCES),  # 48
     ]
+
+
+def create_client_model(data: TypeformData) -> Client:
+    first_name = data.first_name
+    last_name = data.last_name
+
+    client = Client()
+    client.Name = f"{first_name} {last_name}"
+    client.FirstName = first_name
+    client.LastName = last_name
+    client.Email = data.email
+    client.Phone = data.get_value(TypeformIds.PHONE)
+    client.Gender = data.get_value(TypeformIds.GENDER)
+    client.Archived = False
+    client.StateShort = statename_to_abbr.get(data.get_value(TypeformIds.STATE))
+    client.Country = "USA"
+    return client

@@ -4,8 +4,8 @@ from src.models.db.clients import (
     create_from_typeform_data,
     update_from_typeform_data,
 )
-from src.utils.intakeq_bot.bot import create_new_form
-from src.utils.request_utils import intakeq
+from src.utils.intakeq_bot.bot import create_new_form, create_client_model
+from src.utils.request_utils import intakeq, save_update_client
 from src.utils.typeform.typeform_parser import TypeformData
 
 
@@ -29,16 +29,20 @@ def process_typeform_data(db, response_json: dict, base_url: str):
 
     response_id = response_json["form_response"]["token"]
     form = db.query(ClientSignup).filter_by(email=data.email).first()
-    create_on_intakeq = False
+    create_user_on_intakeq = True
     if not form:
         db.add(create_from_typeform_data(response_id, data))
-        create_on_intakeq = True
+        create_user_on_intakeq = True
     else:
         update_from_typeform_data(response_id, form, data)
         if not form.first_name.__eq__(data.first_name) or not form.last_name.__eq__(
             data.last_name
         ):
-            create_on_intakeq = True
-    if create_on_intakeq:
+            create_user_on_intakeq = False
+
+    if create_user_on_intakeq is not None:
+        if create_user_on_intakeq:
+            response = save_update_client(create_client_model(data))
+            print(response.json())
         user_data = create_new_form(data)
         intakeq({"user": user_data, "sheetURL": f"{base_url}_bot"})
