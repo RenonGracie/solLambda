@@ -83,7 +83,6 @@ class CancelAppointment(BaseModel):
 class CreateAppointment(BaseModel):
     client_response_id: str
     therapist_email: str
-    is_promo: bool
     datetime: str
     send_client_email_notification: bool
     reminder_type: str | None
