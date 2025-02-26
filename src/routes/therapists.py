@@ -21,7 +21,7 @@ therapist_api = APIBlueprint(
 )
 
 api = Api(settings.AIRTABLE_API_KEY)
-table = api.table("appeJMQ59lRzIADPP", "tblpLJff9xwTB54yd")
+table = api.table(settings.AIRTABLE_BASE_ID, settings.AIRTABLE_TABLE_ID)
 
 
 @therapist_api.get("", responses={200: Therapists}, summary="Get therapists table")
