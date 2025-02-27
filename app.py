@@ -4,6 +4,7 @@ from flask_openapi3 import Tag, Info, OpenAPI
 from src.models.api.base import SuccessResponse
 from src.routes import client_api, appointment_api, therapist_api
 from src.routes.client_signup_forms import client_signup_api
+from src.routes.events import events_api
 from src.routes.therapist_video import therapist_video_api
 from src.utils.therapists.intakeq_webhook_appointment_utils import process_appointment
 from src.utils.typeform.typeform_utils import process_typeform_data
@@ -19,6 +20,7 @@ app.register_api(client_signup_api)
 app.register_api(appointment_api)
 app.register_api(therapist_api)
 app.register_api(therapist_video_api)
+app.register_api(events_api)
 
 
 @app.after_request

@@ -38,6 +38,8 @@ jobs:
           echo RDS_PORT=${{ secrets.RDS_PORT }} >> .env
           echo RDS_DATABASE=${{ secrets.RDS_DATABASE }} >> .env
           echo RDS_USER=${{ secrets.RDS_USER }} >> .env
+          echo ANALYTICS_MEASUREMENT_ID=${{ secrets.ANALYTICS_MEASUREMENT_ID }} >> .env
+          echo ANALYTICS_API_SECRET=${{ secrets.ANALYTICS_API_SECRET }} >> .env
           echo AIRTABLE_BASE_ID=${{ secrets.AIRTABLE_BASE_ID }} >> .env
           echo AIRTABLE_TABLE_ID=${{ secrets.AIRTABLE_TABLE_ID }} >> .env
           cat .env
@@ -58,3 +60,15 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         run: |
           serverless deploy
+
+      - name: Run Database Migration
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        run: |
+          aws lambda invoke \
+            --function-name SolHealth-BE-dev-migrate \
+            --payload '{}' \
+            --cli-binary-format raw-in-base64-out \
+            response.json
+          cat response.json

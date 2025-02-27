@@ -69,6 +69,8 @@ class ClientSignup(Base):
     promo_code = Column("promo_code", String(100))
     referred_by = Column("referred_by", Text)
 
+    _utm = Column("utm_params", Text, nullable=True)
+
     @property
     def i_would_like_therapist(self):
         return json.loads(self._i_would_like_therapist or "[]")
@@ -92,6 +94,14 @@ class ClientSignup(Base):
     @how_did_you_hear.setter
     def how_did_you_hear(self, sources):
         self._how_did_you_hear_about_us = json.dumps(sources)
+
+    @property
+    def utm(self) -> dict:
+        return json.loads(self._utm or "{}")
+
+    @utm.setter
+    def utm(self, sources: dict):
+        self._utm = json.dumps(sources)
 
     @property
     def ph9_sum(self):

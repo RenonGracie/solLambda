@@ -28,6 +28,9 @@ class Settings(Singleton):
         self.TEST_THERAPIST_EMAIL = os.getenv("TEST_THERAPIST_EMAIL")
         self.IS_AWS = os.getenv("IS_AWS", "false").lower() == "true"
 
+        self.ANALYTICS_MEASUREMENT_ID = os.getenv("ANALYTICS_MEASUREMENT_ID")
+        self.ANALYTICS_API_SECRET = os.getenv("ANALYTICS_API_SECRET")
+
         self.AIRTABLE_BASE_ID = os.getenv("AIRTABLE_BASE_ID")
         self.AIRTABLE_TABLE_ID = os.getenv("AIRTABLE_TABLE_ID")
 
