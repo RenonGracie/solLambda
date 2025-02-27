@@ -66,7 +66,7 @@ class Therapist(BaseModel):
 
         super().__init__(
             id=json["id"],
-            intern_name=fields.get("Intern Name"),
+            intern_name=fields.get("Intern Name") or fields.get("Name"),
             age=fields.get("Age"),
             email=fields.get("Email"),
             biography=fields.get("Intro Bios (Shortened)"),

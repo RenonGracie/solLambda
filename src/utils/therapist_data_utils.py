@@ -82,9 +82,9 @@ def provide_therapist_slots(
     now = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
     if first_week_appointments is not None or second_week_appointments is not None:
         for i in range(168):
-            if first_week_appointments:
+            if first_week_appointments is not None:
                 first_week_slots.append(now + timedelta(hours=i))
-            if second_week_appointments:
+            if second_week_appointments is not None:
                 second_week_slots.append(now + timedelta(hours=i, days=7))
 
     def _filter_slots(slot: datetime, appointments: AppointmentModel, duration) -> bool:
@@ -121,11 +121,11 @@ def provide_therapist_slots(
         )
 
     therapist.available_slots = []
-    if first_week_appointments:
+    if first_week_appointments is not None:
         therapist.available_slots += filter_slots(
             first_week_slots, first_week_appointments
         )
-    if second_week_appointments:
+    if second_week_appointments is not None:
         therapist.available_slots += filter_slots(
             second_week_slots, second_week_appointments
         )
