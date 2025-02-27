@@ -68,6 +68,7 @@ jobs:
         run: |
           aws lambda invoke \
             --function-name SolHealth-BE-dev-migrate \
+            --region us-east-2 \
             --payload '{}' \
             --cli-binary-format raw-in-base64-out \
             response.json
