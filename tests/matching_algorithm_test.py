@@ -75,16 +75,22 @@ def sample_client():
 # Test cases
 def test_hard_factor_state_mismatch(sample_client, sample_therapist):
     sample_client.state = "TX"
-    score, matches = calculate_match_score(sample_client, sample_therapist)
+    score, matched_diagnoses, matched_specialities = calculate_match_score(
+        sample_client, sample_therapist
+    )
     assert score == -1
-    assert matches == []
+    assert matched_diagnoses == []
+    assert matched_specialities == []
 
 
 def test_hard_factor_gender_mismatch(sample_client, sample_therapist):
     sample_client.i_would_like_therapist = ["Is female"]
-    score, matches = calculate_match_score(sample_client, sample_therapist)
+    score, matched_diagnoses, matched_specialities = calculate_match_score(
+        sample_client, sample_therapist
+    )
     assert score == -1
-    assert matches == []
+    assert matched_diagnoses == []
+    assert matched_specialities == []
 
 
 def test_ph9_hard_factor(sample_client, sample_therapist):
@@ -97,24 +103,32 @@ def test_ph9_hard_factor(sample_client, sample_therapist):
     sample_client.trouble_concentrating = "Nearly every day"
     sample_client.moving_or_speaking_so_slowly = "Nearly every day"
 
-    score, matches = calculate_match_score(sample_client, sample_therapist)
+    score, matched_diagnoses, matched_specialities = calculate_match_score(
+        sample_client, sample_therapist
+    )
     assert score == -1
-    assert matches == []
+    assert matched_diagnoses == []
+    assert matched_specialities == []
 
 
 def test_soft_factors(sample_client, sample_therapist):
-    score, matches = calculate_match_score(sample_client, sample_therapist)
+    score, matched_diagnoses, matched_specialities = calculate_match_score(
+        sample_client, sample_therapist
+    )
     assert score == 12
-    assert "Trauma" in matches
-    assert "Family Therapy" in matches
+    assert "Trauma" in matched_specialities
+    assert "Family Therapy" in matched_specialities
 
 
 def test_no_matches(sample_client, sample_therapist):
     sample_client.i_would_like_therapist = []
     sample_client.lived_experiences = []
-    score, matches = calculate_match_score(sample_client, sample_therapist)
+    score, matched_diagnoses, matched_specialities = calculate_match_score(
+        sample_client, sample_therapist
+    )
     assert score == -1
-    assert matches == []
+    assert matched_diagnoses == []
+    assert matched_specialities == []
 
 
 def test_calculate_match_score_full_match(sample_client, sample_therapist):
@@ -136,6 +150,9 @@ def test_calculate_match_score_full_match(sample_client, sample_therapist):
     sample_therapist.diagnoses = ["Anxiety", "Depression"]
     sample_therapist.specialities = ["Trauma"]
     sample_therapist.therapeutic_orientation = ["CBT", "DBT"]
-    score, matches = calculate_match_score(sample_client, sample_therapist)
+    score, matched_diagnoses, matched_specialities = calculate_match_score(
+        sample_client, sample_therapist
+    )
     assert score == 18  # Adjust based on your scoring logic
-    assert matches == ["Anxiety", "Trauma"]
+    assert "Anxiety" in matched_diagnoses
+    assert "Trauma" in matched_specialities

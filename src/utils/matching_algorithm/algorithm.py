@@ -11,7 +11,7 @@ def calculate_match_score(
     if not therapist.states or data.state.lower() not in [
         state.lower() for state in therapist.states
     ]:
-        return -1, []
+        return -1, [], []
 
     # Hard factor #2
     if therapist.gender and (
@@ -26,25 +26,25 @@ def calculate_match_score(
     ):
         pass
     else:
-        return -1, []
+        return -1, [], []
 
     # Hard factor #3
     ph9 = data.ph9_sum
     yes_count = str(therapist.experience_with_risk_clients).lower().count("yes")
     if ph9 > 20 and yes_count < 2:
-        return -1, []
+        return -1, [], []
     elif ph9 > 14 and yes_count < 1:
-        return -1, []
+        return -1, [], []
 
     gad7 = data.gad7_sum
     if gad7 >= 15 and yes_count < 1:
-        return -1, []
+        return -1, [], []
 
     last_ph9 = data.suicidal_thoughts_points
     if last_ph9 >= 2 > yes_count:
-        return -1, []
+        return -1, [], []
     elif last_ph9 >= 1 > yes_count:
-        return -1, []
+        return -1, [], []
 
     score = 0
     matched_diagnoses = []
