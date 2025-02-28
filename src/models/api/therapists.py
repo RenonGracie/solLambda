@@ -68,7 +68,7 @@ class Therapist(BaseModel):
             id=json["id"],
             intern_name=fields.get("Intern Name") or fields.get("Name"),
             age=fields.get("Age"),
-            email=fields.get("Email"),
+            email=fields.get("Email") or fields.get("Notes"),
             biography=fields.get("Intro Bios (Shortened)"),
             availability=fields.get(
                 "Availability: When are you available to see clients?"
