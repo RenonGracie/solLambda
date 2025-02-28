@@ -4,7 +4,9 @@ from src.models.api.therapists import Therapist
 from src.models.db.clients import ClientSignup
 
 
-def calculate_match_score(data: ClientSignup, therapist: Therapist) -> (int, list):
+def calculate_match_score(
+    data: ClientSignup, therapist: Therapist
+) -> (int, list, list):
     # Hard factor #1
     if not therapist.states or data.state.lower() not in [
         state.lower() for state in therapist.states
@@ -111,4 +113,4 @@ def calculate_match_score(data: ClientSignup, therapist: Therapist) -> (int, lis
         ):
             score += 2
 
-    return score, matched_diagnoses[:1] + matched_specialities[:2]
+    return score, matched_diagnoses, matched_specialities

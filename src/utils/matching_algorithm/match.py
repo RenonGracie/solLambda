@@ -25,7 +25,9 @@ def match_client_with_therapists(
     matches = []
 
     for therapist in therapists:
-        score, matched = calculate_match_score(form, therapist)
+        score, matched_diagnoses, matched_specialities = calculate_match_score(
+            form, therapist
+        )
         if score >= 0:
             caseload = re.findall(r"\d+", therapist.max_caseload)
             if len(caseload) > 0:
@@ -62,7 +64,8 @@ def match_client_with_therapists(
                                 {
                                     "therapist": therapist,
                                     "score": score,
-                                    "matched": matched,
+                                    "matched_specialities": matched_specialities,
+                                    "matched_diagnoses": matched_diagnoses,
                                 }
                             )
 

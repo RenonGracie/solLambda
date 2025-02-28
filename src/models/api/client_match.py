@@ -7,7 +7,8 @@ from src.models.api.therapists import Therapist
 class ClientMatch(BaseModel):
     therapist: Therapist
     score: float
-    matched: list[str]
+    matched_diagnoses: list[str]
+    matched_specialities: list[str]
 
 
 class MatchedTherapists(BaseModel):
