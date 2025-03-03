@@ -42,6 +42,8 @@ jobs:
           echo ANALYTICS_API_SECRET=${{ secrets.ANALYTICS_API_SECRET }} >> .env
           echo AIRTABLE_BASE_ID=${{ secrets.AIRTABLE_BASE_ID }} >> .env
           echo AIRTABLE_TABLE_ID=${{ secrets.AIRTABLE_TABLE_ID }} >> .env
+          echo TEST_WELCOME_VIDEO=${{ vars.TEST_WELCOME_VIDEO }} >> .env
+          echo TEST_GREETINGS_VIDEO=${{ vars.TEST_GREETINGS_VIDEO }} >> .env
           cat .env
 
       - name: Install uv

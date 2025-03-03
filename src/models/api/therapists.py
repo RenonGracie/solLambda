@@ -47,6 +47,7 @@ class Therapist(BaseModel):
     family_household: str | None
 
     welcome_video_link: str | None
+    greetings_video_link: str | None
     image_link: str | None
 
     available_slots: list[datetime] | None

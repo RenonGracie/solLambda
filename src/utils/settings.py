@@ -34,5 +34,8 @@ class Settings(Singleton):
         self.AIRTABLE_BASE_ID = os.getenv("AIRTABLE_BASE_ID")
         self.AIRTABLE_TABLE_ID = os.getenv("AIRTABLE_TABLE_ID")
 
+        self.TEST_WELCOME_VIDEO = os.getenv("TEST_WELCOME_VIDEO")
+        self.TEST_GREETINGS_VIDEO = os.getenv("TEST_GREETINGS_VIDEO")
+
 
 settings = Settings()

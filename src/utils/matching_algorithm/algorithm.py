@@ -97,9 +97,11 @@ def calculate_match_score(
             and therapist.culture.lower().__contains__("collectivist")
         ):
             score += 2
-        if lived_experience.lower().__contains__(
-            "many places"
-        ) and therapist.places.lower().__contains__("many places"):
+        if (
+            lived_experience.lower().__contains__("many places")
+            and therapist.places
+            and therapist.places.lower().__contains__("many places")
+        ):
             score += 2
         if lived_experience.lower().__contains__("caretaker role") and (
             therapist.married or therapist.has_children
