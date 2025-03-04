@@ -97,20 +97,34 @@ def provide_therapist_slots(
             if second_week_appointments is not None:
                 second_week_slots.append(now + timedelta(hours=i, days=7))
 
-    def _filter_slots(slot: datetime, appointments: AppointmentModel, duration) -> bool:
+    def _filter_slots(slot: datetime, appointment: AppointmentModel) -> bool:
         slot_time = slot.astimezone()
-        if appointments.recurrence:
-            for rec in appointments.recurrence:
-                rrule = rrulestr(rec, dtstart=appointments.start_date.astimezone())
+        duration = appointment.end_date - appointment.start_date
+        if appointment.recurrence:
+            for rec in appointment.recurrence:
+                rrule = rrulestr(rec, dtstart=appointment.start_date.astimezone())
                 for dt in rrule.between(
                     slot_time + timedelta(days=-1),
                     slot_time + duration + timedelta(days=1),
                 ):
                     if dt.astimezone() <= slot_time < dt.astimezone() + duration:
                         return True
+                    if (
+                        dt.astimezone()
+                        <= slot_time + timedelta(minutes=45)
+                        < dt.astimezone() + duration
+                    ):
+                        return True
             return False
         else:
-            return False
+            if appointment.start_date.astimezone() <= slot_time < appointment.end_date:
+                return True
+            if (
+                appointment.start_date.astimezone()
+                <= slot_time + timedelta(minutes=45)
+                < appointment.end_date
+            ):
+                return True
 
     def filter_slots(
         slots: list[datetime], appointments: list[AppointmentModel]
@@ -118,13 +132,7 @@ def provide_therapist_slots(
         return list(
             filter(
                 lambda dt: not any(
-                    appointment.start_date.astimezone()
-                    <= dt.astimezone()
-                    <= appointment.end_date.astimezone()
-                    or _filter_slots(
-                        dt, appointment, appointment.end_date - appointment.start_date
-                    )
-                    for appointment in appointments
+                    _filter_slots(dt, appointment) for appointment in appointments
                 ),
                 slots,
             )
