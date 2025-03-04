@@ -19,6 +19,10 @@ _creds = service_account.Credentials.from_service_account_info(
 _service = build("calendar", "v3", credentials=_creds)
 
 
+def insert_email_to_gcalendar(calendar_id: str) -> None:
+    _service.calendarList().insert(body={"id": calendar_id}).execute()
+
+
 def get_events_from_gcalendar(
     calendar_id: str,
     time_min: str | None = None,
@@ -26,7 +30,7 @@ def get_events_from_gcalendar(
     max_results: int | None = None,
 ) -> list[dict]:
     try:
-        _service.calendarList().insert(body={"id": calendar_id}).execute()
+        insert_email_to_gcalendar(calendar_id)
         page_token = None
         data = []
         while True:

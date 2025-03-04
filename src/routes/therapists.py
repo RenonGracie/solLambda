@@ -1,12 +1,16 @@
 from flask import jsonify
 from flask_openapi3 import Tag, APIBlueprint
+from googleapiclient.errors import HttpError
 from pyairtable import Api
 
-from src.models.api.calendar import CalendarEvents, EventQuery
+from src.models.api.calendar import CalendarEvents, EventQuery, TherapistEmails
 from src.models.api.client_match import MatchedTherapists, MatchQuery
 from src.models.api.therapist_s3 import MediaQuery, MediaLink
 from src.models.api.therapists import Therapists, Therapist
-from src.utils.google_calendar import get_events_from_gcalendar
+from src.utils.google_calendar import (
+    get_events_from_gcalendar,
+    insert_email_to_gcalendar,
+)
 from src.utils.matching_algorithm.match import match_client_with_therapists
 from src.utils.settings import settings
 from src.utils.s3 import get_media_url
@@ -61,3 +65,26 @@ def get_events(query: EventQuery):
 def get_video_link(query: MediaQuery):
     url = get_media_url(user_id=query.email, s3_media_type=query.type)
     return jsonify({"url": url}), 200
+
+
+@therapist_api.get(
+    "with_calendar",
+    responses={200: TherapistEmails},
+    summary="Get therapists who shared their calendar",
+)
+def with_calendar():
+    emails = list(
+        map(
+            lambda therapist: therapist["fields"].get("Email")
+            or therapist["fields"].get("Notes"),
+            table.all(),
+        )
+    )
+    shared = []
+    for email in emails:
+        try:
+            insert_email_to_gcalendar(email)
+            shared.append(email)
+        except HttpError:
+            pass
+    return jsonify({"emails": shared}), 200

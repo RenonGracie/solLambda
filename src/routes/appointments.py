@@ -66,9 +66,12 @@ def new_appointment(body: CreateAppointment):
         print("Unable to get booking settings")
         return jsonify(Error(error="Unable to get booking settings").dict()), 400
     practitioners = result.json()["Practitioners"]
-    therapist = next(
-        item for item in practitioners if item["Email"] == body.therapist_email
-    )
+    try:
+        therapist = next(
+            item for item in practitioners if item["Email"] == body.therapist_email
+        )
+    except StopIteration:
+        therapist = None
     if not therapist:
         print("Therapist not found")
         return jsonify(Error(error="Therapist not found").dict()), 404
@@ -89,13 +92,17 @@ def new_appointment(body: CreateAppointment):
 
     clients = result.json()
     if len(clients) > 0:
-        client = next(
-            item
-            for item in clients
-            if item["Email"] == form.email and item["Name"] == name
-        )
+        try:
+            client = next(
+                item
+                for item in clients
+                if item["Email"] == form.email and item["Name"] == name
+            )
+        except StopIteration:
+            client = None
     else:
         client = None
+
     if not client:
         print(
             f"Client with name '{form.first_name} {form.last_name}' not found on intakeQ"

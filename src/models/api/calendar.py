@@ -78,3 +78,7 @@ class EventQuery(BaseModel):
     time_min: str = Field(default=None)
     time_max: str = Field(default=None)
     max_results: int = Field(default=None)
+
+
+class TherapistEmails(BaseModel):
+    emails: list[str]
