@@ -117,7 +117,11 @@ def provide_therapist_slots(
                         return True
             return False
         else:
-            if appointment.start_date.astimezone() <= slot_time < appointment.end_date.astimezone():
+            if (
+                appointment.start_date.astimezone()
+                <= slot_time
+                < appointment.end_date.astimezone()
+            ):
                 return True
             if (
                 appointment.start_date.astimezone()
