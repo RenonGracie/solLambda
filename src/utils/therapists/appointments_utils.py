@@ -98,7 +98,8 @@ def get_appointments_for_therapist(
             appointments.append(appointment)
 
             if (
-                now.astimezone()
+                appointment.start_date
+                and now.astimezone()
                 <= appointment.start_date.astimezone()
                 < now_2_weeks.astimezone()
             ):
