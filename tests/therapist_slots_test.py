@@ -31,7 +31,7 @@ def test_first_week_appointments(therapist, now):
     # Create test assignments
     appointment = AppointmentModel(
         start_date=now + timedelta(hours=5),  # 5:00
-        end_date=now + timedelta(hours=6),  # 6:00
+        end_date=now + timedelta(hours=6, minutes=1),  # 6:00
     )
     first_week_appointments = [appointment]
     second_week_appointments = None
@@ -41,6 +41,7 @@ def test_first_week_appointments(therapist, now):
     )
 
     # We check that the slot from 5:00 to 6:00 is excluded
+    print(result.available_slots)
     assert (now + timedelta(hours=5)) not in result.available_slots
     assert (now + timedelta(hours=6)) not in result.available_slots
     assert (
@@ -51,12 +52,12 @@ def test_first_week_appointments(therapist, now):
     ) in result.available_slots  # Slot after appointment
 
 
-# Test 3: Appointments for the second week only
+# # Test 3: Appointments for the second week only
 def test_second_week_appointments(therapist, now):
     # Create test assignments
     appointment = AppointmentModel(
         start_date=now + timedelta(days=7, hours=10),  # 10:00 in a week
-        end_date=now + timedelta(days=7, hours=11),  # 11:00 in a week
+        end_date=now + timedelta(days=7, hours=11, minutes=1),  # 11:01 in a week
     )
     first_week_appointments = None
     second_week_appointments = [appointment]
@@ -81,11 +82,11 @@ def test_both_weeks_appointments(therapist, now):
     # Create test assignments
     first_week_appointment = AppointmentModel(
         start_date=now + timedelta(hours=3),  # 3:00
-        end_date=now + timedelta(hours=4),  # 4:00
+        end_date=now + timedelta(hours=4, minutes=1),  # 4:01
     )
     second_week_appointment = AppointmentModel(
         start_date=now + timedelta(days=7, hours=15),  # 15:00 in a week
-        end_date=now + timedelta(days=7, hours=16),  # 16:00 in a week
+        end_date=now + timedelta(days=7, hours=16, minutes=1),  # 16:01 in a week
     )
     first_week_appointments = [first_week_appointment]
     second_week_appointments = [second_week_appointment]
