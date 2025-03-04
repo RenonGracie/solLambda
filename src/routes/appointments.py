@@ -13,6 +13,7 @@ from src.models.api.appointments import (
     CancelAppointment,
     CreateAppointment,
 )
+from src.models.api.base import Email
 from src.models.api.error import Error
 from src.models.db.clients import ClientSignup
 from src.utils.request_utils import (
@@ -24,6 +25,7 @@ from src.utils.request_utils import (
     appointment_cancellation,
 )
 from src.utils.request_utils import search_clients
+from src.utils.therapists.appointments_utils import delete_all_appointments
 
 __tag = Tag(name="Appointments")
 appointment_api = APIBlueprint(
@@ -144,3 +146,13 @@ def update_existing_appointment(body: AppointmentsShort):
 def cancel_appointment(body: CancelAppointment):
     result = appointment_cancellation(body.dict())
     return jsonify(result.json()), result.status_code
+
+
+@appointment_api.delete(
+    "all",
+    responses={204: None},
+    summary="Delete all appointments by therapist email from db",
+)
+def delete_therapist_appointments(query: Email):
+    delete_all_appointments(query.email)
+    return jsonify({}), 204

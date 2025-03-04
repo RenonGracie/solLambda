@@ -9,3 +9,7 @@ class CustomField(BaseModel):
 
 class SuccessResponse(BaseModel):
     success: bool
+
+
+class Email(BaseModel):
+    email: str

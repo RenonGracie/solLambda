@@ -2,6 +2,8 @@ from enum import Enum
 
 from pydantic import BaseModel
 
+from src.models.api.base import Email
+
 
 class S3MediaType(Enum):
     IMAGE = "image"
@@ -9,8 +11,7 @@ class S3MediaType(Enum):
     INTRO_VIDEO = "intro_video"
 
 
-class MediaQuery(BaseModel):
-    email: str
+class MediaQuery(Email):
     type: S3MediaType
 
 

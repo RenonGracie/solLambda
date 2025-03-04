@@ -5,6 +5,7 @@ from dateutil import parser
 from dateutil.rrule import rrulestr
 from sqlalchemy import column
 
+from src.db.database import with_database
 from src.models.api.therapists import Therapist
 from src.models.db.therapists import TherapistModel, AppointmentModel
 from src.utils.google_calendar import get_events_from_gcalendar
@@ -107,3 +108,10 @@ def get_appointments_for_therapist(
 
     db.add_all(appointments)
     return first_week_appointments, second_week_appointments
+
+
+@with_database
+def delete_all_appointments(db, therapist_email: str) -> None:
+    therapist = db.query(TherapistModel).filter_by(email=therapist_email).first()
+    if therapist is not None:
+        db.query(AppointmentModel).filter_by(therapist_id=therapist.id).delete()
