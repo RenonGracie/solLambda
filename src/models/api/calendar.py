@@ -82,3 +82,12 @@ class EventQuery(BaseModel):
 
 class TherapistEmails(BaseModel):
     emails: list[str]
+
+
+class TherapistEvents(BaseModel):
+    class TherapistEvent(BaseModel):
+        name: str
+        email: str
+        events: list[CalendarEvent]
+
+    therapists: list[TherapistEvent]

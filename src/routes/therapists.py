@@ -3,7 +3,12 @@ from flask_openapi3 import Tag, APIBlueprint
 from googleapiclient.errors import HttpError
 from pyairtable import Api
 
-from src.models.api.calendar import CalendarEvents, EventQuery, TherapistEmails
+from src.models.api.calendar import (
+    CalendarEvents,
+    EventQuery,
+    TherapistEmails,
+    TherapistEvents,
+)
 from src.models.api.client_match import MatchedTherapists, MatchQuery
 from src.models.api.therapist_s3 import MediaQuery, MediaLink
 from src.models.api.therapists import Therapists, Therapist
@@ -14,6 +19,7 @@ from src.utils.google_calendar import (
 from src.utils.matching_algorithm.match import match_client_with_therapists
 from src.utils.settings import settings
 from src.utils.s3 import get_media_url
+from src.utils.therapists.appointments_utils import process_appointments
 
 __tag = Tag(name="Therapists")
 therapist_api = APIBlueprint(
@@ -88,3 +94,13 @@ def with_calendar():
         except HttpError:
             pass
     return jsonify({"emails": shared}), 200
+
+
+@therapist_api.post(
+    "set_events",
+    responses={204: None},
+    summary="Save therapist's calendar events",
+)
+def set_events(body: TherapistEvents):
+    process_appointments(body)
+    return jsonify({}), 204

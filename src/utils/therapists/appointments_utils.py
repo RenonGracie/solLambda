@@ -6,12 +6,48 @@ from dateutil.rrule import rrulestr
 from sqlalchemy import column
 
 from src.db.database import with_database
+from src.models.api.calendar import TherapistEvents
 from src.models.api.therapists import Therapist
 from src.models.db.therapists import TherapistModel, AppointmentModel
 from src.utils.google_calendar import get_events_from_gcalendar
 from src.utils.settings import settings
 
 _DATE_FORMAT = "%Y-%m-%d"
+
+
+def event_to_appointment(event, therapist_model) -> AppointmentModel | None:
+    if event.get("start") and event.get("end"):
+        start = event["start"].get("dateTime")
+        end = event["end"].get("dateTime")
+        if start and end:
+            appointment = AppointmentModel()
+            appointment.start_date = parser.parse(start)
+            appointment.end_date = parser.parse(end)
+            if event.get("description"):
+                match = re.search(r"[\w.+-]+@[\w-]+\.[\w.-]+", event["description"])
+                if match:
+                    email = str(match.group(0))
+                    if email[-1] == ".":
+                        email = email[:-1]
+                    appointment.client_email = email
+            if event.get("recurrence"):
+                appointment.recurrence = event["recurrence"]
+
+            appointment.therapist = therapist_model
+            return appointment
+    return None
+
+
+def _get_therapist_model(db, name, email) -> (TherapistModel, bool):
+    therapist_model = db.query(TherapistModel).filter_by(email=email).first()
+    if therapist_model is not None:
+        return therapist_model, True
+    else:
+        therapist_model = TherapistModel()
+        therapist_model.name = name
+        therapist_model.email = email
+        db.add(therapist_model)
+        return therapist_model, False
 
 
 def get_appointments_for_therapist(
@@ -45,8 +81,10 @@ def get_appointments_for_therapist(
             else:
                 second_week_appointments.append(item)
 
-    therapist_model = db.query(TherapistModel).filter_by(email=therapist.email).first()
-    if therapist_model is not None:
+    therapist_model, exists = _get_therapist_model(
+        db, therapist.intern_name, therapist.email
+    )
+    if exists:
         appointments = (
             db.query(AppointmentModel)
             .filter_by(therapist_id=therapist_model.id)
@@ -64,11 +102,6 @@ def get_appointments_for_therapist(
             for appointment in appointments:
                 _proceed_appointment(appointment)
             return first_week_appointments, second_week_appointments
-    else:
-        therapist_model = TherapistModel()
-        therapist_model.name = therapist.intern_name
-        therapist_model.email = therapist.email
-        db.add(therapist_model)
 
     events = get_events_from_gcalendar(
         calendar_id=settings.TEST_THERAPIST_EMAIL
@@ -77,25 +110,8 @@ def get_appointments_for_therapist(
         time_min=f"{now_str}T00:00:00-00:00",
     )
     for event in events:
-        if event.get("start") and event.get("end"):
-            start = event["start"].get("dateTime")
-            end = event["end"].get("dateTime")
-            appointment = AppointmentModel()
-            if start:
-                appointment.start_date = parser.parse(start)
-            if end:
-                appointment.end_date = parser.parse(end)
-            if event.get("description"):
-                match = re.search(r"[\w.+-]+@[\w-]+\.[\w.-]+", event["description"])
-                if match:
-                    email = str(match.group(0))
-                    if email[-1] == ".":
-                        email = email[:-1]
-                    appointment.client_email = email
-            if event.get("recurrence"):
-                appointment.recurrence = event["recurrence"]
-
-            appointment.therapist = therapist_model
+        appointment = event_to_appointment(event, therapist_model)
+        if appointment:
             appointments.append(appointment)
 
             if appointment.start_date and (
@@ -108,6 +124,21 @@ def get_appointments_for_therapist(
 
     db.add_all(appointments)
     return first_week_appointments, second_week_appointments
+
+
+@with_database
+def process_appointments(db, data: TherapistEvents):
+    for therapist in data.therapists:
+        therapist_model, exists = _get_therapist_model(
+            db, therapist.name, therapist.email
+        )
+        if therapist_model:
+            appointments = []
+            for event in therapist.events:
+                appointment = event_to_appointment(event.dict(), therapist_model)
+                if appointment:
+                    appointments.append(appointment)
+            db.add_all(appointments)
 
 
 @with_database
