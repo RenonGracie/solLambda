@@ -1,9 +1,14 @@
 name: be deploy
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - develop
+    inputs:
+      environment:
+        description: Environment
+        default: 'develop'
+        type: environment
+#  push:
+#    branches:
+#      - develop
 
 jobs:
   deploy:
@@ -61,7 +66,7 @@ jobs:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         run: |
-          serverless deploy
+          serverless deploy --stage ${{ inputs.environment }}
 
       - name: Run Database Migration
         env:
