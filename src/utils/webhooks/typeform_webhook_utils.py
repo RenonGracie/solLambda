@@ -1,9 +1,13 @@
+import random
+import uuid
+
 from src.db.database import with_database
 from src.models.db.clients import (
     ClientSignup,
     create_from_typeform_data,
     update_from_typeform_data,
 )
+from src.utils.event_utils import send_ga_event, REGISTRATION_EVENT, USER_EVENT_TYPE
 from src.utils.intakeq_bot.bot import create_new_form, create_client_model
 from src.utils.request_utils import intakeq, save_update_client
 from src.utils.typeform.typeform_parser import TypeformData
@@ -31,10 +35,11 @@ def process_typeform_data(db, response_json: dict, base_url: str):
     form = db.query(ClientSignup).filter_by(email=data.email).first()
     create_user_on_intakeq = True
     if not form:
-        db.add(create_from_typeform_data(response_id, data))
+        form = create_from_typeform_data(response_id, data)
+        db.add(form)
         create_user_on_intakeq = True
     else:
-        update_from_typeform_data(response_id, form, data)
+        form = update_from_typeform_data(response_id, form, data)
         if not form.first_name.__eq__(data.first_name) or not form.last_name.__eq__(
             data.last_name
         ):
@@ -42,7 +47,24 @@ def process_typeform_data(db, response_json: dict, base_url: str):
 
     if create_user_on_intakeq is not None:
         if create_user_on_intakeq:
+            client_id = f"{random.randint(100, 1000)}.{random.randint(100, 1000)}"
             response = save_update_client(create_client_model(data))
+            user_id = response.json()["Id"]
+            session_id = str(uuid.uuid4())
+            form.utm = {
+                "client_id": client_id,
+                "user_id": user_id,
+                "session_id": session_id,
+            }
             print(response.json())
+            send_ga_event(
+                database=db,
+                client_id=client_id,
+                email=data.email,
+                name=REGISTRATION_EVENT,
+                user_id=user_id,
+                session_id=session_id,
+                event_type=USER_EVENT_TYPE,
+            )
         user_data = create_new_form(data)
         intakeq({"user": user_data, "sheetURL": f"{base_url}_bot"})

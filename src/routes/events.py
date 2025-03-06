@@ -1,8 +1,8 @@
 from flask import jsonify
 from flask_openapi3 import Tag, APIBlueprint
 
-from src.models.api.events import AnalyticsEvent
-from src.utils.request_utils import sent_analytics_event
+from src.models.api.events import AnalyticsEventQuery, AnalyticsEvents
+from src.utils.event_utils import load_events
 
 __tag = Tag(name="Events")
 events_api = APIBlueprint(
@@ -13,9 +13,7 @@ events_api = APIBlueprint(
 )
 
 
-@events_api.post("", responses={204: None}, summary="Test google analytics event")
-def send_event(body: AnalyticsEvent):
-    result = sent_analytics_event(body.dict())
-    if result.status_code == 204:
-        return jsonify({}), result.status_code
-    return jsonify(result.json()), result.status_code
+@events_api.get("", responses={200: AnalyticsEvents}, summary="Get analytics event")
+def send_event(query: AnalyticsEventQuery):
+    events = load_events(query.dict())
+    return jsonify({"events": events}), 200

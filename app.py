@@ -6,8 +6,8 @@ from src.routes import client_api, appointment_api, therapist_api
 from src.routes.client_signup_forms import client_signup_api
 from src.routes.events import events_api
 from src.routes.therapist_video import therapist_video_api
-from src.utils.therapists.intakeq_webhook_appointment_utils import process_appointment
-from src.utils.typeform.typeform_utils import process_typeform_data
+from src.utils.webhooks.intakeq_webhook_appointment_utils import process_appointment
+from src.utils.webhooks.typeform_webhook_utils import process_typeform_data
 
 __jwt = {"type": "http", "scheme": "bearer", "bearerFormat": "JWT"}
 __security_schemes = {"jwt": __jwt}

@@ -1,11 +1,14 @@
 from dateutil import parser
 from sqlalchemy import and_
 
-from src.db.database import db
+from src.db.database import with_database
+from src.models.db.clients import ClientSignup
 from src.models.db.therapists import TherapistModel, AppointmentModel
+from src.utils.event_utils import send_ga_event, INTAKEQ_EVENT_TYPE
+from src.utils.str_utils import camel_to_snake_case
 
 
-def _create_appointment(therapist: TherapistModel, data: dict):
+def _create_appointment(db, therapist: TherapistModel, data: dict):
     appointment = AppointmentModel()
     appointment.intakeq_id = data["Id"]
     appointment.start_date = parser.parse(data["StartDateIso"])
@@ -15,7 +18,7 @@ def _create_appointment(therapist: TherapistModel, data: dict):
     db.add(appointment)
 
 
-def _update_appointment(therapist: TherapistModel, data: dict):
+def _update_appointment(db, therapist: TherapistModel, data: dict):
     appointment = db.query(AppointmentModel).filter_by(intakeq_id=data["Id"]).first()
     if appointment is None:
         _create_appointment(therapist, data)
@@ -24,7 +27,7 @@ def _update_appointment(therapist: TherapistModel, data: dict):
         appointment.end_date = parser.parse(data["EndDateIso"])
 
 
-def _delete_appointment(data: dict):
+def _delete_appointment(db, data: dict):
     appointment = db.query(AppointmentModel).filter_by(intakeq_id=data["Id"]).first()
     if appointment is None:
         start_date = parser.parse(data["StartDateIso"])
@@ -44,7 +47,8 @@ def _delete_appointment(data: dict):
         db.delete(appointment)
 
 
-def process_appointment(data: dict):
+@with_database
+def process_appointment(db, data: dict):
     appointment = data["Appointment"]
     therapist_model = (
         db.query(TherapistModel)
@@ -52,18 +56,33 @@ def process_appointment(data: dict):
         .first()
     )
 
+    client = db.query(ClientSignup).filter_by(email=appointment["ClientEmail"]).first()
+
     if therapist_model is None:
         therapist_model = TherapistModel()
         therapist_model.name = appointment["PractitionerName"]
         therapist_model.email = appointment["PractitionerEmail"]
         db.add(therapist_model)
 
-    match data["EventType"]:
+    event = data["EventType"]
+    match event:
         case "AppointmentCreated":
-            _create_appointment(therapist_model, appointment)
+            _create_appointment(db, therapist_model, appointment)
         case "AppointmentRescheduled":
-            _update_appointment(therapist_model, appointment)
+            _update_appointment(db, therapist_model, appointment)
         case "AppointmentDeleted":
-            _delete_appointment(appointment)
+            _delete_appointment(db, appointment)
 
-    db.commit()
+    send_ga_event(
+        database=db,
+        client_id=client.utm.get("client_id"),
+        email=client.email,
+        user_id=client.utm.get("user_id"),
+        session_id=client.utm.get("session_id"),
+        name=camel_to_snake_case(event),
+        value=appointment.get("Id"),
+        params={
+            "therapist_id": appointment["PractitionerId"],
+        },
+        event_type=INTAKEQ_EVENT_TYPE,
+    )

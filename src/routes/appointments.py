@@ -16,6 +16,7 @@ from src.models.api.appointments import (
 from src.models.api.base import Email
 from src.models.api.error import Error
 from src.models.db.clients import ClientSignup
+from src.utils.event_utils import send_ga_event, CALL_SCHEDULED_EVENT, USER_EVENT_TYPE
 from src.utils.request_utils import (
     get_booking_settings,
     search_appointments,
@@ -129,7 +130,20 @@ def new_appointment(body: CreateAppointment):
             "Status": body.status,
         }
     )
-    return jsonify(result.json()), result.status_code
+    json = result.json()
+    if result.status_code == 200:
+        send_ga_event(
+            database=db,
+            client_id=form.utm.get("client_id"),
+            email=form.email,
+            name=CALL_SCHEDULED_EVENT,
+            value=json.get("Id"),
+            user_id=form.utm.get("user_id"),
+            session_id=form.utm.get("session_id"),
+            event_type=USER_EVENT_TYPE,
+        )
+
+    return jsonify(json), result.status_code
 
 
 @appointment_api.put(
