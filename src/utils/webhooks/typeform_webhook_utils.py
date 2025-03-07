@@ -49,7 +49,8 @@ def process_typeform_data(db, response_json: dict, base_url: str):
         if create_user_on_intakeq:
             client_id = f"{random.randint(100, 1000)}.{random.randint(100, 1000)}"
             response = save_update_client(create_client_model(data))
-            user_id = response.json()["Id"]
+            client_json = response.json()
+            user_id = client_json.get("Id") or client_json.get("ClientId")
             session_id = str(uuid.uuid4())
             form.utm = {
                 "client_id": client_id,
