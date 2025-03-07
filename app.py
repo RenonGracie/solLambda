@@ -56,7 +56,9 @@ def bot_hook():
     summary="Webhook for IntakeQ Appointments",
 )
 def intakeq_hook():
-    process_appointment(request.get_json())
+    json = request.get_json()
+    print(json)
+    process_appointment(json)
     return "", 200
 
 
