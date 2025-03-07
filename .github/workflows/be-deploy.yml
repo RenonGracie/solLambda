@@ -6,15 +6,18 @@ on:
         description: Environment
         default: 'develop'
         type: environment
-#  push:
-#    branches:
-#      - develop
+  push:
+    branches:
+      - develop
+      - staging
 
 jobs:
   deploy:
     name: deploy
     runs-on: ubuntu-24.04
-    environment: develop
+    env:
+      DEPLOY_ENV: ${{ github.event_name == 'workflow_dispatch' && inputs.environment || github.ref_name }}
+      environment: ${{ env.DEPLOY_ENV }}
     steps:
       - uses: actions/checkout@v3
 
@@ -33,9 +36,9 @@ jobs:
       - name: Create .env file
         run: |
           touch .env
-          echo INTAKEQ_BASE_URL=${{ secrets.INTAKEQ_BASE_URL }} >> .env
+          echo INTAKEQ_BASE_URL=${{ vars.INTAKEQ_BASE_URL }} >> .env
           echo INTAKEQ_AUTH_KEY=${{ secrets.INTAKEQ_AUTH_KEY }} >> .env
-          echo INTAKEQ_SIGNUP_FORM=${{ secrets.INTAKEQ_SIGNUP_FORM }} >> .env
+          echo INTAKEQ_SIGNUP_FORM=${{ vars.INTAKEQ_SIGNUP_FORM }} >> .env
           echo AIRTABLE_API_KEY=${{ secrets.AIRTABLE_API_KEY }} >> .env
           echo GOOGLE_CALENDAR_CREDENTIALS=${{ secrets.GOOGLE_CALENDAR_CREDENTIALS }} >> .env
           echo IS_AWS=true >> .env
@@ -66,7 +69,7 @@ jobs:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         run: |
-          serverless deploy --stage ${{ inputs.environment }}
+          serverless deploy --stage ${{ env.DEPLOY_ENV }}
 
       - name: Run Database Migration
         env:

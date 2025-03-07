@@ -29,7 +29,6 @@ custom:
 
 provider:
   name: aws
-  stage: dev
   runtime: python3.12
   region: us-east-2
   architecture: x86_64
@@ -37,12 +36,6 @@ provider:
   iam:
     role:
       statements:
-        # Allow functions to connect to DB
-        - Effect: Allow
-          Action:
-            - 'dsql:DbConnectAdmin'
-          Resource:
-            - 'arn:aws:dsql:us-east-2:762233746762:cluster/leabt3l63pkhelktg2nk45iweu'
         # Allow functions to read/write objects in a bucket
         - Effect: Allow
           Action:
@@ -79,6 +72,20 @@ functions:
 
 resources:
   Resources:
+    RDSCluster:
+      Type: 'AWS::RDS::DBCluster'
+      Properties:
+        MasterUsername: *********************
+        MasterUserPassword: ***************************
+        DatabaseName: db
+        Engine: aurora-postgresql
+        EngineMode: serverless
+        EnableHttpEndpoint: true
+        ScalingConfiguration:
+          AutoPause: true
+          MaxCapacity: 1
+          MinCapacity: 1
+          SecondsUntilAutoPause: 300
     GatewayResponseDefault4XX:
       Type: 'AWS::ApiGateway::GatewayResponse'
       Properties:
