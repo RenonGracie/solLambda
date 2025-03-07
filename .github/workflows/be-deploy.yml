@@ -66,7 +66,7 @@ jobs:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         run: |
-          serverless deploy --stage ${{ inputs.environment }}
+          serverless deploy --stage dev
 
       - name: Run Database Migration
         env:
