@@ -75,12 +75,12 @@ resources:
     RDSCluster:
       Type: 'AWS::RDS::DBCluster'
       Properties:
-        MasterUsername: *********************
-        MasterUserPassword: ***************************
+        MasterUsername: admin
+        MasterUserPassword: admin
         DatabaseName: db
         Engine: aurora-postgresql
         EngineMode: serverless
-        EnableHttpEndpoint: true
+        EnableHttpEndpoint: false
         ScalingConfiguration:
           AutoPause: true
           MaxCapacity: 1

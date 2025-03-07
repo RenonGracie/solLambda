@@ -4,12 +4,12 @@ on:
     inputs:
       environment:
         description: Environment
-        default: 'develop'
+        default: 'dev'
         type: environment
   push:
     branches:
-      - develop
-      - staging
+      - dev
+      - stg
 
 jobs:
   deploy:
