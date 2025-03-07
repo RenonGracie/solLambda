@@ -4,17 +4,17 @@ on:
     inputs:
       environment:
         description: Environment
-        default: 'develop'
+        default: 'dev'
         type: environment
-#  push:
-#    branches:
-#      - develop
+  push:
+    branches:
+      - dev
 
 jobs:
   deploy:
     name: deploy
     runs-on: ubuntu-24.04
-    environment: develop
+    environment: dev
     steps:
       - uses: actions/checkout@v3
 
