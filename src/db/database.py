@@ -39,9 +39,6 @@ def get_db_url() -> (URL, dict):
     database = settings.RDS_DATABASE
     password = settings.RDS_PASSWORD
 
-    if not rds_host:
-        raise ValueError("RDS_HOST environment variable is not set")
-
     if settings.IS_AWS is True:
         region = "us-east-2"
         client = boto3.client("rds", region_name=region)
