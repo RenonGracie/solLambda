@@ -141,7 +141,7 @@ resources:
         ServerlessV2ScalingConfiguration:
           MinCapacity: 0
           MaxCapacity: 2
-          SecondsUntilAutoPause: 180
+          SecondsUntilAutoPause: 300
 
     AuroraPostgresInstance:
       Type: "AWS::RDS::DBInstance"
