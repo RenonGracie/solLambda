@@ -15,9 +15,9 @@ jobs:
   deploy:
     name: deploy
     runs-on: ubuntu-24.04
+    environment: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.environment || github.ref_name }}
     env:
-      DEPLOY_ENV: ${{ github.event_name == 'workflow_dispatch' && inputs.environment || github.ref_name }}
-    environment: ${{ env.DEPLOY_ENV }}
+      DEPLOY_ENV: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.environment || github.ref_name }}
     steps:
       - uses: actions/checkout@v3
 
