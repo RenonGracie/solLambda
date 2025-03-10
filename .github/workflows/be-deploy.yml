@@ -12,12 +12,28 @@ on:
       - stg
 
 jobs:
+  setup:
+    name: Setup environment
+    runs-on: ubuntu-24.04
+    outputs:
+      deploy_env: ${{ steps.set-env.outputs.deploy_env }}
+    steps:
+      - name: Set deploy environment
+        id: set-env
+        run: |
+          if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+            echo "DEPLOY_ENV=${{ github.event.inputs.environment }}" >> $GITHUB_OUTPUT
+          else
+            echo "DEPLOY_ENV=${{ github.ref_name }}" >> $GITHUB_OUTPUT
+          fi
+
   deploy:
     name: deploy
     runs-on: ubuntu-24.04
-    environment: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.environment || github.ref_name }}
+    needs: setup
+    environment: ${{ needs.setup.outputs.deploy_env }}
     env:
-      DEPLOY_ENV: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.environment || github.ref_name }}
+      DEPLOY_ENV: ${{ needs.setup.outputs.deploy_env }}
     steps:
       - uses: actions/checkout@v3
 
@@ -75,7 +91,7 @@ jobs:
           CERTIFICATE_NAME: ${{ vars.CERTIFICATE_NAME }}
           HOSTED_ZONE_ID: ${{ vars.HOSTED_ZONE_ID }}
         run: |
-          serverless create_domain && serverless create-cert && serverless deploy --stage ${{ env.DEPLOY_ENV }}
+          serverless create-cert && serverless create_domain && serverless deploy --stage ${{ env.DEPLOY_ENV }}
 
       - name: Run Database Migration
         env:
