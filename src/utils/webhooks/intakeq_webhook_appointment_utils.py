@@ -72,17 +72,18 @@ def process_appointment(db, data: dict):
             _update_appointment(db, therapist_model, appointment)
         case "AppointmentDeleted":
             _delete_appointment(db, appointment)
-
-    send_ga_event(
-        database=db,
-        client_id=client.utm.get("client_id"),
-        email=client.email,
-        user_id=client.utm.get("user_id"),
-        session_id=client.utm.get("session_id"),
-        name=camel_to_snake_case(event),
-        value=appointment.get("Id"),
-        params={
-            "therapist_id": appointment["PractitionerId"],
-        },
-        event_type=INTAKEQ_EVENT_TYPE,
-    )
+    
+    if client:
+        send_ga_event(
+            database=db,
+            client_id=client.utm.get("client_id"),
+            email=client.email,
+            user_id=client.utm.get("user_id"),
+            session_id=client.utm.get("session_id"),
+            name=camel_to_snake_case(event),
+            value=appointment.get("Id"),
+            params={
+                "therapist_id": appointment["PractitionerId"],
+            },
+            event_type=INTAKEQ_EVENT_TYPE,
+        )
