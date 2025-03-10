@@ -14,18 +14,18 @@ custom:
       - bin
       - pytest
   customDomain:
-    domainName: 'api.dev.solhealth.co'
+    domainName: ${env:DOMAIN_NAME}
     createRoute53Record: true
     createRoute53IPv6Record: true
-    certificateName: 'dev.solhealth.co'
+    certificateName: ${env:CERTIFICATE_NAME}
     apiType: rest
     autoDomain: true
   customCertificate:
-    hostedZoneIds: 'Z0565774GWNT1OIQP463'
-    certificateName: 'dev.solhealth.co'
+    hostedZoneIds: ${env:HOSTED_ZONE_ID}
+    certificateName: ${env:CERTIFICATE_NAME}
     region: us-east-1
     subjectAlternativeNames:
-      - 'api.dev.solhealth.co'
+      - ${env:DOMAIN_NAME}
 
 provider:
   name: aws
@@ -75,9 +75,9 @@ resources:
     RDSCluster:
       Type: 'AWS::RDS::DBCluster'
       Properties:
-        MasterUsername: admin
-        MasterUserPassword: admin
-        DatabaseName: db
+        MasterUsername: ${env:RDS_MASTER_USERNAME}
+        MasterUserPassword: ${env:RDS_MASTER_PASSWORD}
+        DatabaseName: ${env:RDS_NAME}
         Engine: aurora-postgresql
         EngineMode: serverless
         EnableHttpEndpoint: false
