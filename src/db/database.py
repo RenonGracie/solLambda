@@ -43,7 +43,7 @@ def get_db_url() -> (URL, dict):
         region = "us-east-2"
         client = boto3.client("rds", region_name=region)
         db_instance = client.describe_db_instances(
-            DBInstanceIdentifier=settings.DB_INSTANCE_IDENTIFIER
+            DBInstanceIdentifier=settings.RDS_INSTANCE_IDENTIFIER
         )['DBInstances'][0]
         print(db_instance)
         print(db_instance['Endpoint'])
