@@ -137,6 +137,7 @@ resources:
         DatabaseName: ${env:RDS_NAME}
         EngineMode: provisioned
         EnableHttpEndpoint: true
+        Engine: "aurora-postgresql"
         ServerlessV2ScalingConfiguration:
           MinCapacity: 0
           MaxCapacity: 2
