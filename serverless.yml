@@ -138,6 +138,9 @@ resources:
         EngineMode: provisioned
         EnableHttpEndpoint: true
         Engine: "aurora-postgresql"
+        DBSubnetGroupName: !Ref DBSubnetGroup
+        VpcSecurityGroupIds:
+          - !Ref DBSecurityGroup
         ServerlessV2ScalingConfiguration:
           MinCapacity: 0
           MaxCapacity: 2
