@@ -109,5 +109,5 @@ def sent_analytics_event(data: dict):
         headers={
             "Content-type": "application/json",
         },
-        json=json.dumps(data),
+        json=data,
     )

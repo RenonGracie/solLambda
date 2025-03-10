@@ -33,17 +33,17 @@ def process_typeform_data(db, response_json: dict, base_url: str):
 
     response_id = response_json["form_response"]["token"]
     form = db.query(ClientSignup).filter_by(email=data.email).first()
-    create_user_on_intakeq = True
+    create_user_on_intakeq = None
     if not form:
         form = create_from_typeform_data(response_id, data)
         db.add(form)
         create_user_on_intakeq = True
     else:
-        form = update_from_typeform_data(response_id, form, data)
         if not form.first_name.__eq__(data.first_name) or not form.last_name.__eq__(
-            data.last_name
+                data.last_name
         ):
             create_user_on_intakeq = False
+        form = update_from_typeform_data(response_id, form, data)
 
     if create_user_on_intakeq is not None:
         if create_user_on_intakeq:

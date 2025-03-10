@@ -68,8 +68,8 @@ def _send_event(
 
     db.add(event)
 
-    if type:
-        params["type"] = type
+    if event_type:
+        params["type"] = event_type
     if session_id:
         params["session_id"] = session_id
     if utm_source:
