@@ -81,10 +81,9 @@ resources:
         Engine: aurora-postgresql
         EngineMode: provisioned
         EnableHttpEndpoint: false
-        ScalingConfiguration:
-          AutoPause: true
-          MaxCapacity: 1
-          MinCapacity: 2
+        ServerlessV2ScalingConfiguration:
+          MinCapacity: 0.5
+          MaxCapacity: 2
           SecondsUntilAutoPause: 300
     GatewayResponseDefault4XX:
       Type: 'AWS::ApiGateway::GatewayResponse'
