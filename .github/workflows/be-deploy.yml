@@ -62,6 +62,7 @@ jobs:
           echo RDS_PORT=${{ secrets.RDS_PORT }} >> .env
           echo RDS_DATABASE=${{ secrets.RDS_DATABASE }} >> .env
           echo RDS_USER=${{ secrets.RDS_USER }} >> .env
+          echo RDS_PASSWORD=${{ secrets.RDS_PASSWORD }} >> .env
           echo ANALYTICS_MEASUREMENT_ID=${{ secrets.ANALYTICS_MEASUREMENT_ID }} >> .env
           echo ANALYTICS_API_SECRET=${{ secrets.ANALYTICS_API_SECRET }} >> .env
           echo AIRTABLE_BASE_ID=${{ secrets.AIRTABLE_BASE_ID }} >> .env
