@@ -26,7 +26,7 @@ def _intakeq_post(path: str, data: dict):
     return requests.post(
         url=settings.INTAKEQ_BASE_URL + path,
         headers={"X-Auth-Key": settings.INTAKEQ_AUTH_KEY},
-        json=json.dumps(data),
+        json=data,
     )
 
 
@@ -34,7 +34,7 @@ def _intakeq_put(path: str, data: dict):
     return requests.put(
         url=settings.INTAKEQ_BASE_URL + path,
         headers={"X-Auth-Key": settings.INTAKEQ_AUTH_KEY},
-        json=json.dumps(data),
+        json=data,
     )
 
 
@@ -96,7 +96,7 @@ def intakeq(data: dict):
                 "X-Auth-Key": settings.INTAKEQ_AUTH_KEY,
                 "Content-type": "application/json",
             },
-            json=json.dumps(data),
+            json=data,
             timeout=1,
         )
     except requests.exceptions.ReadTimeout:
