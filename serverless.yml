@@ -43,6 +43,18 @@ provider:
             - 's3:PutObject'
           Resource:
             - 'arn:aws:s3:::therapists-personal-data/*'
+        - Effect: Allow
+          Action:
+            - 'rds-data:*'
+          Resource:
+            Fn::Join:
+              - ''
+              - - 'arn:aws:rds:'
+                - ${aws:region}
+                - ':'
+                - ${aws:accountId}
+                - ':cluster:'
+                - Ref: RDSCluster
 
 package:
   exclude:
@@ -80,7 +92,7 @@ resources:
         DatabaseName: ${env:RDS_NAME}
         Engine: aurora-postgresql
         EngineMode: provisioned
-        EnableHttpEndpoint: false
+        EnableHttpEndpoint: true
         ServerlessV2ScalingConfiguration:
           MinCapacity: 0
           MaxCapacity: 2
