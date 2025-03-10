@@ -83,8 +83,8 @@ resources:
         EnableHttpEndpoint: false
         ScalingConfiguration:
           AutoPause: true
-          MaxCapacity: 1
-          MinCapacity: 1
+          MaxCapacity: 0.5
+          MinCapacity: 2
           SecondsUntilAutoPause: 300
     GatewayResponseDefault4XX:
       Type: 'AWS::ApiGateway::GatewayResponse'
