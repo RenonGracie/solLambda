@@ -40,16 +40,6 @@ def get_db_url() -> (URL, dict):
     password = settings.RDS_PASSWORD
 
     if settings.IS_AWS is True:
-        region = "us-east-2"
-        client = boto3.client("rds", region_name=region)
-        db_instance = client.describe_db_instances(
-            DBInstanceIdentifier=settings.RDS_INSTANCE_IDENTIFIER
-        )['DBInstances'][0]
-        print(db_instance)
-        print(db_instance['Endpoint'])
-        rds_host = db_instance['Endpoint']['Address']
-        rds_port = db_instance['Endpoint']['Port']
-
         args = {"sslmode": "require"}
     else:
         args = {"sslmode": "prefer"}

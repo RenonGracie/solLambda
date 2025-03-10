@@ -33,6 +33,12 @@ provider:
   region: us-east-2
   architecture: x86_64
   timeout: 30
+  vpc:
+    securityGroupIds:
+      - !Ref LambdaSecurityGroup
+    subnetIds:
+      - !Ref PrivateSubnet1
+      - !Ref PrivateSubnet2
   iam:
     role:
       statements:
@@ -85,19 +91,78 @@ functions:
 
 resources:
   Resources:
-    RDSCluster:
+    AuroraVPC:
+      Type: "AWS::EC2::VPC"
+      Properties:
+        CidrBlock: "10.0.0.0/16"
+        EnableDnsSupport: true
+        EnableDnsHostnames: true
+        Tags:
+          - Key: "Name"
+            Value: "AuroraVPC"
+
+      PrivateSubnet1:
+        Type: "AWS::EC2::Subnet"
+        Properties:
+          VpcId: !Ref AuroraVPC
+          CidrBlock: "10.0.1.0/24"
+          AvailabilityZone: !Select [ 0, !GetAZs "" ]
+          MapPublicIpOnLaunch: false
+
+      PrivateSubnet2:
+        Type: "AWS::EC2::Subnet"
+        Properties:
+          VpcId: !Ref AuroraVPC
+          CidrBlock: "10.0.2.0/24"
+          AvailabilityZone: !Select [ 1, !GetAZs "" ]
+          MapPublicIpOnLaunch: false
+
+      DBSubnetGroup:
+        Type: "AWS::RDS::DBSubnetGroup"
+        Properties:
+          DBSubnetGroupDescription: "Subnet group for Aurora Serverless v2"
+          SubnetIds:
+            - !Ref PrivateSubnet1
+            - !Ref PrivateSubnet2
+
+      DBSecurityGroup:
+        Type: "AWS::EC2::SecurityGroup"
+        Properties:
+          GroupDescription: "Allow inbound access from Lambda to Aurora"
+          VpcId: !Ref AuroraVPC
+          SecurityGroupIngress:
+            - IpProtocol: "tcp"
+              FromPort: 5432
+              ToPort: 5432
+              SourceSecurityGroupId: !Ref LambdaSecurityGroup
+
+      LambdaSecurityGroup:
+        Type: "AWS::EC2::SecurityGroup"
+        Properties:
+          GroupDescription: "Security Group for Lambda functions"
+          VpcId: !Ref AuroraVPC
+
+    AuroraPostgresCluster:
       Type: 'AWS::RDS::DBCluster'
       Properties:
         MasterUsername: ${env:RDS_MASTER_USERNAME}
         MasterUserPassword: ${env:RDS_MASTER_PASSWORD}
         DatabaseName: ${env:RDS_NAME}
-        Engine: aurora-postgresql
         EngineMode: provisioned
         EnableHttpEndpoint: true
         ServerlessV2ScalingConfiguration:
           MinCapacity: 0
           MaxCapacity: 2
-          SecondsUntilAutoPause: 300
+          SecondsUntilAutoPause: 180
+
+    AuroraPostgresInstance:
+      Type: "AWS::RDS::DBInstance"
+      Properties:
+        DBClusterIdentifier: !Ref AuroraPostgresCluster
+        DBInstanceClass: "db.serverless"
+        Engine: "aurora-postgresql"
+        PubliclyAccessible: false
+
     GatewayResponseDefault4XX:
       Type: 'AWS::ApiGateway::GatewayResponse'
       Properties:
@@ -107,6 +172,11 @@ resources:
         ResponseType: DEFAULT_4XX
         RestApiId:
           Ref: 'ApiGatewayRestApi'
+
+  Outputs:
+    AuroraDBEndpoint:
+      Description: "Aurora PostgreSQL Serverless v2 Cluster Endpoint"
+      Value: !GetAtt AuroraPostgresCluster.Endpoint.Address
 
 plugins:
   - serverless-wsgi
