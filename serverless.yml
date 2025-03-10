@@ -46,6 +46,7 @@ provider:
         - Effect: Allow
           Action:
             - 'rds-data:*'
+            - 'rds:DescribeDBInstances'
           Resource:
             Fn::Join:
               - ''
