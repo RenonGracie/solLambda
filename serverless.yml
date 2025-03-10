@@ -79,7 +79,7 @@ resources:
         MasterUserPassword: ${env:RDS_MASTER_PASSWORD}
         DatabaseName: ${env:RDS_NAME}
         Engine: aurora-postgresql
-        EngineMode: serverless
+        EngineMode: provisioned
         EnableHttpEndpoint: false
         ScalingConfiguration:
           AutoPause: true

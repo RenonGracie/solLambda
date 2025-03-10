@@ -91,8 +91,9 @@ def with_calendar():
         try:
             insert_email_to_gcalendar(email)
             shared.append(email)
+            print("Added", email)
         except HttpError:
-            pass
+            print("Can't add", email)
     return jsonify({"emails": shared}), 200
 
 
