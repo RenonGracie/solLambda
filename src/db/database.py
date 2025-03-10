@@ -37,20 +37,24 @@ def get_db_url() -> (URL, dict):
     rds_port = settings.RDS_PORT
     rds_username = settings.RDS_USER
     database = settings.RDS_DATABASE
+    password = settings.RDS_PASSWORD
 
     if not rds_host:
         raise ValueError("RDS_HOST environment variable is not set")
 
     if settings.IS_AWS is True:
         region = "us-east-2"
-        client = boto3.client("dsql", region_name=region)
-        password = client.generate_db_connect_admin_auth_token(
-            Hostname=rds_host,
-            Region=region,
-        )
+        client = boto3.client("rds", region_name=region)
+        db_instance = client.describe_db_instances(
+            DBInstanceIdentifier=settings.DB_INSTANCE_IDENTIFIER
+        )['DBInstances'][0]
+        print(db_instance)
+        print(db_instance['Endpoint'])
+        rds_host = db_instance['Endpoint']['Address']
+        rds_port = db_instance['Endpoint']['Port']
+
         args = {"sslmode": "require"}
     else:
-        password = settings.RDS_PASSWORD
         args = {"sslmode": "prefer"}
 
     return URL.create(

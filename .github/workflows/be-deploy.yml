@@ -58,7 +58,7 @@ jobs:
           echo AIRTABLE_API_KEY=${{ secrets.AIRTABLE_API_KEY }} >> .env
           echo GOOGLE_CALENDAR_CREDENTIALS=${{ secrets.GOOGLE_CALENDAR_CREDENTIALS }} >> .env
           echo IS_AWS=true >> .env
-          echo RDS_HOST=${{ secrets.RDS_HOST }} >> .env
+          echo RDS_INSTANCE_IDENTIFIER=${{ secrets.RDS_INSTANCE_IDENTIFIER }} >> .env
           echo RDS_PORT=${{ secrets.RDS_PORT }} >> .env
           echo RDS_DATABASE=${{ secrets.RDS_DATABASE }} >> .env
           echo RDS_USER=${{ secrets.RDS_USER }} >> .env
