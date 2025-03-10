@@ -49,19 +49,6 @@ provider:
             - 's3:PutObject'
           Resource:
             - 'arn:aws:s3:::therapists-personal-data/*'
-        - Effect: Allow
-          Action:
-            - 'rds-data:*'
-            - 'rds:Describe*'
-          Resource:
-            Fn::Join:
-              - ''
-              - - 'arn:aws:rds:'
-                - ${aws:region}
-                - ':'
-                - ${aws:accountId}
-                - ':cluster:'
-                - Ref: RDSCluster
 
 package:
   exclude:
@@ -101,46 +88,46 @@ resources:
           - Key: "Name"
             Value: "AuroraVPC"
 
-      PrivateSubnet1:
-        Type: "AWS::EC2::Subnet"
-        Properties:
-          VpcId: !Ref AuroraVPC
-          CidrBlock: "10.0.1.0/24"
-          AvailabilityZone: !Select [ 0, !GetAZs "" ]
-          MapPublicIpOnLaunch: false
+    PrivateSubnet1:
+      Type: "AWS::EC2::Subnet"
+      Properties:
+        VpcId: !Ref AuroraVPC
+        CidrBlock: "10.0.1.0/24"
+        AvailabilityZone: !Select [ 0, !GetAZs "" ]
+        MapPublicIpOnLaunch: false
 
-      PrivateSubnet2:
-        Type: "AWS::EC2::Subnet"
-        Properties:
-          VpcId: !Ref AuroraVPC
-          CidrBlock: "10.0.2.0/24"
-          AvailabilityZone: !Select [ 1, !GetAZs "" ]
-          MapPublicIpOnLaunch: false
+    PrivateSubnet2:
+      Type: "AWS::EC2::Subnet"
+      Properties:
+        VpcId: !Ref AuroraVPC
+        CidrBlock: "10.0.2.0/24"
+        AvailabilityZone: !Select [ 1, !GetAZs "" ]
+        MapPublicIpOnLaunch: false
 
-      DBSubnetGroup:
-        Type: "AWS::RDS::DBSubnetGroup"
-        Properties:
-          DBSubnetGroupDescription: "Subnet group for Aurora Serverless v2"
-          SubnetIds:
-            - !Ref PrivateSubnet1
-            - !Ref PrivateSubnet2
+    DBSubnetGroup:
+      Type: "AWS::RDS::DBSubnetGroup"
+      Properties:
+        DBSubnetGroupDescription: "Subnet group for Aurora Serverless v2"
+        SubnetIds:
+          - !Ref PrivateSubnet1
+          - !Ref PrivateSubnet2
 
-      DBSecurityGroup:
-        Type: "AWS::EC2::SecurityGroup"
-        Properties:
-          GroupDescription: "Allow inbound access from Lambda to Aurora"
-          VpcId: !Ref AuroraVPC
-          SecurityGroupIngress:
-            - IpProtocol: "tcp"
-              FromPort: 5432
-              ToPort: 5432
-              SourceSecurityGroupId: !Ref LambdaSecurityGroup
+    DBSecurityGroup:
+      Type: "AWS::EC2::SecurityGroup"
+      Properties:
+        GroupDescription: "Allow inbound access from Lambda to Aurora"
+        VpcId: !Ref AuroraVPC
+        SecurityGroupIngress:
+          - IpProtocol: "tcp"
+            FromPort: 5432
+            ToPort: 5432
+            SourceSecurityGroupId: !Ref LambdaSecurityGroup
 
-      LambdaSecurityGroup:
-        Type: "AWS::EC2::SecurityGroup"
-        Properties:
-          GroupDescription: "Security Group for Lambda functions"
-          VpcId: !Ref AuroraVPC
+    LambdaSecurityGroup:
+      Type: "AWS::EC2::SecurityGroup"
+      Properties:
+        GroupDescription: "Security Group for Lambda functions"
+        VpcId: !Ref AuroraVPC
 
     AuroraPostgresCluster:
       Type: 'AWS::RDS::DBCluster'
