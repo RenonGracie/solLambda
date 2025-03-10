@@ -1,3 +1,5 @@
+import json
+
 import requests
 
 from src.models.api.clients import Client
@@ -24,7 +26,7 @@ def _intakeq_post(path: str, data: dict):
     return requests.post(
         url=settings.INTAKEQ_BASE_URL + path,
         headers={"X-Auth-Key": settings.INTAKEQ_AUTH_KEY},
-        data=data,
+        json=json.dumps(data),
     )
 
 
@@ -32,7 +34,7 @@ def _intakeq_put(path: str, data: dict):
     return requests.put(
         url=settings.INTAKEQ_BASE_URL + path,
         headers={"X-Auth-Key": settings.INTAKEQ_AUTH_KEY},
-        data=data,
+        json=json.dumps(data),
     )
 
 
@@ -94,7 +96,7 @@ def intakeq(data: dict):
                 "X-Auth-Key": settings.INTAKEQ_AUTH_KEY,
                 "Content-type": "application/json",
             },
-            data=data,
+            json=json.dumps(data),
             timeout=1,
         )
     except requests.exceptions.ReadTimeout:
@@ -107,5 +109,5 @@ def sent_analytics_event(data: dict):
         headers={
             "Content-type": "application/json",
         },
-        data=data,
+        json=json.dumps(data),
     )
