@@ -9,7 +9,7 @@ on:
   push:
     branches:
       - dev
-#      - stg
+      - stg
 
 jobs:
   deploy:
