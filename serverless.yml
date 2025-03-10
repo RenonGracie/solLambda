@@ -83,7 +83,7 @@ resources:
         EnableHttpEndpoint: false
         ScalingConfiguration:
           AutoPause: true
-          MaxCapacity: 0.5
+          MaxCapacity: 1
           MinCapacity: 2
           SecondsUntilAutoPause: 300
     GatewayResponseDefault4XX:
