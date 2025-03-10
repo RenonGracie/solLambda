@@ -24,7 +24,7 @@ class Settings(Singleton):
         self.RDS_USER = os.getenv("RDS_USER")
         self.RDS_PASSWORD = os.getenv("RDS_PASSWORD")
         self.RDS_DATABASE = os.getenv("RDS_DATABASE")
-        self.DB_INSTANCE_IDENTIFIER = os.getenv("DB_INSTANCE_IDENTIFIER")
+        self.RDS_INSTANCE_IDENTIFIER = os.getenv("RDS_INSTANCE_IDENTIFIER")
 
         self.TEST_THERAPIST_EMAIL = os.getenv("TEST_THERAPIST_EMAIL")
         self.IS_AWS = os.getenv("IS_AWS", "false").lower() == "true"
