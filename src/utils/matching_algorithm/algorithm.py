@@ -8,9 +8,11 @@ def calculate_match_score(
     data: ClientSignup, therapist: Therapist
 ) -> (int, list, list):
     # Hard factor #1
-    if not therapist.states or data.state.lower() not in [
-        state.lower() for state in therapist.states
-    ]:
+    if (
+        not therapist.states
+        or not data.state
+        or data.state.lower() not in [state.lower() for state in therapist.states]
+    ):
         return -1, [], []
 
     # Hard factor #2

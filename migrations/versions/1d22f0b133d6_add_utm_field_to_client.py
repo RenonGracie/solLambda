@@ -21,10 +21,10 @@ depends_on: Union[str, Sequence[str], None] = None
 
 def upgrade():
     inspector = inspect(op.get_bind())
-    columns = inspector.get_columns('clients')
-    column_names = [column['name'] for column in columns]
+    columns = inspector.get_columns("clients")
+    column_names = [column["name"] for column in columns]
 
-    if 'utm_params' not in column_names:
+    if "utm_params" not in column_names:
         op.add_column("clients", sa.Column("utm_params", sa.Text, nullable=True))
 
 
