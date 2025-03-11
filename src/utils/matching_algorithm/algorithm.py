@@ -103,8 +103,12 @@ def calculate_match_score(
             and therapist.places.lower().__contains__("many places")
         ):
             score += 2
+        if lived_experience.lower().__contains__("have children") and (
+            therapist.has_children
+        ):
+            score += 2
         if lived_experience.lower().__contains__("caretaker role") and (
-            therapist.married or therapist.has_children
+            therapist.caretaker_role
         ):
             score += 2
         if lived_experience.__contains__("as LGBTQ+") and therapist.lgbtq_part:

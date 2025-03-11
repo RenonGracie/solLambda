@@ -72,7 +72,7 @@ def process_appointment(db, data: dict):
             _update_appointment(db, therapist_model, appointment)
         case "AppointmentDeleted":
             _delete_appointment(db, appointment)
-    
+
     if client:
         send_ga_event(
             database=db,

@@ -14,7 +14,10 @@ class TypeformIds:
 
     I_WOULD_LIKE_THERAPIST_SPECIALIZES = "n3S63NHiJbeJ"
     I_WOULD_LIKE_THERAPIST_IDENTIFIES = "9MPRbZZPOYb7"
-    LIVED_EXPERIENCES = "cubaKBWqjmOu"
+
+    LIVED_EXPERIENCES_FAMILY = "cubaKBWqjmOu"
+    LIVED_EXPERIENCES_UPBRINGING = "lKYkOMvfdoJp"
+    LIVED_EXPERIENCES_IDENTITY = "ZPnvagZiFsxm"
 
     ALCOHOL = "x1gIHnYJItDd"
     DRUGS = "nH69SitRHMj1"
@@ -38,6 +41,16 @@ class TypeformIds:
     FEELING_AFRAID = "79jEf0ZznNTa"
 
     PROMO_CODE = "ZHpfkvOOrSyQ"
+
+
+def _value_to_list(value):
+    if isinstance(value, str):
+        if value:
+            return [value]
+        else:
+            return []
+    else:
+        return value
 
 
 class TypeformData:
@@ -64,26 +77,41 @@ class TypeformData:
 
     @property
     def i_would_like_therapist(self):
-        specializes = self.get_value(TypeformIds.I_WOULD_LIKE_THERAPIST_SPECIALIZES)
-        identifies = self.get_value(TypeformIds.I_WOULD_LIKE_THERAPIST_IDENTIFIES)
-        if specializes is None:
-            specializes = []
-        if identifies is None:
-            identifies = []
+        specializes_value = self.get_value(
+            TypeformIds.I_WOULD_LIKE_THERAPIST_SPECIALIZES, auto_join=False
+        )
+        identifies_value = self.get_value(
+            TypeformIds.I_WOULD_LIKE_THERAPIST_IDENTIFIES, auto_join=False
+        )
 
-        if isinstance(specializes, str) and isinstance(identifies, str):
-            return f"{specializes}, {identifies.replace('Male', 'Is male').replace('Female', 'Is female')}"
-        else:
-            if isinstance(specializes, str):
-                specializes = [specializes]
-            if isinstance(identifies, str):
-                identifies = [identifies]
-            return specializes + list(
-                map(
-                    lambda gender: f"Is {gender.lower()}",
-                    identifies,
-                )
+        value = _value_to_list(specializes_value) + list(
+            map(
+                lambda gender: gender.replace("Male", "Is male").replace(
+                    "Female", "Is female"
+                ),
+                _value_to_list(identifies_value),
             )
+        )
+        return ", ".join(value) if self._use_join and isinstance(value, list) else value
+
+    @property
+    def lived_experiences(self):
+        family_value = self.get_value(
+            TypeformIds.LIVED_EXPERIENCES_FAMILY, auto_join=False
+        )
+        upbringing_value = self.get_value(
+            TypeformIds.LIVED_EXPERIENCES_UPBRINGING, auto_join=False
+        )
+        identity_value = self.get_value(
+            TypeformIds.LIVED_EXPERIENCES_IDENTITY, auto_join=False
+        )
+
+        value = (
+            _value_to_list(family_value)
+            + _value_to_list(upbringing_value)
+            + _value_to_list(identity_value)
+        )
+        return ", ".join(value) if self._use_join and isinstance(value, list) else value
 
     @staticmethod
     def _get_value_from_typeform(data: dict):
@@ -101,9 +129,10 @@ class TypeformData:
             case _:
                 return data.get("answer")
 
-    def get_value(self, field_name: str):
+    def get_value(self, field_name: str, auto_join: bool | None = None):
+        join = auto_join if auto_join is not None else self._use_join
         answer = self._data.get(field_name)
         if not answer:
             return ""
         value = self._get_value_from_typeform(self._data.get(field_name))
-        return ", ".join(value) if self._use_join and isinstance(value, list) else value
+        return ", ".join(value) if join and isinstance(value, list) else value

@@ -40,7 +40,7 @@ def process_typeform_data(db, response_json: dict, base_url: str):
         create_user_on_intakeq = True
     else:
         if not form.first_name.__eq__(data.first_name) or not form.last_name.__eq__(
-                data.last_name
+            data.last_name
         ):
             create_user_on_intakeq = False
         form = update_from_typeform_data(response_id, form, data)

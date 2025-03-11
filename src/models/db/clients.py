@@ -185,7 +185,7 @@ def update_from_typeform_data(
     client.lived_experiences = list(
         map(
             lambda text: emoji.replace_emoji(text),
-            data.get_value(TypeformIds.LIVED_EXPERIENCES),
+            data.lived_experiences,
         )
     )
 
