@@ -93,7 +93,6 @@ def _send_event(
         {
             "client_id": client_id,
             "user_id": user_id,
-            "timestamp_micros": int(now.timestamp() * 1000),
             "events": [{"name": name, "params": params}],
         }
     )
