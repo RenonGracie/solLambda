@@ -164,11 +164,6 @@ resources:
         RestApiId:
           Ref: 'ApiGatewayRestApi'
 
-  Outputs:
-    AuroraDBEndpoint:
-      Description: "Aurora PostgreSQL Serverless v2 Cluster Endpoint"
-      Value: !GetAtt AuroraPostgresCluster.Endpoint.Address
-
 plugins:
   - serverless-wsgi
   - serverless-python-requirements
