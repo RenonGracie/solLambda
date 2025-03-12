@@ -17,7 +17,8 @@ def calculate_match_score(
 
     # Hard factor #2
     if therapist.gender and (
-        (
+        data.i_would_like_therapist.__contains__("No preferences")
+        or (
             data.i_would_like_therapist.__contains__("Is male")
             and str(therapist.gender).lower().__eq__("male")
         )

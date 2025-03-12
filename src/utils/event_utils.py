@@ -1,5 +1,3 @@
-from datetime import datetime
-
 from sqlalchemy import and_
 from sqlalchemy.orm import Session
 
@@ -37,8 +35,6 @@ def _send_event(
     utm_term: str | None = None,
     clid: str | None = None,
 ):
-    now = datetime.now()
-
     if params is None:
         params = {}
 
