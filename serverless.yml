@@ -49,6 +49,10 @@ provider:
             - 's3:PutObject'
           Resource:
             - 'arn:aws:s3:::therapists-personal-data/*'
+        - Effect: Allow
+          Action:
+            - 'rds-db:connect'
+          Resource: !Ref AuroraRDSProxy
 
 package:
   exclude:
@@ -78,6 +82,7 @@ functions:
 
 resources:
   Resources:
+    ## 1. Create VPC
     AuroraVPC:
       Type: "AWS::EC2::VPC"
       Properties:
@@ -88,6 +93,7 @@ resources:
           - Key: "Name"
             Value: "AuroraVPC"
 
+    ## 2. Create private Subnet
     PrivateSubnet1:
       Type: "AWS::EC2::Subnet"
       Properties:
@@ -104,6 +110,7 @@ resources:
         AvailabilityZone: !Select [ 1, !GetAZs "" ]
         MapPublicIpOnLaunch: false
 
+    ## 3. Subnet Group for RDS
     DBSubnetGroup:
       Type: "AWS::RDS::DBSubnetGroup"
       Properties:
@@ -112,6 +119,7 @@ resources:
           - !Ref PrivateSubnet1
           - !Ref PrivateSubnet2
 
+    ## 4. Security Group for rds (only for Lambda)
     DBSecurityGroup:
       Type: "AWS::EC2::SecurityGroup"
       Properties:
@@ -123,36 +131,82 @@ resources:
             ToPort: 5432
             SourceSecurityGroupId: !Ref LambdaSecurityGroup
 
+    ## 5. Security Group for Lambda
     LambdaSecurityGroup:
       Type: "AWS::EC2::SecurityGroup"
       Properties:
         GroupDescription: "Security Group for Lambda functions"
         VpcId: !Ref AuroraVPC
 
+    ## 6. Aurora Serverless v2 Cluster
     AuroraPostgresCluster:
       Type: 'AWS::RDS::DBCluster'
       Properties:
         MasterUsername: ${env:RDS_MASTER_USERNAME}
         MasterUserPassword: ${env:RDS_MASTER_PASSWORD}
         DatabaseName: ${env:RDS_NAME}
-        EngineMode: provisioned
-        EnableHttpEndpoint: true
-        Engine: "aurora-postgresql"
+        Engine: aurora-postgresql
+        EngineMode: serverless
         DBSubnetGroupName: !Ref DBSubnetGroup
         VpcSecurityGroupIds:
           - !Ref DBSecurityGroup
         ServerlessV2ScalingConfiguration:
           MinCapacity: 0
           MaxCapacity: 2
-          SecondsUntilAutoPause: 300
+          SecondsUntilAutoPause: 180
 
-    AuroraPostgresInstance:
-      Type: "AWS::RDS::DBInstance"
+    ## 7. RDS Proxy for Aurora
+    AuroraRDSProxy:
+      Type: "AWS::RDS::DBProxy"
       Properties:
-        DBClusterIdentifier: !Ref AuroraPostgresCluster
-        DBInstanceClass: "db.serverless"
-        Engine: "aurora-postgresql"
-        PubliclyAccessible: false
+        DBProxyName: "aurora-rds-proxy"
+        EngineFamily: "POSTGRESQL"
+        RoleArn: !GetAtt RDSProxyRole.Arn
+        Auth:
+          - AuthScheme: "SECRETS"
+            SecretArn: !Ref RDSSecret
+            IAMAuth: DISABLED
+        VpcSecurityGroupIds:
+          - !Ref DBSecurityGroup
+        VpcSubnetIds:
+          - !Ref PrivateSubnet1
+          - !Ref PrivateSubnet2
+        RequireTLS: true
+
+    ## 8. Secrets Manager for RDS Proxy
+    RDSSecret:
+      Type: "AWS::SecretsManager::Secret"
+      Properties:
+        Name: "AuroraRDSProxySecret"
+        Description: "Credentials for Aurora RDS Proxy"
+        SecretString: !Sub |
+          {
+            "username": "${env:RDS_MASTER_USERNAME}",
+            "password": "${env:RDS_MASTER_PASSWORD}"
+          }
+
+    ## 8. IAM-role for RDS Proxy
+    RDSProxyRole:
+      Type: "AWS::IAM::Role"
+      Properties:
+        AssumeRolePolicyDocument:
+          Version: "2012-10-17"
+          Statement:
+            - Effect: "Allow"
+              Principal:
+                Service: "rds.amazonaws.com"
+              Action: "sts:AssumeRole"
+        Policies:
+          - PolicyName: "RDSProxyAccess"
+            PolicyDocument:
+              Version: "2012-10-17"
+              Statement:
+                - Effect: "Allow"
+                  Action:
+                    - "rds-db:connect"
+                  Resource:
+                    - !Ref AuroraRDSProxy
+                    - !Ref AuroraPostgresCluster
 
     GatewayResponseDefault4XX:
       Type: 'AWS::ApiGateway::GatewayResponse'
@@ -163,6 +217,11 @@ resources:
         ResponseType: DEFAULT_4XX
         RestApiId:
           Ref: 'ApiGatewayRestApi'
+
+  Outputs:
+    RDSProxyEndpoint:
+      Description: "RDS Proxy Endpoint"
+      Value: !GetAtt AuroraRDSProxy.Endpoint
 
 plugins:
   - serverless-wsgi
