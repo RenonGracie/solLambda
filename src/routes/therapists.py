@@ -15,6 +15,7 @@ from src.models.api.therapists import Therapists, Therapist
 from src.utils.google_calendar import (
     get_events_from_gcalendar,
     insert_email_to_gcalendar,
+    gcalendar_list,
 )
 from src.utils.matching_algorithm.match import match_client_with_therapists
 from src.utils.settings import settings
@@ -87,13 +88,20 @@ def with_calendar():
         )
     )
     shared = []
+    errors = []
+    items = gcalendar_list()  ##nhi.vo@columbia.edu
+    items = {item["id"] for item in items}
     for email in emails:
-        try:
-            insert_email_to_gcalendar(email)
-            shared.append(email)
-        except HttpError:
-            pass
-    return jsonify({"emails": shared}), 200
+        if items.__contains__(email) is False:
+            try:
+                insert_email_to_gcalendar(email)
+                shared.append(email)
+                print("Email added", email)
+            except HttpError as e:
+                print("Email error", email, e)
+                errors.append({"email": email, "error": str(e)})
+                pass
+    return jsonify({"emails": list(items) + shared, "errors": errors}), 200
 
 
 @therapist_api.post(
