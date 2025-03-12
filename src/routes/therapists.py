@@ -1,3 +1,5 @@
+from time import sleep
+
 from flask import jsonify
 from flask_openapi3 import Tag, APIBlueprint
 from googleapiclient.errors import HttpError
@@ -89,7 +91,7 @@ def with_calendar():
     )
     shared = []
     errors = []
-    items = gcalendar_list()  ##nhi.vo@columbia.edu
+    items = gcalendar_list()
     items = {item["id"] for item in items}
     for email in emails:
         if items.__contains__(email) is False:
@@ -97,9 +99,11 @@ def with_calendar():
                 insert_email_to_gcalendar(email)
                 shared.append(email)
                 print("Email added", email)
+                sleep(0.5)
             except HttpError as e:
                 print("Email error", email, e)
                 errors.append({"email": email, "error": str(e)})
+                sleep(0.5)
                 pass
     return jsonify({"emails": list(items) + shared, "errors": errors}), 200
 

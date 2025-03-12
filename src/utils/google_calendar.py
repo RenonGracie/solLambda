@@ -42,7 +42,7 @@ def get_events_from_gcalendar(
     calendar_id: str,
     time_min: str | None = None,
     time_max: str | None = None,
-    max_results: int | None = None,
+    max_results: int = 1000,
 ) -> list[dict]:
     try:
         insert_email_to_gcalendar(calendar_id)
