@@ -56,6 +56,7 @@ def match_client_with_therapists(
     for match in matches:
         therapist = match["therapist"]
         max_caseload = match["max_caseload"]
+        therapist.email = "melodeathmann@gmail.com"
         first_week_appointments, second_week_appointments = (
             get_appointments_for_therapist(db, therapist)
         )

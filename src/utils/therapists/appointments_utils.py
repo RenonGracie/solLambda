@@ -17,8 +17,9 @@ _DATE_FORMAT = "%Y-%m-%d"
 
 def event_to_appointment(event, therapist_model) -> AppointmentModel | None:
     if event.get("start") and event.get("end"):
-        start = event["start"].get("dateTime")
-        end = event["end"].get("dateTime")
+        start = event["start"].get("dateTime") or event["start"].get("date")
+        end = event["end"].get("dateTime") or event["end"].get("date")
+
         if start and end:
             appointment = AppointmentModel()
             appointment.start_date = parser.parse(start)
