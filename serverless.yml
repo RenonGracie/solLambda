@@ -63,28 +63,28 @@ package:
     - tests/**
     - .ruff_cache/**
 
-functions:
-  api:
-    handler: wsgi_handler.handler
-    events:
-      - http:
-          path: /
-          method: ANY
-          cors: true
-      - http:
-          path: /{proxy+}
-          method: ANY
-          cors: true
-    dependsOn:
-      - AuroraRDSProxy
-      - RDSProxyRole
-  migrate:
-    handler: migrate.handler
-    timeout: 15
-    role: !GetAtt LambdaExecutionRole.Arn
-    dependsOn:
-      - AuroraRDSProxy
-      - RDSProxyRole
+#functions:
+#  api:
+#    handler: wsgi_handler.handler
+#    events:
+#      - http:
+#          path: /
+#          method: ANY
+#          cors: true
+#      - http:
+#          path: /{proxy+}
+#          method: ANY
+#          cors: true
+#    dependsOn:
+#      - AuroraRDSProxy
+#      - RDSProxyRole
+#  migrate:
+#    handler: migrate.handler
+#    timeout: 15
+#    role: !GetAtt LambdaExecutionRole.Arn
+#    dependsOn:
+#      - AuroraRDSProxy
+#      - RDSProxyRole
 
 
 resources:
