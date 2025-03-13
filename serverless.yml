@@ -75,6 +75,9 @@ functions:
           path: /{proxy+}
           method: ANY
           cors: true
+    dependsOn:
+      - AuroraRDSProxy
+      - RDSProxyRole
   migrate:
     handler: migrate.handler
     timeout: 15
