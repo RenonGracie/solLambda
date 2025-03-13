@@ -78,6 +78,7 @@ functions:
   migrate:
     handler: migrate.handler
     timeout: 15
+    role: !GetAtt LambdaExecutionRole.Arn
 
 
 resources:
@@ -185,7 +186,7 @@ resources:
             "password": "${env:RDS_MASTER_PASSWORD}"
           }
 
-    ## 8. IAM-role for RDS Proxy
+    ## 9. IAM-role for RDS Proxy
     RDSProxyRole:
       Type: "AWS::IAM::Role"
       Properties:
@@ -207,6 +208,27 @@ resources:
                   Resource:
                     - !Ref AuroraRDSProxy
                     - !Ref AuroraPostgresCluster
+
+    ## 10. IAM Role for Lambda (разделяем IAM)
+    LambdaExecutionRole:
+      Type: "AWS::IAM::Role"
+      Properties:
+        AssumeRolePolicyDocument:
+          Version: "2012-10-17"
+          Statement:
+            - Effect: "Allow"
+              Principal:
+                Service: "lambda.amazonaws.com"
+              Action: "sts:AssumeRole"
+        Policies:
+          - PolicyName: "LambdaAccess"
+            PolicyDocument:
+              Version: "2012-10-17"
+              Statement:
+                - Effect: "Allow"
+                  Action:
+                    - "rds-db:connect"
+                  Resource: !Ref AuroraRDSProxy
 
     GatewayResponseDefault4XX:
       Type: 'AWS::ApiGateway::GatewayResponse'
