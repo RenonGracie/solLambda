@@ -79,6 +79,9 @@ functions:
     handler: migrate.handler
     timeout: 15
     role: !GetAtt LambdaExecutionRole.Arn
+    dependsOn:
+      - AuroraRDSProxy
+      - RDSProxyRole
 
 
 resources:
