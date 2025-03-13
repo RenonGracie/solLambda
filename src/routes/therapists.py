@@ -1,3 +1,5 @@
+from time import sleep
+
 from flask import jsonify
 from flask_openapi3 import Tag, APIBlueprint
 from googleapiclient.errors import HttpError
@@ -15,6 +17,7 @@ from src.models.api.therapists import Therapists, Therapist
 from src.utils.google_calendar import (
     get_events_from_gcalendar,
     insert_email_to_gcalendar,
+    gcalendar_list,
 )
 from src.utils.matching_algorithm.match import match_client_with_therapists
 from src.utils.settings import settings
@@ -87,14 +90,22 @@ def with_calendar():
         )
     )
     shared = []
+    errors = []
+    items = gcalendar_list()
+    items = {item["id"] for item in items}
     for email in emails:
-        try:
-            insert_email_to_gcalendar(email)
-            shared.append(email)
-            print("Added", email)
-        except HttpError:
-            print("Can't add", email)
-    return jsonify({"emails": shared}), 200
+        if items.__contains__(email) is False:
+            try:
+                insert_email_to_gcalendar(email)
+                shared.append(email)
+                print("Email added", email)
+                sleep(0.5)
+            except HttpError as e:
+                print("Email error", email, e)
+                errors.append({"email": email, "error": str(e)})
+                sleep(0.5)
+                pass
+    return jsonify({"emails": list(items) + shared, "errors": errors}), 200
 
 
 @therapist_api.post(

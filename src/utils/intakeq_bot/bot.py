@@ -54,7 +54,10 @@ def create_new_form(data: TypeformData) -> list:
         "---",  # 45 BEST_TIME_FIRST_SESSION
         "",  # 46
         "",  # 47
-        data.get_value(TypeformIds.LIVED_EXPERIENCES),  # 48
+        str(data.lived_experiences).replace(
+            "🏡 Raised in a non-traditional family",
+            "🏡 Grew up in a non-traditional family (e.g. single or divorced parents or foster family)",
+        ),  # 48
     ]
 
 

@@ -33,23 +33,24 @@ def process_typeform_data(db, response_json: dict, base_url: str):
 
     response_id = response_json["form_response"]["token"]
     form = db.query(ClientSignup).filter_by(email=data.email).first()
-    create_user_on_intakeq = True
+    create_user_on_intakeq = None
     if not form:
         form = create_from_typeform_data(response_id, data)
         db.add(form)
         create_user_on_intakeq = True
     else:
-        form = update_from_typeform_data(response_id, form, data)
         if not form.first_name.__eq__(data.first_name) or not form.last_name.__eq__(
             data.last_name
         ):
             create_user_on_intakeq = False
+        form = update_from_typeform_data(response_id, form, data)
 
     if create_user_on_intakeq is not None:
         if create_user_on_intakeq:
-            client_id = f"{random.randint(100, 1000)}.{random.randint(100, 1000)}"
+            client_id = f"{random.randint(1000, 9999)}.{random.randint(1000, 9999)}"
             response = save_update_client(create_client_model(data))
-            user_id = response.json()["Id"]
+            client_json = response.json()
+            user_id = client_json.get("Id") or client_json.get("ClientId")
             session_id = str(uuid.uuid4())
             form.utm = {
                 "client_id": client_id,

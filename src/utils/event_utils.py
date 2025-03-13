@@ -1,5 +1,3 @@
-from datetime import datetime
-
 from sqlalchemy import and_
 from sqlalchemy.orm import Session
 
@@ -37,8 +35,6 @@ def _send_event(
     utm_term: str | None = None,
     clid: str | None = None,
 ):
-    now = datetime.now()
-
     if params is None:
         params = {}
 
@@ -68,8 +64,8 @@ def _send_event(
 
     db.add(event)
 
-    if type:
-        params["type"] = type
+    if event_type:
+        params["type"] = event_type
     if session_id:
         params["session_id"] = session_id
     if utm_source:
@@ -93,7 +89,6 @@ def _send_event(
         {
             "client_id": client_id,
             "user_id": user_id,
-            "timestamp_micros": int(now.timestamp() * 1000),
             "events": [{"name": name, "params": params}],
         }
     )

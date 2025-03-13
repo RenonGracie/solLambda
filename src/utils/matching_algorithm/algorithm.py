@@ -8,14 +8,17 @@ def calculate_match_score(
     data: ClientSignup, therapist: Therapist
 ) -> (int, list, list):
     # Hard factor #1
-    if not therapist.states or data.state.lower() not in [
-        state.lower() for state in therapist.states
-    ]:
+    if (
+        not therapist.states
+        or not data.state
+        or data.state.lower() not in [state.lower() for state in therapist.states]
+    ):
         return -1, [], []
 
     # Hard factor #2
     if therapist.gender and (
-        (
+        data.i_would_like_therapist.__contains__("No preference")
+        or (
             data.i_would_like_therapist.__contains__("Is male")
             and str(therapist.gender).lower().__eq__("male")
         )
@@ -103,8 +106,12 @@ def calculate_match_score(
             and therapist.places.lower().__contains__("many places")
         ):
             score += 2
+        if lived_experience.lower().__contains__("have children") and (
+            therapist.has_children
+        ):
+            score += 2
         if lived_experience.lower().__contains__("caretaker role") and (
-            therapist.married or therapist.has_children
+            therapist.caretaker_role
         ):
             score += 2
         if lived_experience.__contains__("as LGBTQ+") and therapist.lgbtq_part:

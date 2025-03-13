@@ -1,7 +1,7 @@
 import json
 from uuid import uuid4
 
-from sqlalchemy import Column, String, DateTime, Text
+from sqlalchemy import Column, String, DateTime, Text, Boolean
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 
@@ -14,6 +14,8 @@ class TherapistModel(Base):
     id = Column("id", UUID, primary_key=True, default=uuid4)
     name = Column("name", Text)
     email = Column("email", Text, unique=True)
+
+    calendar_fetched = Column("calendar_fetched", Boolean, default=False)
 
 
 class AppointmentModel(Base):

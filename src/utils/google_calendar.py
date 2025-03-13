@@ -23,11 +23,26 @@ def insert_email_to_gcalendar(calendar_id: str) -> None:
     _service.calendarList().insert(body={"id": calendar_id}).execute()
 
 
+def gcalendar_list():
+    try:
+        page_token = None
+        data = []
+        while True:
+            calendars = _service.calendarList().list(pageToken=page_token).execute()
+            data += calendars["items"]
+            page_token = calendars.get("nextPageToken")
+            if not page_token:
+                break
+        return data
+    except HttpError:
+        return []
+
+
 def get_events_from_gcalendar(
     calendar_id: str,
     time_min: str | None = None,
     time_max: str | None = None,
-    max_results: int | None = None,
+    max_results: int = 1000,
 ) -> list[dict]:
     try:
         insert_email_to_gcalendar(calendar_id)
@@ -50,5 +65,6 @@ def get_events_from_gcalendar(
             if not page_token:
                 break
         return data
-    except HttpError:
+    except HttpError as e:
+        print("Fetch calendar error", calendar_id, str(e))
         return []

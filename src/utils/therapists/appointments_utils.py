@@ -84,7 +84,7 @@ def get_appointments_for_therapist(
     therapist_model, exists = _get_therapist_model(
         db, therapist.intern_name, therapist.email
     )
-    if exists:
+    if exists and therapist_model.calendar_fetched is True:
         appointments = (
             db.query(AppointmentModel)
             .filter_by(therapist_id=therapist_model.id)
@@ -109,6 +109,8 @@ def get_appointments_for_therapist(
         else therapist.email,
         time_min=f"{now_str}T00:00:00-00:00",
     )
+    therapist_model.calendar_fetched = len(events) > 0
+
     for event in events:
         appointment = event_to_appointment(event, therapist_model)
         if appointment:
