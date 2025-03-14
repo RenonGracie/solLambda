@@ -71,6 +71,39 @@ jobs:
           echo TEST_GREETINGS_VIDEO=${{ vars.TEST_GREETINGS_VIDEO }} >> .env
           cat .env
 
+      - name: Generate Python class from JSON
+        env:
+          TYPEFORM_IDS: ${{ vars.TYPEFORM_IDS }}
+        run: |
+          echo "Generating Python class..."
+      
+          # Creating Python-script for class generation
+          cat <<EOF > generate_class.py
+          import json
+          import os
+      
+          # Static class generation
+          json_data = '''$TYPEFORM_IDS'''
+          data = json.loads(json_data)
+      
+          class_content = "class TypeformIds:\\n"
+          for key, value in data.items():
+              class_content += f"    {key.upper()} = \\"{value}\\"\\n"
+      
+          # Creating dir, if if doesn't exist
+          os.makedirs("src/utils/typeform", exist_ok=True)
+      
+          # Saving class to file
+          with open("src/utils/typeform/typeform_ids.py", "w") as f:
+              f.write(class_content)
+          EOF
+      
+          # Running script
+          python generate_class.py
+      
+          # Checking
+          cat src/utils/typeform/typeform_ids.py
+
       - name: Install uv
         uses: astral-sh/setup-uv@v5
 

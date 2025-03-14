@@ -1,46 +1,4 @@
-class TypeformIds:
-    FIRST_NAME = "ZpNE6gPlqimL"
-    LAST_NAME = "i6Vq0HOOoCFA"
-    PHONE = "O2RRFNhyN0ki"
-    EMAIL = "2rcVFVb8w9LK"
-
-    GENDER = "enJruAtdreAz"
-
-    AGE = "YU4dLIkFJG4T"
-
-    UNIVERSITY = "i8SZCoPAlFlc"
-
-    STATE = "4LLiLAhMSw1x"
-
-    I_WOULD_LIKE_THERAPIST_SPECIALIZES = "n3S63NHiJbeJ"
-    I_WOULD_LIKE_THERAPIST_IDENTIFIES = "9MPRbZZPOYb7"
-
-    LIVED_EXPERIENCES_FAMILY = "cubaKBWqjmOu"
-    LIVED_EXPERIENCES_UPBRINGING = "lKYkOMvfdoJp"
-    LIVED_EXPERIENCES_IDENTITY = "ZPnvagZiFsxm"
-
-    ALCOHOL = "x1gIHnYJItDd"
-    DRUGS = "nH69SitRHMj1"
-
-    PLEASURE_DOING_THINGS = "nyrbO2sbPxpM"
-    FEELING_DOWN = "p6Ru9DWpDGQA"
-    TROUBLE_FALLING = "qZOAuSGkzZJa"
-    FEELING_TIRED = "GFz6NgYEsaON"
-    POOR_APPETITE = "rXcqXMa2zvZ3"
-    FEELING_BAD_ABOUT_YOURSELF = "ZvZWiv2rhyUG"
-    TROUBLE_CONCENTRATING = "fYW5AClinzxf"
-    MOVING_OR_SPEAKING_SO_SLOWLY = "qFEJeO59PQNa"
-    SUICIDAL_THOUGHTS = "6s24QQNgk4RB"
-
-    FEELING_NERVOUS = "WzwDGj9h5zSb"
-    NOT_CONTROL_WORRYING = "7Uu6sezExQWc"
-    WORRYING_TOO_MUCH = "wMZ1xHx3hO9Q"
-    TROUBLE_RELAXING = "EzWLlvgbKOMH"
-    BEING_SO_RESTLESS = "nOLsTJkvKSeO"
-    EASILY_ANNOYED = "AynrL5fyp8Vg"
-    FEELING_AFRAID = "79jEf0ZznNTa"
-
-    PROMO_CODE = "ZHpfkvOOrSyQ"
+from src.utils.typeform.typeform_ids import TypeformIds
 
 
 def _value_to_list(value):
