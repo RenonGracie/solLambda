@@ -122,9 +122,9 @@ def new_appointment(body: CreateAppointment):
             "ClientId": client["ClientNumber"],
             "LocationId": "1",
             "UtcDateTime": int(parser.parse(body.datetime).timestamp() * 1000),
-            "ServiceId": "2a8e50df-b874-430d-9499-eb4b4451249c"
+            "ServiceId": "e818ad3d-5758-4a7d-a1f9-657af8ac4dc8"
             if form.promo_code and len(form.promo_code) > 1
-            else "df82b0de-5f6f-4dfa-a3d1-02faf691551c",
+            else "099e964f-c444-4c68-9668-00f734b95afd",
             "SendClientEmailNotification": body.send_client_email_notification,
             "ReminderType": body.reminder_type if body.reminder_type else "Email",
             "Status": body.status,

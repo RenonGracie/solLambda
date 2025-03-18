@@ -85,6 +85,7 @@ def get_appointments_for_therapist(
     therapist_model, exists = _get_therapist_model(
         db, therapist.intern_name, therapist.email
     )
+    therapist_model.calendar_email = therapist.calendar_email
     if exists and therapist_model.calendar_fetched is True:
         appointments = (
             db.query(AppointmentModel)
@@ -107,7 +108,7 @@ def get_appointments_for_therapist(
     events = get_events_from_gcalendar(
         calendar_id=settings.TEST_THERAPIST_EMAIL
         if settings.TEST_THERAPIST_EMAIL
-        else therapist.email,
+        else therapist.calendar_email or therapist.email,
         time_min=f"{now_str}T00:00:00-00:00",
     )
     therapist_model.calendar_fetched = len(events) > 0

@@ -50,8 +50,8 @@ def calculate_match_score(
         return -1, [], []
 
     score = 0
-    matched_diagnoses = []
-    matched_specialities = []
+    matched_diagnoses = set()
+    matched_specialities = set()
 
     # Soft factor #1
     for preference in data.i_would_like_therapist:
@@ -59,13 +59,13 @@ def calculate_match_score(
             for diagnose in therapist.diagnoses:
                 if fuzz.partial_token_set_ratio(preference, diagnose) > 80:
                     score += 3
-                    matched_diagnoses.append(diagnose)
+                    matched_diagnoses.add(diagnose)
         if therapist.specialities:
             for speciality in therapist.specialities:
                 print()
                 if fuzz.partial_token_set_ratio(preference, speciality) > 80:
                     score += 3
-                    matched_specialities.append(speciality)
+                    matched_specialities.add(speciality)
         if therapist.therapeutic_orientation:
             for therapeutic_orientation in therapist.therapeutic_orientation:
                 if (
@@ -122,4 +122,4 @@ def calculate_match_score(
         ):
             score += 2
 
-    return score, matched_diagnoses, matched_specialities
+    return score, list(matched_diagnoses), list(matched_specialities)

@@ -26,7 +26,11 @@ def main():
 
     data = []
     for value in table.all():
-        email = value["fields"].get("Email") or value["fields"].get("Notes")
+        email = (
+            value["fields"].get("Calendar")
+            or value["fields"].get("Email")
+            or value["fields"].get("Notes")
+        )
         print("Working on", email)
         if email:
             events = get_events_from_gcalendar(email, time_min=now_str)

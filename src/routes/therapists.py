@@ -84,7 +84,8 @@ def get_video_link(query: MediaQuery):
 def with_calendar():
     emails = list(
         map(
-            lambda therapist: therapist["fields"].get("Email")
+            lambda therapist: therapist["fields"].get("Calendar")
+            or therapist["fields"].get("Email")
             or therapist["fields"].get("Notes"),
             table.all(),
         )

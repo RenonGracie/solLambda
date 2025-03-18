@@ -16,6 +16,7 @@ class TherapistModel(Base):
     email = Column("email", Text, unique=True)
 
     calendar_fetched = Column("calendar_fetched", Boolean, default=False)
+    calendar_email = Column("calendar_email", Text, nullable=True)
 
 
 class AppointmentModel(Base):
