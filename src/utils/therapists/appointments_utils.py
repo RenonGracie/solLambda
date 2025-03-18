@@ -149,4 +149,5 @@ def process_appointments(db, data: TherapistEvents):
 def delete_all_appointments(db, therapist_email: str) -> None:
     therapist = db.query(TherapistModel).filter_by(email=therapist_email).first()
     if therapist is not None:
+        therapist.calendar_fetched = False
         db.query(AppointmentModel).filter_by(therapist_id=therapist.id).delete()

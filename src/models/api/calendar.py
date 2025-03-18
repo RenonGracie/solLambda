@@ -88,6 +88,7 @@ class TherapistEvents(BaseModel):
     class TherapistEvent(BaseModel):
         name: str
         email: str
+        calendar_email: str | None
         events: list[CalendarEvent]
 
     therapists: list[TherapistEvent]
