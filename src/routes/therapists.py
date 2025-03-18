@@ -1,3 +1,4 @@
+from datetime import datetime, timedelta
 from time import sleep
 
 from flask import jsonify
@@ -12,9 +13,11 @@ from src.models.api.calendar import (
     TherapistEvents,
 )
 from src.models.api.client_match import MatchedTherapists, MatchQuery
+from src.models.api.error import Error
 from src.models.api.therapist_s3 import MediaQuery, MediaLink
 from src.models.api.therapists import Therapists, Therapist
-from src.utils.google_calendar import (
+from src.utils.google.calendar_event_parser import parse_calendar_events
+from src.utils.google.google_calendar import (
     get_events_from_gcalendar,
     insert_email_to_gcalendar,
     gcalendar_list,
@@ -58,16 +61,23 @@ def match(query: MatchQuery):
 
 
 @therapist_api.get(
-    "/calendar_events", responses={200: CalendarEvents}, summary="Get calendar events"
+    "/calendar_events",
+    responses={200: CalendarEvents, 500: Error},
+    summary="Get calendar events",
 )
 def get_events(query: EventQuery):
-    events = get_events_from_gcalendar(
-        calendar_id=query.calendar_id,
-        time_min=query.time_min,
-        time_max=query.time_max,
-        max_results=query.max_results,
-    )
-    return jsonify({"events": events}), 200
+    now = datetime.now()
+    try:
+        events = get_events_from_gcalendar(
+            calendar_id=query.calendar_id,
+            time_min=f"{query.date_min or now.strftime('%Y-%m-%d')}T00:00:00+0000",
+            time_max=f"{query.date_max or (now + timedelta(days=14)).strftime('%Y-%m-%d')}T00:00:00+0000",
+            max_results=query.max_results,
+            raise_error=True,
+        )
+        return jsonify({"data": parse_calendar_events(events)}), 200
+    except HttpError as e:
+        return jsonify(Error(error=str(e)).dict()), 500
 
 
 @therapist_api.get("/media", responses={200: MediaLink}, summary="Get the media link")

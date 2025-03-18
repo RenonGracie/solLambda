@@ -43,6 +43,7 @@ def get_events_from_gcalendar(
     time_min: str | None = None,
     time_max: str | None = None,
     max_results: int = 1000,
+    raise_error: bool = False,
 ) -> list[dict]:
     try:
         insert_email_to_gcalendar(calendar_id)
@@ -67,4 +68,6 @@ def get_events_from_gcalendar(
         return data
     except HttpError as e:
         print("Fetch calendar error", calendar_id, str(e))
+        if raise_error:
+            raise e
         return []

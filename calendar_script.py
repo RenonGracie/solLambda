@@ -3,7 +3,7 @@ from datetime import datetime
 
 from pyairtable import Api
 
-from src.utils.google_calendar import get_events_from_gcalendar
+from src.utils.google.google_calendar import get_events_from_gcalendar
 from src.utils.settings import settings
 
 api = Api(settings.AIRTABLE_API_KEY)

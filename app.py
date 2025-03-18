@@ -14,6 +14,7 @@ __security_schemes = {"jwt": __jwt}
 
 info = Info(title="SolHealth API", version="1.0.0")
 app = OpenAPI(__name__, info=info, security_schemes=__security_schemes)
+app.json.sort_keys = False
 
 app.register_api(client_api)
 app.register_api(client_signup_api)

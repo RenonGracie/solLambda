@@ -9,7 +9,7 @@ from src.db.database import with_database
 from src.models.api.calendar import TherapistEvents
 from src.models.api.therapists import Therapist
 from src.models.db.therapists import TherapistModel, AppointmentModel
-from src.utils.google_calendar import get_events_from_gcalendar
+from src.utils.google.google_calendar import get_events_from_gcalendar
 from src.utils.settings import settings
 
 _DATE_FORMAT = "%Y-%m-%d"
