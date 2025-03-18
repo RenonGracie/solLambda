@@ -10,10 +10,11 @@ on:
     branches:
       - dev
       - stg
-      - prod
+    tags:
+      - 'v*'
+
 
 jobs:
-
   setup:
     name: Setup environment
     runs-on: ubuntu-24.04
@@ -24,9 +25,11 @@ jobs:
         id: set-env
         run: |
           if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
-            echo "DEPLOY_ENV=${{ github.event.inputs.environment }}" >> $GITHUB_OUTPUT
+            echo "deploy_env=${{ github.event.inputs.environment }}" >> $GITHUB_OUTPUT
+          elif [ "${{ github.event_name }}" == "push" ] && [[ "${{ github.ref }}" == refs/tags/* ]]; then
+            echo "deploy_env=prod" >> $GITHUB_OUTPUT
           else
-            echo "DEPLOY_ENV=${{ github.ref_name }}" >> $GITHUB_OUTPUT
+            echo "deploy_env=${{ github.ref_name }}" >> $GITHUB_OUTPUT
           fi
 
   deploy:
