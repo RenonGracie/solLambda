@@ -109,7 +109,7 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         run: |
           aws lambda invoke \
-            --function-name SolHealth-BE-dev-migrate \
+            --function-name SolHealth-BE-${{ env.DEPLOY_ENV }}-migrate \
             --region us-east-2 \
             --payload '{}' \
             --cli-binary-format raw-in-base64-out \

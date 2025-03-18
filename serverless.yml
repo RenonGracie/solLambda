@@ -32,7 +32,7 @@ provider:
   runtime: python3.12
   region: us-east-2
   architecture: x86_64
-  timeout: 30
+  timeout: 29
   iam:
     role:
       statements:
