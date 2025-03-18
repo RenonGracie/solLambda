@@ -1,7 +1,7 @@
 import pytest
 
 from src.models.api.therapists import Therapist
-from src.utils.therapist_data_utils import implement_age_factor
+from src.utils.therapists.therapist_data_utils import implement_age_factor
 
 
 # Fixture for creating test data

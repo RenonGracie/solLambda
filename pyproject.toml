@@ -25,6 +25,7 @@ dependencies = [
     "ruff>=0.9.4",
     "sqlalchemy>=2.0.37",
     "sqlalchemy-utils>=0.41.2",
+    "tzdata>=2025.1",
 ]
 
 [tool.pytest.ini_options]

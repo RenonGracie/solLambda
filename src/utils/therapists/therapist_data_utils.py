@@ -1,6 +1,7 @@
 from datetime import timedelta, datetime
 
 from dateutil.rrule import rrulestr
+from zoneinfo import ZoneInfo
 
 from src.models.api.therapist_s3 import S3MediaType
 from src.models.api.therapist_videos import VideoType
@@ -89,13 +90,16 @@ def provide_therapist_slots(
 ) -> Therapist:
     first_week_slots = []
     second_week_slots = []
-    now = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
+    now = datetime.now(tz=ZoneInfo("US/Eastern")).replace(
+        hour=7, minute=0, second=0, microsecond=0
+    )
     if first_week_appointments is not None or second_week_appointments is not None:
-        for i in range(168):
-            if first_week_appointments is not None:
-                first_week_slots.append(now + timedelta(hours=i))
-            if second_week_appointments is not None:
-                second_week_slots.append(now + timedelta(hours=i, days=7))
+        for day in range(7):
+            for hour in range(15):
+                if first_week_appointments is not None:
+                    first_week_slots.append(now + timedelta(hours=hour, days=day))
+                if second_week_appointments is not None:
+                    second_week_slots.append(now + timedelta(hours=hour, days=day + 7))
 
     def _filter_slots(slot: datetime, appointment: AppointmentModel) -> bool:
         slot_time = slot.astimezone()
@@ -129,6 +133,7 @@ def provide_therapist_slots(
                 < appointment.end_date.astimezone()
             ):
                 return True
+            return False
 
     def filter_slots(
         slots: list[datetime], appointments: list[AppointmentModel]

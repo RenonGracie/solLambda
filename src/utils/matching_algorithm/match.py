@@ -6,7 +6,7 @@ from src.models.api.clients import ClientShort
 from src.models.api.therapists import Therapist
 from src.models.db.clients import ClientSignup
 from src.utils.matching_algorithm.algorithm import calculate_match_score
-from src.utils.therapist_data_utils import (
+from src.utils.therapists.therapist_data_utils import (
     provide_therapist_slots,
     load_therapist_media,
     implement_age_factor,
