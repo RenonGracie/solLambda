@@ -20,11 +20,12 @@ def _intakeq_delete(path: str, params: dict = None):
     )
 
 
-def _intakeq_post(path: str, data: dict):
+def _intakeq_post(path: str, data: dict, timeout: int | None = None):
     return requests.post(
         url=settings.INTAKEQ_BASE_URL + path,
         headers={"X-Auth-Key": settings.INTAKEQ_AUTH_KEY},
         json=data,
+        timeout=timeout,
     )
 
 
@@ -84,6 +85,10 @@ def update_appointment(data: dict):
 
 def appointment_cancellation(data: dict):
     return _intakeq_post("/appointments/cancellation", data)
+
+
+def send_intake_form(data: dict):
+    return _intakeq_post("/intakes/send", data, timeout=1)
 
 
 def intakeq(data: dict):
