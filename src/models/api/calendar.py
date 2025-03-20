@@ -8,6 +8,7 @@ class CalendarEvent(BaseModel):
     end: str | None
     event: str | None
     description: str | None
+    recurrence: str | None
 
 
 class CalendarEventsDateGroup(BaseModel):
