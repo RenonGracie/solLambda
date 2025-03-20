@@ -14,6 +14,7 @@ def _format_event(event):
         "start": event["start"]["dateTime"] or event["start"]["date"],
         "end": event["end"]["dateTime"] or event["end"]["date"],
         "description": event.get("description"),
+        "recurrence": event.get("recurrence"),
     }
 
 
