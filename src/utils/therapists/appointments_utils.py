@@ -5,7 +5,7 @@ from dateutil import parser
 from dateutil.rrule import rrulestr
 from sqlalchemy import column
 
-from src.db.database import with_database
+from src.db.database import with_database, drop_appointments
 from src.models.api.calendar import TherapistEvents
 from src.models.api.therapists import Therapist
 from src.models.db.therapists import TherapistModel, AppointmentModel
@@ -146,7 +146,7 @@ def process_appointments(db, data: TherapistEvents):
 @with_database
 def delete_all_appointments(db, therapist_email: str) -> None:
     if therapist_email.__eq__("*"):
-        db.query(AppointmentModel).delete()
+        drop_appointments()
     else:
         therapist = db.query(TherapistModel).filter_by(email=therapist_email).first()
         if therapist is not None:

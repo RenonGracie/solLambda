@@ -66,16 +66,27 @@ def get_db_url() -> (URL, dict):
 class _Database(Singleton):
     def __init__(self):
         url, args = get_db_url()
-        engine = create_engine(url, connect_args=args, isolation_level="AUTOCOMMIT")
+        self._engine = create_engine(
+            url, connect_args=args, isolation_level="AUTOCOMMIT"
+        )
 
-        ClientSignup.__table__.create(engine, checkfirst=True)
-        TherapistModel.__table__.create(engine, checkfirst=True)
-        AppointmentModel.__table__.create(engine, checkfirst=True)
-        TherapistVideoModel.__table__.create(engine, checkfirst=True)
-        AnalyticEvent.__table__.create(engine, checkfirst=True)
+        ClientSignup.__table__.create(self._engine, checkfirst=True)
+        TherapistModel.__table__.create(self._engine, checkfirst=True)
+        AppointmentModel.__table__.create(self._engine, checkfirst=True)
+        TherapistVideoModel.__table__.create(self._engine, checkfirst=True)
+        AnalyticEvent.__table__.create(self._engine, checkfirst=True)
 
-        session_maker = sessionmaker(bind=engine)
+        session_maker = sessionmaker(bind=self._engine)
         self.session = session_maker()
 
+    def drop_appointments(self):
+        AppointmentModel.__table__.drop(self._engine)
+        AppointmentModel.__table__.create(self._engine, checkfirst=True)
 
-db = _Database().session
+
+_database = _Database()
+db = _database.session
+
+
+def drop_appointments():
+    _database.drop_appointments()
