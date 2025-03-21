@@ -30,7 +30,7 @@ def main():
         email = value["fields"].get("Email") or value["fields"].get("Notes")
         calendar_email = value["fields"].get("Calendar") or email
         print("Working on", name, calendar_email)
-        if email:
+        if calendar_email:
             events = get_events_from_gcalendar(calendar_email, time_min=now_str)
             if len(events) > 0:
                 therapist_data = {
