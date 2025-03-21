@@ -101,59 +101,39 @@ def provide_therapist_slots(
                 if second_week_appointments is not None:
                     second_week_slots.append(now + timedelta(hours=hour, days=day + 7))
 
-    def _filter_slots(slot: datetime, appointment: AppointmentModel) -> bool:
-        slot_time = slot.astimezone()
-        duration = appointment.end_date - appointment.start_date
-        if appointment.recurrence:
-            for rec in appointment.recurrence:
-                rrule = rrulestr(rec, dtstart=appointment.start_date.astimezone())
-                for dt in rrule.between(
-                    slot_time + timedelta(days=-1),
-                    slot_time + duration + timedelta(days=1),
-                ):
-                    if dt.astimezone() <= slot_time < dt.astimezone() + duration:
-                        return True
-                    if (
-                        dt.astimezone()
-                        <= slot_time + timedelta(minutes=45)
-                        < dt.astimezone() + duration
-                    ):
-                        return True
-            return False
-        else:
-            if (
-                appointment.start_date.astimezone()
-                <= slot_time
-                < appointment.end_date.astimezone()
-            ):
-                return True
-            if (
-                appointment.start_date.astimezone()
-                <= slot_time + timedelta(minutes=45)
-                < appointment.end_date.astimezone()
-            ):
-                return True
-            return False
+    def _check_slot(slot: datetime, start: datetime, end: datetime) -> bool:
+        if start.astimezone() <= slot.astimezone() < end.astimezone():
+            return True
+        if (
+                start.astimezone()
+                <= slot.astimezone() + timedelta(minutes=45)
+                < end.astimezone()
+        ):
+            return True
+        return False
 
     def filter_slots(
         slots: list[datetime], appointments: list[AppointmentModel]
     ) -> list[datetime]:
-        return list(
-            filter(
-                lambda dt: not any(
-                    _filter_slots(dt, appointment) for appointment in appointments
-                ),
-                slots,
-            )
-        )
+        filtered = slots
+        for appointment in appointments:
+            recurrence = appointment.recurrence
+            if recurrence is None or len(recurrence) == 0:
+                start = appointment.start_date.astimezone()
+                end = appointment.end_date.astimezone()
+                filtered = [dt for dt in filtered if not _check_slot(dt, start, end)]
+            else:
+                duration = appointment.end_date - appointment.start_date
+                for rule_str in recurrence:
+                    rule = rrulestr(rule_str, dtstart=appointment.start_date.astimezone())
+                    occurrences = rule.between(now.astimezone(), now.astimezone() + duration + timedelta(days=14))
+                    for occurrence_start in occurrences:
+                        occurrence_end = occurrence_start + duration
+                        filtered = [dt for dt in filtered if not _check_slot(dt, occurrence_start, occurrence_end)]
 
-    therapist.available_slots = []
-    if first_week_appointments is not None:
-        therapist.available_slots += filter_slots(
-            first_week_slots, first_week_appointments
-        )
-    if second_week_appointments is not None:
-        therapist.available_slots += filter_slots(
-            second_week_slots, second_week_appointments
-        )
+        return filtered
+
+    therapist.available_slots = filter_slots(
+        first_week_slots + second_week_slots, first_week_appointments + second_week_appointments
+    )
     return therapist
