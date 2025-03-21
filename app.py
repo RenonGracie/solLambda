@@ -2,10 +2,15 @@ from flask import jsonify, request
 from flask_openapi3 import Tag, Info, OpenAPI
 
 from src.models.api.base import SuccessResponse
-from src.routes import client_api, appointment_api, therapist_api
-from src.routes.client_signup_forms import client_signup_api
-from src.routes.events import events_api
-from src.routes.therapist_video import therapist_video_api
+from src.routes import (
+    client_api,
+    appointment_api,
+    therapist_api,
+    client_signup_api,
+    therapist_video_api,
+    events_api,
+    intakeq_forms_api,
+)
 from src.utils.webhooks.intakeq_webhook_appointment_utils import process_appointment
 from src.utils.webhooks.typeform_webhook_utils import process_typeform_data
 
@@ -22,6 +27,7 @@ app.register_api(appointment_api)
 app.register_api(therapist_api)
 app.register_api(therapist_video_api)
 app.register_api(events_api)
+app.register_api(intakeq_forms_api)
 
 
 @app.after_request

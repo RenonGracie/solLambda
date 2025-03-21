@@ -13,3 +13,7 @@ class SuccessResponse(BaseModel):
 
 class Email(BaseModel):
     email: str
+
+
+class Url(BaseModel):
+    url: str

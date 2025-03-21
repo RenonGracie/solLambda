@@ -24,7 +24,6 @@ from src.utils.request_utils import (
     create_appointment,
     update_appointment,
     appointment_cancellation,
-    send_intake_form,
 )
 from src.utils.request_utils import search_clients
 from src.utils.therapists.appointments_utils import delete_all_appointments
@@ -142,13 +141,6 @@ def new_appointment(body: CreateAppointment):
             user_id=form.utm.get("user_id"),
             session_id=form.utm.get("session_id"),
             event_type=USER_EVENT_TYPE,
-        )
-        send_intake_form(
-            {
-                "QuestionnaireId": "64c09477f824647fdb9f4c1c",
-                "ClientId": client["ClientNumber"],
-                "PractitionerId": therapist["Id"],
-            }
         )
     return jsonify(json), result.status_code
 
