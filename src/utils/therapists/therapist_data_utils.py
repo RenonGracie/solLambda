@@ -113,7 +113,7 @@ def provide_therapist_slots(
         return False
 
     def filter_slots(
-        slots: list[datetime], appointments: list[AppointmentModel]
+        slots: list[datetime], appointments: set[AppointmentModel]
     ) -> list[datetime]:
         filtered = slots
         for appointment in appointments:
@@ -134,6 +134,6 @@ def provide_therapist_slots(
         return filtered
 
     therapist.available_slots = filter_slots(
-        first_week_slots + second_week_slots, first_week_appointments + second_week_appointments
+        first_week_slots + second_week_slots, set(first_week_appointments + second_week_appointments)
     )
     return therapist
