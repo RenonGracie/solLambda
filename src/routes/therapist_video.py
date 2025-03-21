@@ -3,6 +3,7 @@ from flask_openapi3 import Tag, APIBlueprint
 from pyairtable import Api
 
 from src.db.database import db, with_database
+from src.models.api.base import AdminPass
 from src.models.api.therapist_videos import TherapistVideos, TherapistVideo
 from src.models.db.therapist_videos import TherapistVideoModel
 from src.utils.settings import settings
@@ -37,10 +38,13 @@ def _save_video(database, video: TherapistVideos):
 @therapist_video_api.post(
     "", responses={200: TherapistVideos}, summary="Set therapist's videos"
 )
-def set_videos(body: TherapistVideos):
-    _save_video(body)
+def set_videos(query: AdminPass, body: TherapistVideos):
+    if not query.admin_password.__eq__(settings.ADMIN_PASSWORD):
+        return jsonify({}), 401
+    else:
+        _save_video(body)
 
-    return jsonify(body.dict()), 200
+        return jsonify(body.dict()), 200
 
 
 @with_database
@@ -59,7 +63,10 @@ def _update_video(database, video: TherapistVideo) -> bool:
 @therapist_video_api.patch(
     "", responses={200: TherapistVideo}, summary="Update therapist's video"
 )
-def update_video(body: TherapistVideo):
-    if not _update_video(body):
-        return jsonify({}), 404
-    return jsonify(body.dict()), 200
+def update_video(query: AdminPass, body: TherapistVideo):
+    if not query.admin_password.__eq__(settings.ADMIN_PASSWORD):
+        return jsonify({}), 401
+    else:
+        if not _update_video(body):
+            return jsonify({}), 404
+        return jsonify(body.dict()), 200

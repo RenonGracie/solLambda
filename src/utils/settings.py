@@ -38,5 +38,7 @@ class Settings(Singleton):
         self.TEST_WELCOME_VIDEO = os.getenv("TEST_WELCOME_VIDEO")
         self.TEST_GREETINGS_VIDEO = os.getenv("TEST_GREETINGS_VIDEO")
 
+        self.ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD")
+
 
 settings = Settings()

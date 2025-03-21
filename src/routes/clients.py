@@ -28,12 +28,6 @@ client_api = APIBlueprint(
 )
 
 
-@client_api.patch("", responses={200: Client}, summary="Update client")
-def update_client(body: Client):
-    result = save_update_client(body)
-    return jsonify(result.json()), result.status_code
-
-
 @client_api.get("search", responses={200: Clients}, summary="Search clients")
 def search_clients(query: ClientQueryModel):
     result = search(query.dict())
@@ -42,13 +36,23 @@ def search_clients(query: ClientQueryModel):
     return jsonify({"clients": result.json()}), result.status_code
 
 
-@client_api.post("clientTags", responses={204: None}, summary="Add client tag")
+@client_api.patch("", responses={200: Client}, summary="Update client", doc_ui=False)
+def update_client(body: Client):
+    result = save_update_client(body)
+    return jsonify(result.json()), result.status_code
+
+
+@client_api.post(
+    "clientTags", responses={204: None}, summary="Add client tag", doc_ui=False
+)
 def add_tag(body: ClientTag):
     result = add_client_tag(body.dict())
     return "", result.status_code
 
 
-@client_api.delete("clientTags", responses={204: None}, summary="Delete client tag")
+@client_api.delete(
+    "clientTags", responses={204: None}, summary="Delete client tag", doc_ui=False
+)
 def delete_tag(query: ClientTagQuery):
     result = delete_client_tag(query.dict())
     return "", result.status_code

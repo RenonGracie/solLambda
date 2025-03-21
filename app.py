@@ -51,7 +51,9 @@ def typeform_webhook():
     return jsonify({"success": True}), 200
 
 
-@app.post("/hook_bot", tags=[Tag(name="Webhook")], summary="Webhook for bot")
+@app.post(
+    "/hook_bot", tags=[Tag(name="Webhook")], summary="Webhook for bot", doc_ui=False
+)
 def bot_hook():
     print(request.get_json())
     return "", 200

@@ -17,3 +17,12 @@ class Email(BaseModel):
 
 class Url(BaseModel):
     url: str
+
+
+class EmailWithAdminPass(BaseModel):
+    email: str
+    admin_password: str
+
+
+class AdminPass(BaseModel):
+    admin_password: str

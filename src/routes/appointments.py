@@ -13,7 +13,7 @@ from src.models.api.appointments import (
     CancelAppointment,
     CreateAppointment,
 )
-from src.models.api.base import Email
+from src.models.api.base import EmailWithAdminPass
 from src.models.api.error import Error
 from src.models.db.clients import ClientSignup
 from src.utils.event_utils import send_ga_event, CALL_SCHEDULED_EVENT, USER_EVENT_TYPE
@@ -26,6 +26,7 @@ from src.utils.request_utils import (
     appointment_cancellation,
 )
 from src.utils.request_utils import search_clients
+from src.utils.settings import settings
 from src.utils.therapists.appointments_utils import delete_all_appointments
 
 __tag = Tag(name="Appointments")
@@ -146,7 +147,10 @@ def new_appointment(body: CreateAppointment):
 
 
 @appointment_api.put(
-    "", responses={200: Appointment}, summary="Update an existing appointment"
+    "",
+    responses={200: Appointment},
+    summary="Update an existing appointment",
+    doc_ui=False,
 )
 def update_existing_appointment(body: AppointmentsShort):
     result = update_appointment(body.dict())
@@ -154,7 +158,10 @@ def update_existing_appointment(body: AppointmentsShort):
 
 
 @appointment_api.delete(
-    "", responses={200: Appointment}, summary="Cancel an existing appointment"
+    "",
+    responses={200: Appointment},
+    summary="Cancel an existing appointment",
+    doc_ui=False,
 )
 def cancel_appointment(body: CancelAppointment):
     result = appointment_cancellation(body.dict())
@@ -166,6 +173,9 @@ def cancel_appointment(body: CancelAppointment):
     responses={204: None},
     summary="Delete all appointments by therapist email from db",
 )
-def delete_therapist_appointments(query: Email):
-    delete_all_appointments(query.email)
-    return jsonify({}), 204
+def delete_therapist_appointments(query: EmailWithAdminPass):
+    if not query.admin_password.__eq__(settings.ADMIN_PASSWORD):
+        return jsonify({}), 401
+    else:
+        delete_all_appointments(query.email)
+        return jsonify({}), 204

@@ -6,6 +6,7 @@ from flask_openapi3 import Tag, APIBlueprint
 from googleapiclient.errors import HttpError
 from pyairtable import Api
 
+from src.models.api.base import AdminPass
 from src.models.api.calendar import (
     CalendarEvents,
     EventQuery,
@@ -123,7 +124,11 @@ def with_calendar():
     "set_events",
     responses={204: None},
     summary="Save therapist's calendar events",
+    doc_ui=False,
 )
-def set_events(body: TherapistEvents):
-    process_appointments(body)
-    return jsonify({}), 204
+def set_events(query: AdminPass, body: TherapistEvents):
+    if not query.admin_password.__eq__(settings.ADMIN_PASSWORD):
+        return jsonify({}), 401
+    else:
+        process_appointments(body)
+        return jsonify({}), 204

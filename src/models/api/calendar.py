@@ -36,6 +36,6 @@ class TherapistEvents(BaseModel):
         name: str
         email: str
         calendar_email: str | None
-        events: list[CalendarEvent]
+        events: list[dict]
 
-    therapists: list[TherapistEvent]
+    therapist: TherapistEvent

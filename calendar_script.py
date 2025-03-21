@@ -1,6 +1,7 @@
-import json
 from datetime import datetime
+from time import sleep
 
+import requests
 from pyairtable import Api
 
 from src.utils.google.google_calendar import get_events_from_gcalendar
@@ -24,26 +25,28 @@ def main():
     now_str = f"{now.strftime("%Y-%m-%d")}T00:00:00-00:00"
     print(now_str)
 
-    data = []
     for value in table.all():
+        name = value["fields"].get("Name") or value["fields"].get("Intern Name")
         email = value["fields"].get("Email") or value["fields"].get("Notes")
-        calendar_email = value["fields"].get("Calendar")
-        print("Working on", email)
+        calendar_email = value["fields"].get("Calendar") or email
+        print("Working on", name, calendar_email)
         if email:
-            events = get_events_from_gcalendar(email, time_min=now_str)
-            if events:
-                data.append(
-                    {
-                        "name": value["fields"].get("Name")
-                        or value["fields"].get("Intern Name"),
-                        "email": email,
-                        "calendar_email": calendar_email,
-                        "events": [_filter_event(event) for event in events],
-                    }
+            events = get_events_from_gcalendar(calendar_email, time_min=now_str)
+            if len(events) > 0:
+                therapist_data = {
+                    "name": name,
+                    "email": email,
+                    "calendar_email": calendar_email,
+                    "events": [_filter_event(event) for event in events],
+                }
+                print("Sending data", calendar_email)
+                result = requests.post(
+                    url=f"fhttps://api.therapists.solhealth.co/therapists/set_events?admin_password={settings.ADMIN_PASSWORD}",
+                    json={"therapist": therapist_data},
                 )
-    print("Writing to file")
-    with open("events.json", "w") as f:
-        f.write(json.dumps({"therapists": data}))
+                print(result)
+            break
+        sleep(1)
     print("finished")
 
 

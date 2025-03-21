@@ -132,22 +132,23 @@ def get_appointments_for_therapist(
 
 @with_database
 def process_appointments(db, data: TherapistEvents):
-    for therapist in data.therapists:
-        therapist_model, exists = _get_therapist_model(
-            db, therapist.name, therapist.email
-        )
-        if therapist_model:
-            appointments = []
-            for event in therapist.events:
-                appointment = event_to_appointment(event.dict(), therapist_model)
-                if appointment:
-                    appointments.append(appointment)
-            db.add_all(appointments)
+    therapist = data.therapist
+    therapist_model, exists = _get_therapist_model(db, therapist.name, therapist.email)
+    if therapist_model:
+        appointments = []
+        for event in therapist.events:
+            appointment = event_to_appointment(event, therapist_model)
+            if appointment:
+                appointments.append(appointment)
+        db.add_all(appointments)
 
 
 @with_database
 def delete_all_appointments(db, therapist_email: str) -> None:
-    therapist = db.query(TherapistModel).filter_by(email=therapist_email).first()
-    if therapist is not None:
-        therapist.calendar_fetched = False
-        db.query(AppointmentModel).filter_by(therapist_id=therapist.id).delete()
+    if therapist_email.__eq__("*"):
+        db.query(AppointmentModel).delete()
+    else:
+        therapist = db.query(TherapistModel).filter_by(email=therapist_email).first()
+        if therapist is not None:
+            therapist.calendar_fetched = False
+            db.query(AppointmentModel).filter_by(therapist_id=therapist.id).delete()
