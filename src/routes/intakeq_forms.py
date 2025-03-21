@@ -20,12 +20,12 @@ intakeq_forms_api = APIBlueprint(
     responses={200: Url},
     summary="Send mandatory form and get its link",
 )
-def mandatory_form(query: IntakeQMandatoryFormQuery):
+def mandatory_form(body: IntakeQMandatoryFormQuery):
     result = send_intake_form(
         {
             "QuestionnaireId": "64c09477f824647fdb9f4c1c",
-            "ClientId": query.client_id,
-            "PractitionerId": query.therapist_id,
+            "ClientId": body.client_id,
+            "PractitionerId": body.therapist_id,
         }
     )
     json = result.json()
