@@ -45,7 +45,8 @@ def main():
                     json={"therapist": therapist_data},
                 )
                 print(result)
-            break
+            else:
+                print("List events is empty", calendar_email)
         sleep(1)
     print("finished")
 
