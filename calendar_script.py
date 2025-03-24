@@ -41,11 +41,9 @@ def main():
                 }
                 print("Sending data", calendar_email)
                 result = requests.post(
-                    url=f"https://api.therapy.solhealth.co/therapists/set_events",
+                    url="https://api.therapy.solhealth.co/therapists/set_events",
                     json={"therapist": therapist_data},
-                    params={
-                        "admin_password": settings.ADMIN_PASSWORD
-                    },
+                    params={"admin_password": settings.ADMIN_PASSWORD},
                 )
                 print(result)
             else:

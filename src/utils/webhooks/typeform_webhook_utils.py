@@ -59,12 +59,10 @@ def process_typeform_data(db, response_json: dict, base_url: str):
             }
             print(response.json())
             send_ga_event(
-                database=db,
                 client_id=client_id,
-                email=data.email,
-                name=REGISTRATION_EVENT,
                 user_id=user_id,
                 session_id=session_id,
+                name=REGISTRATION_EVENT,
                 event_type=USER_EVENT_TYPE,
             )
         user_data = create_new_form(data)

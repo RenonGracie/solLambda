@@ -1,5 +1,4 @@
 from src.routes.client_signup_forms import client_signup_api
-from src.routes.events import events_api
 from src.routes.intakeq_forms import intakeq_forms_api
 from src.routes.therapist_video import therapist_video_api
 from src.routes.therapists import therapist_api
@@ -13,5 +12,4 @@ __all__ = [
     "intakeq_forms_api",
     "client_signup_api",
     "therapist_video_api",
-    "events_api",
 ]

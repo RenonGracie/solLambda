@@ -4,7 +4,6 @@ from sqlalchemy import create_engine, URL
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import sessionmaker
 
-from src.models.db.analytic_event import AnalyticEvent
 from src.models.db.clients import ClientSignup
 from src.models.db.therapist_videos import TherapistVideoModel
 from src.models.db.therapists import AppointmentModel, TherapistModel
@@ -74,7 +73,6 @@ class _Database(Singleton):
         TherapistModel.__table__.create(self._engine, checkfirst=True)
         AppointmentModel.__table__.create(self._engine, checkfirst=True)
         TherapistVideoModel.__table__.create(self._engine, checkfirst=True)
-        AnalyticEvent.__table__.create(self._engine, checkfirst=True)
 
         session_maker = sessionmaker(bind=self._engine)
         self.session = session_maker()

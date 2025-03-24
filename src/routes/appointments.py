@@ -134,9 +134,7 @@ def new_appointment(body: CreateAppointment):
     json = result.json()
     if result.status_code == 200:
         send_ga_event(
-            database=db,
             client_id=form.utm.get("client_id"),
-            email=form.email,
             name=CALL_SCHEDULED_EVENT,
             value=json.get("Id"),
             user_id=form.utm.get("user_id"),
