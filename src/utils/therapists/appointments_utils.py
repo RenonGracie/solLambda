@@ -59,6 +59,7 @@ def get_appointments_for_therapist(
     now_2_weeks = now + timedelta(weeks=2)
     now_2_weeks_str = now_2_weeks.strftime(_DATE_FORMAT)
 
+    appointments = []
     first_week_appointments = []
     second_week_appointments = []
 
@@ -102,15 +103,15 @@ def get_appointments_for_therapist(
                 _proceed_appointment(appointment)
             return first_week_appointments, second_week_appointments
 
-    appointments = events_from_calendar_to_appointments(
+    fetched = events_from_calendar_to_appointments(
         settings.TEST_THERAPIST_EMAIL
         if settings.TEST_THERAPIST_EMAIL
         else therapist.calendar_email or therapist.email,
         now,
     )
-    therapist_model.calendar_fetched = len(appointments) > 0
+    therapist_model.calendar_fetched = len(fetched) > 0
 
-    for appointment in appointments:
+    for appointment in fetched:
         if appointment:
             appointment.therapist = therapist_model
             appointments.append(appointment)
