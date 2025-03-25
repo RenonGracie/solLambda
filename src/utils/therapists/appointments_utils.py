@@ -15,7 +15,7 @@ from src.utils.settings import settings
 _DATE_FORMAT = "%Y-%m-%d"
 
 
-def event_to_appointment(event, therapist_model) -> AppointmentModel | None:
+def event_to_appointment(event) -> AppointmentModel | None:
     if event.get("start") and event.get("end"):
         start = event["start"].get("dateTime") or event["start"].get("date")
         end = event["end"].get("dateTime") or event["end"].get("date")
@@ -33,8 +33,6 @@ def event_to_appointment(event, therapist_model) -> AppointmentModel | None:
                     appointment.client_email = email
             if event.get("recurrence"):
                 appointment.recurrence = event["recurrence"]
-
-            appointment.therapist = therapist_model
             return appointment
     return None
 
@@ -61,7 +59,6 @@ def get_appointments_for_therapist(
     now_2_weeks = now + timedelta(weeks=2)
     now_2_weeks_str = now_2_weeks.strftime(_DATE_FORMAT)
 
-    appointments = []
     first_week_appointments = []
     second_week_appointments = []
 
@@ -105,17 +102,17 @@ def get_appointments_for_therapist(
                 _proceed_appointment(appointment)
             return first_week_appointments, second_week_appointments
 
-    events = get_events_from_gcalendar(
-        calendar_id=settings.TEST_THERAPIST_EMAIL
+    appointments = events_from_calendar_to_appointments(
+        settings.TEST_THERAPIST_EMAIL
         if settings.TEST_THERAPIST_EMAIL
         else therapist.calendar_email or therapist.email,
-        time_min=f"{now_str}T00:00:00-00:00",
+        now,
     )
-    therapist_model.calendar_fetched = len(events) > 0
+    therapist_model.calendar_fetched = len(appointments) > 0
 
-    for event in events:
-        appointment = event_to_appointment(event, therapist_model)
+    for appointment in appointments:
         if appointment:
+            appointment.therapist = therapist_model
             appointments.append(appointment)
 
             if appointment.start_date and (
@@ -130,6 +127,19 @@ def get_appointments_for_therapist(
     return first_week_appointments, second_week_appointments
 
 
+def events_from_calendar_to_appointments(
+    calendar_id: str, now: datetime = datetime.now()
+) -> list[AppointmentModel | None]:
+    print("Fetch from calendar", calendar_id)
+    now_str = now.strftime(_DATE_FORMAT)
+    events = get_events_from_gcalendar(
+        calendar_id=calendar_id,
+        time_min=f"{now_str}T00:00:00-00:00",
+    )
+
+    return [event_to_appointment(event) for event in events]
+
+
 @with_database
 def process_appointments(db, data: TherapistEvents):
     therapist = data.therapist
@@ -137,7 +147,8 @@ def process_appointments(db, data: TherapistEvents):
     if therapist_model:
         appointments = []
         for event in therapist.events:
-            appointment = event_to_appointment(event, therapist_model)
+            appointment = event_to_appointment(event)
+            appointment.therapist = therapist_model
             if appointment:
                 appointments.append(appointment)
         db.add_all(appointments)

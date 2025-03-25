@@ -6,7 +6,7 @@ from flask_openapi3 import Tag, APIBlueprint
 from googleapiclient.errors import HttpError
 from pyairtable import Api
 
-from src.models.api.base import AdminPass
+from src.models.api.base import AdminPass, Email
 from src.models.api.calendar import (
     CalendarEvents,
     EventQuery,
@@ -16,7 +16,7 @@ from src.models.api.calendar import (
 from src.models.api.client_match import MatchedTherapists, MatchQuery
 from src.models.api.error import Error
 from src.models.api.therapist_s3 import MediaQuery, MediaLink
-from src.models.api.therapists import Therapists, Therapist
+from src.models.api.therapists import Therapists, Therapist, AvailableSlots
 from src.utils.google.calendar_event_parser import parse_calendar_events
 from src.utils.google.google_calendar import (
     get_events_from_gcalendar,
@@ -26,7 +26,11 @@ from src.utils.google.google_calendar import (
 from src.utils.matching_algorithm.match import match_client_with_therapists
 from src.utils.settings import settings
 from src.utils.s3 import get_media_url
-from src.utils.therapists.appointments_utils import process_appointments
+from src.utils.therapists.appointments_utils import (
+    process_appointments,
+    events_from_calendar_to_appointments,
+)
+from src.utils.therapists.therapist_data_utils import provide_therapist_slots
 
 __tag = Tag(name="Therapists")
 therapist_api = APIBlueprint(
@@ -132,3 +136,14 @@ def set_events(query: AdminPass, body: TherapistEvents):
     else:
         process_appointments(body)
         return jsonify({}), 204
+
+
+@therapist_api.get(
+    "slots",
+    responses={200: AvailableSlots},
+    summary="Get therapist's available slots by calendar email",
+)
+def free_slots(query: Email):
+    appointments = events_from_calendar_to_appointments(query.email)
+    slots = provide_therapist_slots(appointments, [])
+    return jsonify({"available_slots": slots}), 200

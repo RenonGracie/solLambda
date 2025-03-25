@@ -10,7 +10,11 @@ class Appointment(BaseModel):
     client_email: str | None
 
 
-class Therapist(BaseModel):
+class AvailableSlots(BaseModel):
+    available_slots: list[datetime] | None
+
+
+class Therapist(AvailableSlots):
     id: str
     intern_name: str | None
     age: str | None

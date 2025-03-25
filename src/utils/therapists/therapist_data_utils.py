@@ -5,7 +5,6 @@ from zoneinfo import ZoneInfo
 
 from src.models.api.therapist_s3 import S3MediaType
 from src.models.api.therapist_videos import VideoType
-from src.models.api.therapists import Therapist
 from src.models.db.therapist_videos import TherapistVideoModel
 from src.models.db.therapists import AppointmentModel
 from src.utils import s3
@@ -84,10 +83,9 @@ def load_therapist_media(db, data: dict) -> dict:
 
 
 def provide_therapist_slots(
-    therapist: Therapist,
     first_week_appointments: list[AppointmentModel] | None,
     second_week_appointments: list[AppointmentModel] | None,
-) -> Therapist:
+) -> list[datetime]:
     first_week_slots = []
     second_week_slots = []
     now = datetime.now(tz=ZoneInfo("US/Eastern")).replace(
@@ -142,8 +140,8 @@ def provide_therapist_slots(
 
         return filtered
 
-    therapist.available_slots = filter_slots(
+    available_slots = filter_slots(
         first_week_slots + second_week_slots,
         set((first_week_appointments or []) + (second_week_appointments or [])),
     )
-    return therapist
+    return available_slots

@@ -72,8 +72,7 @@ def match_client_with_therapists(
             second_week_appointments = None
 
         if first_week_appointments is not None or second_week_appointments is not None:
-            therapist = provide_therapist_slots(
-                therapist,
+            therapist.available_slots = provide_therapist_slots(
                 first_week_appointments,
                 second_week_appointments,
             )
