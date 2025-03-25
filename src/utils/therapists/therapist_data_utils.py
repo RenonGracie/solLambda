@@ -144,6 +144,6 @@ def provide_therapist_slots(
 
     therapist.available_slots = filter_slots(
         first_week_slots + second_week_slots,
-        set(first_week_appointments + second_week_appointments),
+        set((first_week_appointments or []) + (second_week_appointments or [])),
     )
     return therapist

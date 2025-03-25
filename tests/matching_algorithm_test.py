@@ -145,7 +145,7 @@ def test_calculate_match_score_full_match(sample_client, sample_therapist):
         "Experienced with Anxiety",
         "CBT-focused",
         "DBT skills based",
-        "Traumatic experience",
+        "Trauma",
     ]
     sample_therapist.diagnoses = ["Anxiety", "Depression"]
     sample_therapist.specialities = ["Trauma"]
