@@ -39,19 +39,13 @@ def test_first_week_appointments(now):
     first_week_appointments = [appointment]
     second_week_appointments = None
 
-    result = provide_therapist_slots(
-        first_week_appointments, second_week_appointments
-    )
+    result = provide_therapist_slots(first_week_appointments, second_week_appointments)
 
     # We check that the slot from 12:00 to 12:01 is excluded
     assert (now + timedelta(hours=5)) not in result
     assert (now + timedelta(hours=6)) not in result
-    assert (
-        now + timedelta(hours=4)
-    ) in result  # Slot before appointment
-    assert (
-        now + timedelta(hours=7)
-    ) in result  # Slot after appointment
+    assert (now + timedelta(hours=4)) in result  # Slot before appointment
+    assert (now + timedelta(hours=7)) in result  # Slot after appointment
 
 
 # Test 3: Appointments for the second week only
@@ -64,19 +58,13 @@ def test_second_week_appointments(now):
     first_week_appointments = None
     second_week_appointments = [appointment]
 
-    result = provide_therapist_slots(
-        first_week_appointments, second_week_appointments
-    )
+    result = provide_therapist_slots(first_week_appointments, second_week_appointments)
 
     # We check that the slot from 17:00 to 18:01 is excluded
     assert (now + timedelta(days=7, hours=10)) not in result
     assert (now + timedelta(days=7, hours=11)) not in result
-    assert (
-        now + timedelta(days=7, hours=9)
-    ) in result  # Slot before appointment
-    assert (
-        now + timedelta(days=7, hours=12)
-    ) in result  # Slot after appointment
+    assert (now + timedelta(days=7, hours=9)) in result  # Slot before appointment
+    assert (now + timedelta(days=7, hours=12)) in result  # Slot after appointment
 
 
 # Test 4: Appointments for both weeks
@@ -93,9 +81,7 @@ def test_both_weeks_appointments(now):
     first_week_appointments = [first_week_appointment]
     second_week_appointments = [second_week_appointment]
 
-    result = provide_therapist_slots(
-        first_week_appointments, second_week_appointments
-    )
+    result = provide_therapist_slots(first_week_appointments, second_week_appointments)
 
     # Check that slots are excluded
     assert (now + timedelta(hours=3)) not in result
@@ -139,9 +125,7 @@ def test_random_booked_slots(now):
     ]
 
     # Calling the method
-    result = provide_therapist_slots(
-        first_week_appointments, second_week_appointments
-    )
+    result = provide_therapist_slots(first_week_appointments, second_week_appointments)
 
     # Check that occupied slots are excluded
     for slot in first_week_booked_slots:

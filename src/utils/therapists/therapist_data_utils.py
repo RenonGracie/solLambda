@@ -124,8 +124,8 @@ def provide_therapist_slots(
                 for rule_str in recurrence:
                     rule = rrulestr(rule_str, dtstart=appointment.start_date)
                     occurrences = rule.between(
-                        now,
-                        now + duration + timedelta(days=15),
+                        now.astimezone(),
+                        now.astimezone() + duration + timedelta(days=15),
                     )
                     for occurrence_start in occurrences:
                         occurrence_end = occurrence_start + duration

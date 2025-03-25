@@ -3,14 +3,6 @@ from datetime import datetime
 from pydantic import BaseModel
 
 
-class GoogleEvent(BaseModel):
-    start_date: datetime | None
-    end_date: datetime | None
-    recurrence: list[str] | None
-
-    client_email: str | None
-
-
 class AvailableSlots(BaseModel):
     available_slots: list[datetime] | None
 
