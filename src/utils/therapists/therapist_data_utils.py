@@ -128,7 +128,7 @@ def provide_therapist_slots(
                     if start.tzinfo is None:
                         start.replace(tzinfo=_DEFAULT_ZONE)
 
-                    rule = rrulestr(rule_str, dtstart=appointment.start_date)
+                    rule = rrulestr(rule_str, dtstart=start)
                     occurrences = rule.between(
                         now.astimezone(),
                         now.astimezone() + duration + timedelta(days=15),
