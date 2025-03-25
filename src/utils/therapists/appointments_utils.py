@@ -3,9 +3,9 @@ from datetime import datetime, timedelta
 
 from dateutil import parser
 from dateutil.rrule import rrulestr
-from sqlalchemy import column
+from sqlalchemy import column, delete
 
-from src.db.database import with_database, drop_appointments
+from src.db.database import with_database
 from src.models.api.calendar import TherapistEvents
 from src.models.api.therapists import Therapist
 from src.models.db.therapists import TherapistModel, AppointmentModel
@@ -146,9 +146,22 @@ def process_appointments(db, data: TherapistEvents):
 @with_database
 def delete_all_appointments(db, therapist_email: str) -> None:
     if therapist_email.__eq__("*"):
-        drop_appointments()
+        db.execute(delete(AppointmentModel))
+        therapists = db.query(TherapistModel).all()
+        for therapist in therapists:
+            therapist.calendar_fetched = False
     else:
         therapist = db.query(TherapistModel).filter_by(email=therapist_email).first()
         if therapist is not None:
+            db.execute(
+                delete(AppointmentModel).where(
+                    AppointmentModel.therapist_id == therapist.id
+                )
+            )
             therapist.calendar_fetched = False
-            db.query(AppointmentModel).filter_by(therapist_id=therapist.id).delete()
+            print(
+                "Therapist",
+                therapist_email,
+                "appointments count",
+                len(db.query(AppointmentModel).all()),
+            )
