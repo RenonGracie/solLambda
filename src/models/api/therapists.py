@@ -3,7 +3,7 @@ from datetime import datetime
 from pydantic import BaseModel
 
 
-class Appointment(BaseModel):
+class GoogleEvent(BaseModel):
     start_date: datetime | None
     end_date: datetime | None
     recurrence: list[str] | None

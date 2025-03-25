@@ -16,7 +16,12 @@ from src.models.api.calendar import (
 from src.models.api.client_match import MatchedTherapists, MatchQuery
 from src.models.api.error import Error
 from src.models.api.therapist_s3 import MediaQuery, MediaLink
-from src.models.api.therapists import Therapists, Therapist, AvailableSlots, Appointment
+from src.models.api.therapists import (
+    Therapists,
+    Therapist,
+    AvailableSlots,
+    GoogleEvent,
+)
 from src.models.db.therapists import AppointmentModel
 from src.utils.google.calendar_event_parser import parse_calendar_events
 from src.utils.google.google_calendar import (
@@ -155,7 +160,7 @@ def free_slots(query: Email):
     responses={200: AvailableSlots},
     summary="Get therapist's available slots by calendar email",
 )
-def free_slots_post(body: Appointment):
+def free_slots_post(body: GoogleEvent):
     appointments = [AppointmentModel(**body.dict())]
     slots = provide_therapist_slots(appointments, [])
     return jsonify({"available_slots": slots}), 200
