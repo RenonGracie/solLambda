@@ -6,6 +6,7 @@ from pydantic import BaseModel
 class Appointment(BaseModel):
     start_date: datetime | None
     end_date: datetime | None
+    recurrence: list[str] | None
 
     client_email: str | None
 
