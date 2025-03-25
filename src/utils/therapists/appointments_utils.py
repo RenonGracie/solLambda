@@ -164,5 +164,5 @@ def delete_all_appointments(db, therapist_email: str) -> None:
                 "Therapist",
                 therapist_email,
                 "appointments count",
-                len(db.query(AppointmentModel).all()),
+                len(db.query(AppointmentModel).filter_by(email=therapist_email).all()),
             )
