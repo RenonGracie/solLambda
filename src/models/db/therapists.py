@@ -1,10 +1,11 @@
 import json
 from uuid import uuid4
 
-from sqlalchemy import Column, String, DateTime, Text, Boolean
+from sqlalchemy import Column, String, Text, Boolean
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 
+from src.db.fields.custom import DateTimeAsString
 from src.models.db.base import Base
 
 
@@ -26,8 +27,8 @@ class AppointmentModel(Base):
 
     intakeq_id = Column("intakeq_id", String(100))
 
-    start_date = Column("start_date", DateTime)
-    end_date = Column("end_date", DateTime)
+    start_date = Column("start_date", DateTimeAsString(32))
+    end_date = Column("end_date", DateTimeAsString(32))
 
     client_email = Column("client_emails", Text)
 
