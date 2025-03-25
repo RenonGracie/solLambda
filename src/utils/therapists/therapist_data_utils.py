@@ -125,14 +125,17 @@ def provide_therapist_slots(
             else:
                 duration = appointment.end_date - start
                 for rule_str in recurrence:
+                    print(rule_str, start, start.tzinfo is None)
                     if start.tzinfo is None:
-                        start.replace(tzinfo=_DEFAULT_ZONE)
-
-                    rule = rrulestr(rule_str, dtstart=start)
-                    occurrences = rule.between(
-                        now.astimezone(),
-                        now.astimezone() + duration + timedelta(days=15),
-                    )
+                        occurrences = rrulestr(rule_str, dtstart=start).between(
+                            now.replace(tzinfo=None),
+                            now.replace(tzinfo=None) + duration + timedelta(days=15),
+                        )
+                    else:
+                        occurrences = rrulestr(rule_str, dtstart=start).between(
+                            now.astimezone(),
+                            now.astimezone() + duration + timedelta(days=15),
+                        )
                     for occurrence_start in occurrences:
                         occurrence_end = occurrence_start + duration
                         filtered = [
