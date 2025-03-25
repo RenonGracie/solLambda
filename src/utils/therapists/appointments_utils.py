@@ -158,6 +158,7 @@ def delete_all_appointments(db, therapist_email: str) -> None:
                     AppointmentModel.therapist_id == therapist.id
                 )
             )
+            db.commit()
             therapist.calendar_fetched = False
             print(
                 "Therapist",
