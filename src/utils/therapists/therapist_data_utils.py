@@ -11,6 +11,9 @@ from src.utils import s3
 from src.utils.settings import settings
 
 
+_DEFAULT_ZONE = ZoneInfo("US/Eastern")
+
+
 def _rearrange_elements(elements, indices):
     selected_elements = [elements[i] for i in indices if i < len(elements)]
     remaining_elements = [
@@ -88,7 +91,7 @@ def provide_therapist_slots(
 ) -> list[datetime]:
     first_week_slots = []
     second_week_slots = []
-    now = datetime.now(tz=ZoneInfo("US/Eastern")).replace(
+    now = datetime.now(tz=_DEFAULT_ZONE).replace(
         hour=7, minute=0, second=0, microsecond=0
     )
     if first_week_appointments is not None or second_week_appointments is not None:
@@ -115,13 +118,16 @@ def provide_therapist_slots(
         filtered = slots
         for appointment in appointments:
             recurrence = appointment.recurrence
+            start = appointment.start_date
             if recurrence is None or len(recurrence) == 0:
-                start = appointment.start_date
                 end = appointment.end_date
                 filtered = [dt for dt in filtered if not _check_slot(dt, start, end)]
             else:
-                duration = appointment.end_date - appointment.start_date
+                duration = appointment.end_date - start
                 for rule_str in recurrence:
+                    if start.tzinfo is None:
+                        start.replace(tzinfo=_DEFAULT_ZONE)
+
                     rule = rrulestr(rule_str, dtstart=appointment.start_date)
                     occurrences = rule.between(
                         now.astimezone(),
