@@ -11,7 +11,7 @@ from src.utils import s3
 from src.utils.settings import settings
 
 
-_DEFAULT_ZONE = ZoneInfo("US/Eastern")
+_DEFAULT_ZONE = ZoneInfo('EST')
 
 
 def _rearrange_elements(elements, indices):
