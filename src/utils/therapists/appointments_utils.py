@@ -16,23 +16,32 @@ from src.utils.settings import settings
 _DATE_FORMAT = "%Y-%m-%d"
 
 
+def _is_offset_within_tolerance(dt, zone, max_diff_hours=1) -> bool:
+    date_offset = dt.utcoffset().total_seconds() if dt.utcoffset() else 0
+    tz_offset = dt.astimezone(ZoneInfo(zone)).utcoffset().total_seconds()
+    diff_hours = abs(date_offset - tz_offset) / 3600
+    return diff_hours <= max_diff_hours
+
+
 def event_to_appointment(event) -> AppointmentModel | None:
     if event.get("start") and event.get("end"):
         start = None
+        start_zone = None
         end = None
+        end_zone = None
 
         if "dateTime" in event["start"] and "dateTime" in event["end"]:
             date_time = event["start"].get("dateTime")
             zone = event["start"].get("timeZone")
             start = parser.parse(date_time)
-            if abs(ZoneInfo(zone).utcoffset(start).total_seconds() // 3600) <= 1:
-                start.replace(tzinfo=ZoneInfo(zone))
+            if _is_offset_within_tolerance(start, zone):
+                start_zone = zone
 
             date_time = event["end"].get("dateTime")
             zone = event["end"].get("timeZone")
             end = parser.parse(date_time).replace(tzinfo=ZoneInfo(zone))
-            if abs(ZoneInfo(zone).utcoffset(end).total_seconds() // 3600) <= 1:
-                end.replace(tzinfo=ZoneInfo(zone))
+            if _is_offset_within_tolerance(start, zone):
+                end_zone = zone
 
         if "date" in event["start"] and "date" in event["end"]:
             start = parser.parse(event["start"].get("date"))
@@ -41,7 +50,9 @@ def event_to_appointment(event) -> AppointmentModel | None:
         if start and end:
             appointment = AppointmentModel()
             appointment.start_date = start
+            appointment.start_zone = start_zone
             appointment.end_date = end
+            appointment.end_zone = end_zone
             if event.get("description"):
                 match = re.search(r"[\w.+-]+@[\w-]+\.[\w.-]+", event["description"])
                 if match:
@@ -86,14 +97,14 @@ def get_appointments_for_therapist(
             return
         if item.recurrence:
             for rec in item.recurrence:
-                rrule = rrulestr(rec, dtstart=item.start_date.astimezone())
+                rrule = rrulestr(rec, dtstart=item.start.astimezone())
                 if len(rrule.between(now, now_1_weeks)) > 0:
                     first_week_appointments.append(item)
                 if len(rrule.between(now_1_weeks, now_2_weeks)) > 0:
                     second_week_appointments.append(item)
 
-        if now <= item.start_date.astimezone() < now_2_weeks:
-            if item.start_date.astimezone() < now_1_weeks:
+        if now <= item.start.astimezone() < now_2_weeks:
+            if item.start.astimezone() < now_1_weeks:
                 first_week_appointments.append(item)
             else:
                 second_week_appointments.append(item)
@@ -136,7 +147,7 @@ def get_appointments_for_therapist(
 
             if appointment.start_date and (
                 now.astimezone()
-                <= appointment.start_date.astimezone()
+                <= appointment.start.astimezone()
                 < now_2_weeks.astimezone()
                 or appointment.recurrence
             ):

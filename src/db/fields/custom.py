@@ -5,7 +5,7 @@ from dateutil.parser import parse
 
 
 class DateTimeAsString(TypeDecorator):
-    impl = String  # Базовый тип в базе данных — строка
+    impl = String
     cache_ok = True
 
     def __init__(self, length=32, *args, **kwargs):

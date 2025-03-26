@@ -1,4 +1,5 @@
-from dateutil import parser
+from datetime import datetime, UTC
+
 from sqlalchemy import and_
 
 from src.db.database import with_database
@@ -11,8 +12,8 @@ from src.utils.str_utils import camel_to_snake_case
 def _create_appointment(db, therapist: TherapistModel, data: dict):
     appointment = AppointmentModel()
     appointment.intakeq_id = data["Id"]
-    appointment.start_date = parser.parse(data["StartDateIso"])
-    appointment.end_date = parser.parse(data["EndDateIso"])
+    appointment.start_date = datetime.fromtimestamp(data["StartDate"] / 1e3, UTC)
+    appointment.end_date = datetime.fromtimestamp(data["EndDate"] / 1e3, UTC)
     appointment.client_email = data["ClientEmail"]
     appointment.therapist = therapist
     db.add(appointment)
@@ -21,17 +22,17 @@ def _create_appointment(db, therapist: TherapistModel, data: dict):
 def _update_appointment(db, therapist: TherapistModel, data: dict):
     appointment = db.query(AppointmentModel).filter_by(intakeq_id=data["Id"]).first()
     if appointment is None:
-        _create_appointment(therapist, data)
+        _create_appointment(db, therapist, data)
     else:
-        appointment.start_date = parser.parse(data["StartDateIso"])
-        appointment.end_date = parser.parse(data["EndDateIso"])
+        appointment.start_date = datetime.fromtimestamp(data["StartDate"] / 1e3, UTC)
+        appointment.end_date = datetime.fromtimestamp(data["EndDate"] / 1e3, UTC)
 
 
 def _delete_appointment(db, data: dict):
     appointment = db.query(AppointmentModel).filter_by(intakeq_id=data["Id"]).first()
     if appointment is None:
-        start_date = parser.parse(data["StartDateIso"])
-        end_date = parser.parse(data["EndDateIso"])
+        start_date = datetime.fromtimestamp(data["StartDate"] / 1e3, UTC)
+        end_date = datetime.fromtimestamp(data["EndDate"] / 1e3, UTC)
         appointment = (
             db.query(AppointmentModel)
             .filter(

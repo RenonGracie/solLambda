@@ -118,12 +118,12 @@ def provide_therapist_slots(
         filtered = slots
         for appointment in appointments:
             recurrence = appointment.recurrence
-            start = appointment.start_date
+            start = appointment.start
             if recurrence is None or len(recurrence) == 0:
-                end = appointment.end_date
+                end = appointment.end
                 filtered = [dt for dt in filtered if not _check_slot(dt, start, end)]
             else:
-                duration = appointment.end_date - start
+                duration = appointment.end - start
                 for rule_str in recurrence:
                     print(rule_str, start, start.tzinfo is None)
                     if start.tzinfo is None:

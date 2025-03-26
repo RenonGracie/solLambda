@@ -1,5 +1,6 @@
 import json
 from uuid import uuid4
+from zoneinfo import ZoneInfo
 
 from sqlalchemy import Column, String, Text, Boolean
 from sqlalchemy.dialects.postgresql import UUID
@@ -28,7 +29,9 @@ class AppointmentModel(Base):
     intakeq_id = Column("intakeq_id", String(100))
 
     start_date = Column("start_date", DateTimeAsString(32))
+    start_zone = Column("start_zone", String(30), nullable=True)
     end_date = Column("end_date", DateTimeAsString(32))
+    end_zone = Column("end_zone", String(30), nullable=True)
 
     client_email = Column("client_emails", Text)
 
@@ -40,6 +43,22 @@ class AppointmentModel(Base):
         foreign_keys=[therapist_id],
         primaryjoin="TherapistModel.id == AppointmentModel.therapist_id",
     )
+
+    @property
+    def start(self):
+        return (
+            self.start_date
+            if self.start_zone is None
+            else self.start_date.replace(tzinfo=ZoneInfo(self.start_zone))
+        )
+
+    @property
+    def end(self):
+        return (
+            self.end_date
+            if self.end_zone is None
+            else self.end_date.replace(tzinfo=ZoneInfo(self.end_zone))
+        )
 
     @property
     def recurrence(self):
