@@ -7,6 +7,7 @@ class CalendarEvent(BaseModel):
     start: str | None
     end: str | None
     event: str | None
+    zone: str | None
     description: str | None
     recurrence: list[str] | None
 

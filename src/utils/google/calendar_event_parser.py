@@ -13,6 +13,7 @@ def _format_event(event):
         "event": event.get("summary"),
         "start": event["start"]["dateTime"] or event["start"]["date"],
         "end": event["end"]["dateTime"] or event["end"]["date"],
+        "zone": event["end"]["timeZone"],
         "description": event.get("description"),
         "recurrence": event.get("recurrence"),
     }
