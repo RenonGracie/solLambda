@@ -1,5 +1,6 @@
 import re
 from datetime import datetime, timedelta
+from zoneinfo import ZoneInfo
 
 from dateutil import parser
 from dateutil.rrule import rrulestr
@@ -17,13 +18,26 @@ _DATE_FORMAT = "%Y-%m-%d"
 
 def event_to_appointment(event) -> AppointmentModel | None:
     if event.get("start") and event.get("end"):
-        start = event["start"].get("dateTime") or event["start"].get("date")
-        end = event["end"].get("dateTime") or event["end"].get("date")
+        start = None
+        end = None
+
+        if "dateTime" in event["start"] and "dateTime" in event["end"]:
+            date_time = event["start"].get("dateTime")
+            zone = event["start"].get("timeZone")
+            start = parser.parse(date_time).replace(tzinfo=ZoneInfo(zone))
+
+            date_time = event["end"].get("dateTime")
+            zone = event["end"].get("timeZone")
+            end = parser.parse(date_time).replace(tzinfo=ZoneInfo(zone))
+
+        if "date" in event["start"] and "date" in event["end"]:
+            start = parser.parse(event["start"].get("date"))
+            end = parser.parse(event["end"].get("date"))
 
         if start and end:
             appointment = AppointmentModel()
-            appointment.start_date = parser.parse(start)
-            appointment.end_date = parser.parse(end)
+            appointment.start_date = start
+            appointment.end_date = end
             if event.get("description"):
                 match = re.search(r"[\w.+-]+@[\w-]+\.[\w.-]+", event["description"])
                 if match:
