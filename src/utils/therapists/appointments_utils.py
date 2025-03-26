@@ -24,11 +24,15 @@ def event_to_appointment(event) -> AppointmentModel | None:
         if "dateTime" in event["start"] and "dateTime" in event["end"]:
             date_time = event["start"].get("dateTime")
             zone = event["start"].get("timeZone")
-            start = parser.parse(date_time).replace(tzinfo=ZoneInfo(zone))
+            start = parser.parse(date_time)
+            if abs(ZoneInfo(zone).utcoffset(start).total_seconds() // 3600) <= 1:
+                start.replace(tzinfo=ZoneInfo(zone))
 
             date_time = event["end"].get("dateTime")
             zone = event["end"].get("timeZone")
             end = parser.parse(date_time).replace(tzinfo=ZoneInfo(zone))
+            if abs(ZoneInfo(zone).utcoffset(end).total_seconds() // 3600) <= 1:
+                end.replace(tzinfo=ZoneInfo(zone))
 
         if "date" in event["start"] and "date" in event["end"]:
             start = parser.parse(event["start"].get("date"))
