@@ -26,6 +26,7 @@ class Therapist(AvailableSlots):
     diagnoses: list[str] | None
     ethnicity: list[str] | None
     gender: str | None
+    identities_as: str | None
     gender_interest: str | None
     immigration_background: str | None
     lgbtq_part: bool | None
@@ -86,6 +87,7 @@ class Therapist(AvailableSlots):
             ),
             ethnicity=fields.get("Ethnicity"),
             gender=fields.get("Gender"),
+            identities_as=fields.get("Identities as (Gender)"),
             gender_interest=fields.get(
                 "Gender: Do you have experience and/or interest in working with individuals who do not identify as cisgender? (i.e. transgender, gender fluid, etc.) "
             ),
