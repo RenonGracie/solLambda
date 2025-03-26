@@ -149,8 +149,8 @@ def process_appointments(db, data: TherapistEvents):
         appointments = []
         for event in therapist.events:
             appointment = event_to_appointment(event)
-            appointment.therapist = therapist_model
             if appointment:
+                appointment.therapist = therapist_model
                 appointments.append(appointment)
         db.add_all(appointments)
 
