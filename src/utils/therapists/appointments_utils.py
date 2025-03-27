@@ -187,6 +187,7 @@ def process_appointments(db, data: TherapistEvents):
             if appointment:
                 appointment.therapist = therapist_model
                 appointments.append(appointment)
+        therapist_model.calendar_fetched = True
         db.add_all(appointments)
 
 
