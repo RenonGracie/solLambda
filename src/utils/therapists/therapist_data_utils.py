@@ -125,7 +125,6 @@ def provide_therapist_slots(
             else:
                 duration = appointment.end - start
                 for rule_str in recurrence:
-                    print(rule_str, start, start.tzinfo is None)
                     if start.tzinfo is None:
                         occurrences = rrulestr(rule_str, dtstart=start).between(
                             now.replace(tzinfo=None),

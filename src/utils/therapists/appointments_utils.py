@@ -17,6 +17,8 @@ _DATE_FORMAT = "%Y-%m-%d"
 
 
 def _is_offset_within_tolerance(dt, zone, max_diff_hours=1) -> bool:
+    if zone.startswith("GMT") or zone.startswith("UTC"):
+        return False
     date_offset = dt.utcoffset().total_seconds() if dt.utcoffset() else 0
     tz_offset = dt.astimezone(ZoneInfo(zone)).utcoffset().total_seconds()
     diff_hours = abs(date_offset - tz_offset) / 3600
@@ -34,12 +36,16 @@ def event_to_appointment(event) -> AppointmentModel | None:
             date_time = event["start"].get("dateTime")
             zone = event["start"].get("timeZone")
             start = parser.parse(date_time)
+            if zone == "GMT-04:00":
+                pass
             if _is_offset_within_tolerance(start, zone):
                 start_zone = zone
 
             date_time = event["end"].get("dateTime")
             zone = event["end"].get("timeZone")
-            end = parser.parse(date_time).replace(tzinfo=ZoneInfo(zone))
+            if zone == "GMT-04:00":
+                pass
+            end = parser.parse(date_time)
             if _is_offset_within_tolerance(start, zone):
                 end_zone = zone
 
