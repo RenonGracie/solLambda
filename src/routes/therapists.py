@@ -82,7 +82,9 @@ def get_events(query: EventQuery):
         )
         return jsonify({"data": parse_calendar_events(events)}), 200
     except HttpError as e:
-        return jsonify(Error(error=str(e)).dict()), 500
+        return jsonify(
+            Error(error=e.reason, details=e.error_details).dict()
+        ), e.status_code
 
 
 @therapist_api.get("/media", responses={200: MediaLink}, summary="Get the media link")
