@@ -117,31 +117,36 @@ def provide_therapist_slots(
     ) -> list[datetime]:
         filtered = slots
         for appointment in appointments:
-            recurrence = appointment.recurrence
-            start = appointment.start
-            if recurrence is None or len(recurrence) == 0:
-                end = appointment.end
-                filtered = [dt for dt in filtered if not _check_slot(dt, start, end)]
-            else:
-                duration = appointment.end - start
-                for rule_str in recurrence:
-                    if start.tzinfo is None:
-                        occurrences = rrulestr(rule_str, dtstart=start).between(
-                            now.replace(tzinfo=None),
-                            now.replace(tzinfo=None) + duration + timedelta(days=15),
-                        )
-                    else:
-                        occurrences = rrulestr(rule_str, dtstart=start).between(
-                            now.astimezone(),
-                            now.astimezone() + duration + timedelta(days=15),
-                        )
-                    for occurrence_start in occurrences:
-                        occurrence_end = occurrence_start + duration
-                        filtered = [
-                            dt
-                            for dt in filtered
-                            if not _check_slot(dt, occurrence_start, occurrence_end)
-                        ]
+            if appointment is not None:
+                recurrence = appointment.recurrence
+                start = appointment.start
+                if recurrence is None or len(recurrence) == 0:
+                    end = appointment.end
+                    filtered = [
+                        dt for dt in filtered if not _check_slot(dt, start, end)
+                    ]
+                else:
+                    duration = appointment.end - start
+                    for rule_str in recurrence:
+                        if start.tzinfo is None:
+                            occurrences = rrulestr(rule_str, dtstart=start).between(
+                                now.replace(tzinfo=None),
+                                now.replace(tzinfo=None)
+                                + duration
+                                + timedelta(days=15),
+                            )
+                        else:
+                            occurrences = rrulestr(rule_str, dtstart=start).between(
+                                now.astimezone(),
+                                now.astimezone() + duration + timedelta(days=15),
+                            )
+                        for occurrence_start in occurrences:
+                            occurrence_end = occurrence_start + duration
+                            filtered = [
+                                dt
+                                for dt in filtered
+                                if not _check_slot(dt, occurrence_start, occurrence_end)
+                            ]
 
         return filtered
 

@@ -3,17 +3,17 @@ from dateutil import parser
 
 
 def _get_event_date(event):
-    return parser.parse(event["start"]["dateTime"] or event["start"]["date"]).strftime(
-        "%Y-%m-%d"
-    )
+    return parser.parse(
+        event["start"].get("dateTime") or event["start"].get("date")
+    ).strftime("%Y-%m-%d")
 
 
 def _format_event(event):
     return {
         "event": event.get("summary"),
-        "start": event["start"]["dateTime"] or event["start"]["date"],
-        "end": event["end"]["dateTime"] or event["end"]["date"],
-        "zone": event["end"]["timeZone"],
+        "start": event["start"].get("dateTime") or event["start"].get("date"),
+        "end": event["end"].get("dateTime") or event["end"].get("date"),
+        "zone": event["end"].get("timeZone"),
         "description": event.get("description"),
         "recurrence": event.get("recurrence"),
     }
