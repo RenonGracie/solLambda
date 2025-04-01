@@ -50,6 +50,8 @@ class Therapist(AvailableSlots):
     greetings_video_link: str | None
     image_link: str | None
 
+    accepting_new_clients: bool | None
+
     available_slots: list[datetime] | None
 
     def __init__(self, json: dict):
@@ -71,6 +73,7 @@ class Therapist(AvailableSlots):
             age=fields.get("Age"),
             email=fields.get("Email") or fields.get("Notes"),
             calendar_email=fields.get("Calendar"),
+            accepting_new_clients=parce_bool(fields.get("Accepting New Clients")),
             biography=fields.get("Intro Bios (Shortened)"),
             availability=fields.get(
                 "Availability: When are you available to see clients?"

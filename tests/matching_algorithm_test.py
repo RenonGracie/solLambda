@@ -14,6 +14,7 @@ def sample_therapist():
             "id": "1",
             "fields": {
                 "States": ["CA", "NY"],
+                "Accepting New Clients": "Yes",
                 "Gender": "Male",
                 "Experience and/or interest in working with higher-risk clients": "Yes",
                 "Diagnoses: Please select the diagnoses you have experience and/or interest in working with": [

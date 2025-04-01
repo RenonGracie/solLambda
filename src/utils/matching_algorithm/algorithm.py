@@ -7,6 +7,10 @@ from src.models.db.clients import ClientSignup
 def calculate_match_score(
     data: ClientSignup, therapist: Therapist
 ) -> (int, list, list):
+    # Hard factor #0
+    if therapist.accepting_new_clients is not True:
+        return -1, [], []
+
     # Hard factor #1
     if (
         not therapist.states
