@@ -8,6 +8,7 @@ from src.models.api.therapist_videos import VideoType
 from src.models.db.therapist_videos import TherapistVideoModel
 from src.models.db.therapists import AppointmentModel
 from src.utils import s3
+from src.utils.rrule_utils import get_start_date
 from src.utils.settings import settings
 
 
@@ -136,7 +137,9 @@ def provide_therapist_slots(
                                 + timedelta(days=15),
                             )
                         else:
-                            occurrences = rrulestr(rule_str, dtstart=start).between(
+                            occurrences = rrulestr(
+                                rule_str, dtstart=get_start_date(start, rule_str)
+                            ).between(
                                 now.astimezone(),
                                 now.astimezone() + duration + timedelta(days=15),
                             )
