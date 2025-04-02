@@ -2,7 +2,6 @@ from datetime import timedelta
 
 
 def get_start_date(start_date, rrule_str: str):
-
     if not rrule_str.__contains__("BYDAY="):
         return start_date
 

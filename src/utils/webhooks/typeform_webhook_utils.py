@@ -34,10 +34,12 @@ def process_typeform_data(db, response_json: dict, base_url: str):
     response_id = response_json["form_response"]["token"]
     form = db.query(ClientSignup).filter_by(email=data.email).first()
     create_user_on_intakeq = None
+    print("Is user new", form is None)
     if not form:
         form = create_from_typeform_data(response_id, data)
-        db.add(form)
         create_user_on_intakeq = True
+        db.add(form)
+        db.flush()
     else:
         if not form.first_name.__eq__(data.first_name) or not form.last_name.__eq__(
             data.last_name
@@ -45,6 +47,7 @@ def process_typeform_data(db, response_json: dict, base_url: str):
             create_user_on_intakeq = False
         form = update_from_typeform_data(response_id, form, data)
 
+    print("create_user_on_intakeq", create_user_on_intakeq)
     if create_user_on_intakeq is not None:
         if create_user_on_intakeq:
             client_id = f"{random.randint(1000, 9999)}.{random.randint(1000, 9999)}"
@@ -59,8 +62,10 @@ def process_typeform_data(db, response_json: dict, base_url: str):
             }
             print(response.json())
             send_ga_event(
+                database=db,
                 client_id=client_id,
                 user_id=user_id,
+                email=form.email,
                 session_id=session_id,
                 name=REGISTRATION_EVENT,
                 event_type=USER_EVENT_TYPE,

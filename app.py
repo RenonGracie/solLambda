@@ -9,6 +9,7 @@ from src.routes import (
     client_signup_api,
     therapist_video_api,
     intakeq_forms_api,
+    events_api,
 )
 from src.utils.webhooks.intakeq_webhook_appointment_utils import process_appointment
 from src.utils.webhooks.typeform_webhook_utils import process_typeform_data
@@ -26,6 +27,7 @@ app.register_api(appointment_api)
 app.register_api(therapist_api)
 app.register_api(therapist_video_api)
 app.register_api(intakeq_forms_api)
+app.register_api(events_api)
 
 
 @app.after_request

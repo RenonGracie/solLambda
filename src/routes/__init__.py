@@ -4,6 +4,7 @@ from src.routes.therapist_video import therapist_video_api
 from src.routes.therapists import therapist_api
 from src.routes.appointments import appointment_api
 from src.routes.clients import client_api
+from src.routes.events import events_api
 
 __all__ = [
     "therapist_api",
@@ -12,4 +13,5 @@ __all__ = [
     "intakeq_forms_api",
     "client_signup_api",
     "therapist_video_api",
+    "events_api",
 ]

@@ -6,7 +6,6 @@ from src.db.database import with_database
 from src.models.db.clients import ClientSignup
 from src.models.db.therapists import TherapistModel, AppointmentModel
 from src.utils.event_utils import send_ga_event, INTAKEQ_EVENT_TYPE
-from src.utils.str_utils import camel_to_snake_case
 
 
 def _create_appointment(db, therapist: TherapistModel, data: dict):
@@ -76,10 +75,12 @@ def process_appointment(db, data: dict):
 
     if client:
         send_ga_event(
+            database=db,
             client_id=client.utm.get("client_id"),
             user_id=client.utm.get("user_id"),
+            email=client.email,
             session_id=client.utm.get("session_id"),
-            name=camel_to_snake_case(event),
+            name=event,
             value=appointment.get("Id"),
             params={
                 "therapist_id": appointment["PractitionerId"],

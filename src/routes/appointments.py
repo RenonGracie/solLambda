@@ -140,6 +140,7 @@ def new_appointment(body: CreateAppointment):
             user_id=form.utm.get("user_id"),
             session_id=form.utm.get("session_id"),
             event_type=USER_EVENT_TYPE,
+            email=form.email,
         )
     return jsonify(json), result.status_code
 
