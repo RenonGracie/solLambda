@@ -72,7 +72,10 @@ def new_appointment(body: CreateAppointment):
     practitioners = result.json()["Practitioners"]
     try:
         therapist = next(
-            item for item in practitioners if item["Email"] == body.therapist_email
+            item
+            for item in practitioners
+            if item["Email"] == body.therapist_email
+            or item["CompleteName"] == body.therapist_name
         )
     except StopIteration:
         therapist = None
@@ -90,22 +93,30 @@ def new_appointment(body: CreateAppointment):
         ), 404
 
     name = f"{form.first_name} {form.last_name}"
-    result = search_clients({"search": name})
+
+    def find_client(clients) -> dict | None:
+        if len(clients) > 0:
+            try:
+                return next(
+                    item
+                    for item in clients
+                    if item["Email"] == form.email and item["Name"] == name
+                )
+            except StopIteration:
+                return None
+        else:
+            return None
+
+    result = search_clients({"email": form.email})
     if result.status_code != 200:
         return jsonify(result.json()), result.status_code
+    client = find_client(result.json())
 
-    clients = result.json()
-    if len(clients) > 0:
-        try:
-            client = next(
-                item
-                for item in clients
-                if item["Email"] == form.email and item["Name"] == name
-            )
-        except StopIteration:
-            client = None
-    else:
-        client = None
+    if not client:
+        result = search_clients({"search": name})
+        if result.status_code != 200:
+            return jsonify(result.json()), result.status_code
+        client = find_client(result.json())
 
     if not client:
         print(
