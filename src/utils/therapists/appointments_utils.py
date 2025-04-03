@@ -101,19 +101,30 @@ def get_appointments_for_therapist(
     def _proceed_appointment(item: AppointmentModel):
         if not item.start_date:
             return
+        if item.start.tzinfo is None:
+            start = item.start
+            current_now = now.replace(tzinfo=None)
+            current_now_1_weeks = now_1_weeks.replace(tzinfo=None)
+            current_now_2_weeks = now_2_weeks.replace(tzinfo=None)
+        else:
+            start = item.start.astimezone()
+            current_now = now.astimezone()
+            current_now_1_weeks = now_1_weeks.astimezone()
+            current_now_2_weeks = now_2_weeks.astimezone()
+
         if item.recurrence:
             for rec in item.recurrence:
-                rrule = rrulestr(rec, dtstart=item.start.astimezone())
-                if len(rrule.between(now, now_1_weeks)) > 0:
+                rrule = rrulestr(rec, dtstart=start)
+                if len(rrule.between(current_now, current_now_1_weeks)) > 0:
                     first_week_appointments.append(item)
-                if len(rrule.between(now_1_weeks, now_2_weeks)) > 0:
+                if len(rrule.between(current_now_1_weeks, current_now_2_weeks)) > 0:
                     second_week_appointments.append(item)
-
-        if now <= item.start.astimezone() < now_2_weeks:
-            if item.start.astimezone() < now_1_weeks:
-                first_week_appointments.append(item)
-            else:
-                second_week_appointments.append(item)
+        else:
+            if current_now <= start < current_now_2_weeks:
+                if start < current_now_1_weeks:
+                    first_week_appointments.append(item)
+                else:
+                    second_week_appointments.append(item)
 
     therapist_model, exists = _get_therapist_model(
         db, therapist.intern_name, therapist.email
