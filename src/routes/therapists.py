@@ -5,7 +5,9 @@ from flask import jsonify
 from flask_openapi3 import Tag, APIBlueprint
 from googleapiclient.errors import HttpError
 from pyairtable import Api
+from sqlalchemy import column
 
+from src.db.database import db
 from src.models.api.base import AdminPass, Email
 from src.models.api.calendar import (
     CalendarEvents,
@@ -17,6 +19,7 @@ from src.models.api.client_match import MatchedTherapists, MatchQuery
 from src.models.api.error import Error
 from src.models.api.therapist_s3 import MediaQuery, MediaLink
 from src.models.api.therapists import Therapists, Therapist, AvailableSlots
+from src.models.db.therapists import TherapistModel, AppointmentModel
 from src.utils.google.calendar_event_parser import parse_calendar_events
 from src.utils.google.google_calendar import (
     get_events_from_gcalendar,
@@ -147,5 +150,35 @@ def set_events(query: AdminPass, body: TherapistEvents):
 )
 def free_slots(query: Email):
     appointments = events_from_calendar_to_appointments(query.email)
+    slots = provide_therapist_slots(appointments, [])
+    return jsonify({"available_slots": slots}), 200
+
+
+@therapist_api.get(
+    "slots_from_db",
+    responses={200: AvailableSlots},
+    summary="Get therapist's available slots by calendar email",
+)
+def free_slots_db(query: Email):
+    therapist_model = db.query(TherapistModel).filter_by(email=query.email).first()
+    if therapist_model is None:
+        return jsonify({}), 404
+    _DATE_FORMAT = "%Y-%m-%d"
+    now = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0).astimezone()
+    now_str = now.strftime(_DATE_FORMAT)
+    now_2_weeks = now + timedelta(weeks=2)
+    now_2_weeks_str = now_2_weeks.strftime(_DATE_FORMAT)
+    appointments = (
+        db.query(AppointmentModel)
+        .filter_by(therapist_id=therapist_model.id)
+        .filter(AppointmentModel.start_date.between(now_str, now_2_weeks_str))
+        .all()
+    )
+    appointments += (
+        db.query(AppointmentModel)
+        .filter_by(therapist_id=therapist_model.id)
+        .filter(column("recurrence").isnot(None))
+        .all()
+    )
     slots = provide_therapist_slots(appointments, [])
     return jsonify({"available_slots": slots}), 200
