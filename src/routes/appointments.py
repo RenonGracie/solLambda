@@ -107,31 +107,35 @@ def new_appointment(body: CreateAppointment):
         else:
             return None
 
-    result = search_clients({"search": form.email})
-    if result.status_code != 200:
-        return jsonify(result.json()), result.status_code
-    client = find_client(result.json())
-
-    if not client:
-        result = search_clients({"search": name})
+    if form.utm and "user_id" in form.utm:
+        client_id = form.utm["user_id"]
+    else:
+        result = search_clients({"search": form.email})
         if result.status_code != 200:
             return jsonify(result.json()), result.status_code
         client = find_client(result.json())
 
-    if not client:
-        print(
-            f"Client with name '{form.first_name} {form.last_name}' not found on intakeQ"
-        )
-        return jsonify(
-            Error(
-                error=f"Client with name '{form.first_name} {form.last_name}' not found on intakeQ"
-            ).dict()
-        ), 404
+        if not client:
+            result = search_clients({"search": name})
+            if result.status_code != 200:
+                return jsonify(result.json()), result.status_code
+            client = find_client(result.json())
+
+        if not client:
+            print(
+                f"Client with name '{form.first_name} {form.last_name}' not found on intakeQ"
+            )
+            return jsonify(
+                Error(
+                    error=f"Client with name '{form.first_name} {form.last_name}' not found on intakeQ"
+                ).dict()
+            ), 404
+        client_id = client["ClientNumber"]
 
     result = create_appointment(
         {
             "PractitionerId": therapist["Id"],
-            "ClientId": client["ClientNumber"],
+            "ClientId": client_id,
             "LocationId": "1",
             "UtcDateTime": int(parser.parse(body.datetime).timestamp() * 1000),
             "ServiceId": "e818ad3d-5758-4a7d-a1f9-657af8ac4dc8"
