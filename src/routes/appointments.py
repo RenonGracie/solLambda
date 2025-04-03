@@ -107,7 +107,7 @@ def new_appointment(body: CreateAppointment):
         else:
             return None
 
-    result = search_clients({"email": form.email})
+    result = search_clients({"search": form.email})
     if result.status_code != 200:
         return jsonify(result.json()), result.status_code
     client = find_client(result.json())
