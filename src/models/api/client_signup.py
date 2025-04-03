@@ -48,3 +48,7 @@ class ClientSignup(BaseModel):
 
     promo_code: str | None
     referred_by: str | None
+
+
+class ClientSignupForms(BaseModel):
+    forms: list[ClientSignup]
