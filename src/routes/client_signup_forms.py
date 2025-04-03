@@ -33,7 +33,7 @@ def search_clients(query: ClientSignupQuery):
 @client_signup_api.get(
     "all", responses={200: SignupForm, 404: Error}, summary="Search clients"
 )
-def search_clients(query: Email):
+def all_clients(query: Email):
     forms = db.query(ClientSignup).filter_by(email=query.email).all()
     items = []
     for form in forms:
