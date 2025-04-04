@@ -95,6 +95,7 @@ def new_appointment(body: CreateAppointment):
     name = f"{form.first_name} {form.last_name}"
 
     def find_client(clients) -> dict | None:
+        print(clients)
         if len(clients) > 0:
             try:
                 return next(
@@ -107,30 +108,31 @@ def new_appointment(body: CreateAppointment):
         else:
             return None
 
-    if form.utm and "user_id" in form.utm:
-        client_id = form.utm["user_id"]
-    else:
-        result = search_clients({"search": form.email})
+    print("searching clients", form.email)
+    result = search_clients({"search": form.email})
+    if result.status_code != 200:
+        return jsonify(result.json()), result.status_code
+    client = find_client(result.json())
+
+    print("client found", client is not None)
+    if not client:
+        print("searching clients", name)
+        result = search_clients({"search": name})
         if result.status_code != 200:
             return jsonify(result.json()), result.status_code
         client = find_client(result.json())
+        print("client found", client is not None)
 
-        if not client:
-            result = search_clients({"search": name})
-            if result.status_code != 200:
-                return jsonify(result.json()), result.status_code
-            client = find_client(result.json())
-
-        if not client:
-            print(
-                f"Client with name '{form.first_name} {form.last_name}' not found on intakeQ"
-            )
-            return jsonify(
-                Error(
-                    error=f"Client with name '{form.first_name} {form.last_name}' not found on intakeQ"
-                ).dict()
-            ), 404
-        client_id = client["ClientNumber"]
+    if not client:
+        print(
+            f"Client with name '{form.first_name} {form.last_name}' not found on intakeQ"
+        )
+        return jsonify(
+            Error(
+                error=f"Client with name '{form.first_name} {form.last_name}' not found on intakeQ"
+            ).dict()
+        ), 404
+    client_id = client["ClientNumber"]
 
     result = create_appointment(
         {
