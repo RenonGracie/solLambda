@@ -50,7 +50,7 @@ class TypeformData:
                 _value_to_list(identifies_value),
             )
         )
-        return ", ".join(value) if self._use_join and isinstance(value, list) else value
+        return ",".join(value) if self._use_join and isinstance(value, list) else value
 
     @property
     def lived_experiences(self):
@@ -69,7 +69,7 @@ class TypeformData:
             + _value_to_list(upbringing_value)
             + _value_to_list(identity_value)
         )
-        return ", ".join(value) if self._use_join and isinstance(value, list) else value
+        return ",".join(value) if self._use_join and isinstance(value, list) else value
 
     @staticmethod
     def _get_value_from_typeform(data: dict):
@@ -93,4 +93,4 @@ class TypeformData:
         if not answer:
             return ""
         value = self._get_value_from_typeform(self._data.get(field_name))
-        return ", ".join(value) if join and isinstance(value, list) else value
+        return ",".join(value) if join and isinstance(value, list) else value
