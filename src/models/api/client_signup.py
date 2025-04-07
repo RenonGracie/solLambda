@@ -18,7 +18,9 @@ class ClientSignup(BaseModel):
     age: str | None
     state: str | None
 
-    i_would_like_therapist: list[str] | None
+    therapist_specializes_in: list[str] | None
+    therapist_identifies_as: str | None
+
     alcohol: str | None
     drugs: str | None
 
