@@ -9,7 +9,7 @@ class Settings(Singleton):
     def __init__(self):
         load_dotenv()
         self.INTAKEQ_AUTH_KEY = os.getenv("INTAKEQ_AUTH_KEY")
-        self.INTAKEQ_BASE_URL = os.getenv("INTAKEQ_BASE_URL")
+        self.INTAKEQ_BASE_URL = "https://intakeq.com/api/v1"
         self.INTAKEQ_SIGNUP_FORM = os.getenv("INTAKEQ_SIGNUP_FORM")
 
         self.TEST_USER_ID = os.getenv("TEST_USER_ID")
@@ -41,7 +41,7 @@ class Settings(Singleton):
         self.ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD")
 
         self.BOT_LOG_URL = os.getenv("BOT_LOG_URL")
-        self.BOT_URL = os.getenv("BOT_URL")
+        self.BOT_URL = "https://intakeq-bot-482066738827.us-central1.run.app"
 
 
 settings = Settings()
