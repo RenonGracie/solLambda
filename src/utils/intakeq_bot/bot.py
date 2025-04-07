@@ -8,7 +8,7 @@ def create_new_form(data: ClientSignup) -> dict:
     return {
         "first_name": data.first_name,
         "last_name": data.last_name,
-        "age": data.age,
+        "age": str(data.age),
         "email": data.email,
         "phone": data.phone,
         "gender": data.gender,
