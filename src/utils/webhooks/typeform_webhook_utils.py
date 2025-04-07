@@ -2,7 +2,7 @@ import random
 import uuid
 
 from src.db.database import with_database
-from src.models.db.signup_form import create_from_typeform_data
+from src.models.db.signup_form import create_from_typeform_data, ClientSignup
 from src.utils.event_utils import send_ga_event, REGISTRATION_EVENT, USER_EVENT_TYPE
 from src.utils.intakeq_bot.bot import create_new_form, create_client_model
 from src.utils.request_utils import intakeq, save_update_client
@@ -12,6 +12,11 @@ from src.utils.typeform.typeform_parser import TypeformData
 
 @with_database
 def process_typeform_data(db, response_json: dict):
+    response_id = response_json["form_response"]["token"]
+
+    if db.query(ClientSignup).filter_by(response_id=response_id).first():
+        return
+
     questions_json = response_json["form_response"]["definition"]["fields"]
     questions = dict(map(lambda item: (item["ref"], item), questions_json))
     answers = response_json["form_response"]["answers"]
@@ -28,7 +33,6 @@ def process_typeform_data(db, response_json: dict):
         }
     data = TypeformData(json)
 
-    response_id = response_json["form_response"]["token"]
     form = create_from_typeform_data(response_id, data)
 
     response = save_update_client(create_client_model(data))
