@@ -2,6 +2,7 @@ from fuzzywuzzy import fuzz
 
 from src.models.api.therapists import Therapist
 from src.models.db.signup_form import ClientSignup
+from src.utils.states_utils import statename_to_abbr
 
 
 def calculate_match_score(
@@ -12,10 +13,11 @@ def calculate_match_score(
         return -1, [], []
 
     # Hard factor #1
+    state = statename_to_abbr.get(data.state)
     if (
         not therapist.states
-        or not data.state
-        or data.state.lower() not in [state.lower() for state in therapist.states]
+        or not state
+        or state.lower() not in [state.lower() for state in therapist.states]
     ):
         return -1, [], []
 
