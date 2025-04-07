@@ -22,7 +22,7 @@ def _calc_points(value: str):
 
 
 class ClientSignup(Base):
-    __tablename__ = "signup_forms"
+    __tablename__ = "signup"
 
     id = Column("id", UUID, primary_key=True, default=uuid4)
 
@@ -35,7 +35,7 @@ class ClientSignup(Base):
     gender = Column("gender", String(20))
     age = Column("age", String(20))
     state = Column("state", String(100))
-    race = Column("race", String(100))
+    _race = Column("race", Text)
 
     _therapist_specializes_in = Column("therapist_specializes_in", Text)
     therapist_identifies_as = Column("therapist_identifies_as", String(50))
@@ -71,6 +71,14 @@ class ClientSignup(Base):
     _how_did_you_hear_about_us = Column("how_did_you_hear_about_us", Text)
 
     _utm = Column("utm_params", Text, nullable=True)
+
+    @property
+    def race(self):
+        return json.loads(self._race or "[]")
+
+    @race.setter
+    def race(self, data):
+        self._race = json.dumps(data)
 
     @property
     def therapist_specializes_in(self):

@@ -40,7 +40,7 @@ class Settings(Singleton):
 
         self.ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD")
 
-        self.BOT_LOG_URL = os.getenv("BOT_LOG_URL")
+        self.SPREADSHEET_ID = os.getenv("SPREADSHEET_ID")
         self.BOT_URL = "https://intakeq-bot-482066738827.us-central1.run.app"
 
 

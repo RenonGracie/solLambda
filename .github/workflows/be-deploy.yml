@@ -73,7 +73,7 @@ jobs:
           echo TEST_WELCOME_VIDEO=${{ vars.TEST_WELCOME_VIDEO }} >> .env
           echo TEST_GREETINGS_VIDEO=${{ vars.TEST_GREETINGS_VIDEO }} >> .env
           echo ADMIN_PASSWORD=${{ secrets.ADMIN_PASSWORD }} >> .env
-          echo BOT_LOG_URL=${{ vars.BOT_LOG_URL }} >> .env
+          echo SPREADSHEET_ID=${{ vars.SPREADSHEET_ID }} >> .env
           cat .env
 
       - uses: ./.github/actions/generate-class

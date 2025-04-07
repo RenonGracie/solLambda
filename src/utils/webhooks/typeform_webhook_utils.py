@@ -54,12 +54,12 @@ def process_typeform_data(db, response_json: dict):
         event_type=USER_EVENT_TYPE,
     )
 
-    # db.add(form)
+    db.add(form)
     user_data = create_new_form(form)
     intakeq(
         {
             "user": user_data,
-            "log_url": settings.BOT_LOG_URL,
+            "spreadsheet_id": settings.SPREADSHEET_ID,
             "form_url": settings.INTAKEQ_SIGNUP_FORM,
         }
     )
