@@ -2,19 +2,16 @@ import random
 import uuid
 
 from src.db.database import with_database
-from src.models.db.clients import (
-    ClientSignup,
-    create_from_typeform_data,
-    update_from_typeform_data,
-)
+from src.models.db.signup_form import create_from_typeform_data
 from src.utils.event_utils import send_ga_event, REGISTRATION_EVENT, USER_EVENT_TYPE
 from src.utils.intakeq_bot.bot import create_new_form, create_client_model
 from src.utils.request_utils import intakeq, save_update_client
+from src.utils.settings import settings
 from src.utils.typeform.typeform_parser import TypeformData
 
 
 @with_database
-def process_typeform_data(db, response_json: dict, base_url: str):
+def process_typeform_data(db, response_json: dict):
     questions_json = response_json["form_response"]["definition"]["fields"]
     questions = dict(map(lambda item: (item["ref"], item), questions_json))
     answers = response_json["form_response"]["answers"]
@@ -32,14 +29,7 @@ def process_typeform_data(db, response_json: dict, base_url: str):
     data = TypeformData(json)
 
     response_id = response_json["form_response"]["token"]
-    form = db.query(ClientSignup).filter_by(email=data.email).first()
-    print("Is user new", form is None)
-    if not form:
-        form = create_from_typeform_data(response_id, data)
-        db.add(form)
-        db.flush()
-    else:
-        form = update_from_typeform_data(response_id, form, data)
+    form = create_from_typeform_data(response_id, data)
 
     response = save_update_client(create_client_model(data))
 
@@ -52,6 +42,7 @@ def process_typeform_data(db, response_json: dict, base_url: str):
         "user_id": user_id,
         "session_id": session_id,
     }
+
     print(response.json())
     send_ga_event(
         database=db,
@@ -62,5 +53,13 @@ def process_typeform_data(db, response_json: dict, base_url: str):
         name=REGISTRATION_EVENT,
         event_type=USER_EVENT_TYPE,
     )
-    user_data = create_new_form(data)
-    intakeq({"user": user_data, "sheetURL": f"{base_url}_bot"})
+
+    # db.add(form)
+    user_data = create_new_form(form)
+    intakeq(
+        {
+            "user": user_data,
+            "log_url": settings.BOT_LOG_URL,
+            "form_url": settings.INTAKEQ_SIGNUP_FORM,
+        }
+    )

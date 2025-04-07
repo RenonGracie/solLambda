@@ -1,7 +1,7 @@
 from fuzzywuzzy import fuzz
 
 from src.models.api.therapists import Therapist
-from src.models.db.clients import ClientSignup
+from src.models.db.signup_form import ClientSignup
 
 
 def calculate_match_score(
@@ -21,13 +21,13 @@ def calculate_match_score(
 
     # Hard factor #2
     if therapist.gender and (
-        data.i_would_like_therapist.__contains__("No preference")
+        data.therapist_identifies_as.__contains__("No preference")
         or (
-            data.i_would_like_therapist.__contains__("Is male")
+            data.therapist_identifies_as.__contains__("Male")
             and str(therapist.gender).lower().__eq__("male")
         )
         or (
-            data.i_would_like_therapist.__contains__("Is female")
+            data.therapist_identifies_as.__contains__("Female")
             and str(therapist.gender).lower().__eq__("female")
         )
     ):
@@ -58,7 +58,7 @@ def calculate_match_score(
     matched_specialities = set()
 
     # Soft factor #1
-    for preference in data.i_would_like_therapist:
+    for preference in data.therapist_specializes_in:
         if therapist.diagnoses:
             for diagnose in therapist.diagnoses:
                 if fuzz.token_set_ratio(preference, diagnose) > 80:

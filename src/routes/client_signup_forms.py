@@ -5,7 +5,7 @@ from src.db.database import db
 from src.models.api.base import Email
 from src.models.api.client_signup import ClientSignup as SignupForm, ClientSignupQuery
 from src.models.api.error import Error
-from src.models.db.clients import ClientSignup
+from src.models.db.signup_form import ClientSignup
 
 __tag = Tag(name="Clients Signup Forms")
 client_signup_api = APIBlueprint(

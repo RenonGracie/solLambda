@@ -3,7 +3,7 @@ from datetime import datetime, UTC
 from sqlalchemy import and_
 
 from src.db.database import with_database
-from src.models.db.clients import ClientSignup
+from src.models.db.signup_form import ClientSignup
 from src.models.db.therapists import TherapistModel, AppointmentModel
 from src.utils.event_utils import send_ga_event, INTAKEQ_EVENT_TYPE
 

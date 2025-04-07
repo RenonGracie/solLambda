@@ -15,7 +15,7 @@ from src.models.api.appointments import (
 )
 from src.models.api.base import EmailWithAdminPass
 from src.models.api.error import Error
-from src.models.db.clients import ClientSignup
+from src.models.db.signup_form import ClientSignup
 from src.utils.event_utils import send_ga_event, CALL_SCHEDULED_EVENT, USER_EVENT_TYPE
 from src.utils.request_utils import (
     get_booking_settings,

@@ -13,7 +13,6 @@ def _value_to_list(value):
 
 class TypeformData:
     _data: dict = {}
-    _use_join = False
 
     @property
     def first_name(self):
@@ -30,46 +29,23 @@ class TypeformData:
     def __init__(self, data: dict) -> None:
         self._data = data
 
-    def enable_join(self):
-        self._use_join = True
-
-    @property
-    def i_would_like_therapist(self):
-        specializes_value = self.get_value(
-            TypeformIds.I_WOULD_LIKE_THERAPIST_SPECIALIZES, auto_join=False
-        )
-        identifies_value = self.get_value(
-            TypeformIds.I_WOULD_LIKE_THERAPIST_IDENTIFIES, auto_join=False
-        )
-
-        value = _value_to_list(specializes_value) + list(
-            map(
-                lambda gender: gender.replace("Male", "Is male").replace(
-                    "Female", "Is female"
-                ),
-                _value_to_list(identifies_value),
-            )
-        )
-        return ",".join(value) if self._use_join and isinstance(value, list) else value
-
     @property
     def lived_experiences(self):
-        family_value = self.get_value(
-            TypeformIds.LIVED_EXPERIENCES_FAMILY, auto_join=False
-        )
-        upbringing_value = self.get_value(
-            TypeformIds.LIVED_EXPERIENCES_UPBRINGING, auto_join=False
-        )
-        identity_value = self.get_value(
-            TypeformIds.LIVED_EXPERIENCES_IDENTITY, auto_join=False
-        )
+        family_value = self.get_value(TypeformIds.LIVED_EXPERIENCES_FAMILY)
+        upbringing_value = self.get_value(TypeformIds.LIVED_EXPERIENCES_UPBRINGING)
+        identity_value = self.get_value(TypeformIds.LIVED_EXPERIENCES_IDENTITY)
 
         value = (
             _value_to_list(family_value)
             + _value_to_list(upbringing_value)
             + _value_to_list(identity_value)
         )
-        return ",".join(value) if self._use_join and isinstance(value, list) else value
+        return value
+
+    @property
+    def how_did_you_heard(self):
+        value = self.get_value(TypeformIds.HOW_DID_YOU_HEAR_ABOUT)
+        return value if isinstance(value, list) else [value]
 
     @staticmethod
     def _get_value_from_typeform(data: dict):
@@ -84,13 +60,14 @@ class TypeformData:
                     return data["answer"].get("label")
             case "dropdown":
                 return data["answer"].get("label")
+            case "choice":
+                return data["answer"].get("label")
             case _:
                 return data.get("answer")
 
-    def get_value(self, field_name: str, auto_join: bool | None = None):
-        join = auto_join if auto_join is not None else self._use_join
+    def get_value(self, field_name: str):
         answer = self._data.get(field_name)
         if not answer:
             return ""
         value = self._get_value_from_typeform(self._data.get(field_name))
-        return ",".join(value) if join and isinstance(value, list) else value
+        return value

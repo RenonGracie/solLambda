@@ -5,7 +5,6 @@ import emoji
 from sqlalchemy import Column, String, Text
 from sqlalchemy.dialects.postgresql import UUID
 
-from src.utils.states_utils import statename_to_abbr
 from src.utils.typeform.typeform_parser import TypeformData, TypeformIds
 from src.models.db.base import Base
 
@@ -23,21 +22,24 @@ def _calc_points(value: str):
 
 
 class ClientSignup(Base):
-    __tablename__ = "clients"
+    __tablename__ = "signup_forms"
 
     id = Column("id", UUID, primary_key=True, default=uuid4)
 
-    response_id = Column("response_id", String(50))
+    response_id = Column("response_id", String(50), unique=True)
 
     first_name = Column("first_name", Text)
     last_name = Column("last_name", Text)
-    email = Column("email", Text, unique=True)
+    email = Column("email", Text)
     phone = Column("phone", String(50))
     gender = Column("gender", String(20))
     age = Column("age", String(20))
-    state = Column("state", String(5))
+    state = Column("state", String(100))
+    race = Column("race", String(100))
 
-    _i_would_like_therapist = Column("i_would_like_therapist", Text)
+    _therapist_specializes_in = Column("therapist_specializes_in", Text)
+    therapist_identifies_as = Column("therapist_identifies_as", String(50))
+
     alcohol = Column("alcohol", String(50))
     drugs = Column("drugs", String(50))
 
@@ -59,25 +61,24 @@ class ClientSignup(Base):
     easily_annoyed = Column("easily_annoyed", String(50))
     feeling_afraid = Column("feeling_afraid", String(50))
 
-    university = Column("university", String(150))
+    university = Column("university", Text)
 
-    what_brings_you = Column("what_brings_you", Text)
     _lived_experiences = Column("lived_experiences", Text)
-    best_time_for_first_session = Column("best_time_for_first_session", Text)
+
+    promo_code = Column("promo_code", String(255))
+    referred_by = Column("referred_by", Text)
 
     _how_did_you_hear_about_us = Column("how_did_you_hear_about_us", Text)
-    promo_code = Column("promo_code", String(100))
-    referred_by = Column("referred_by", Text)
 
     _utm = Column("utm_params", Text, nullable=True)
 
     @property
-    def i_would_like_therapist(self):
-        return json.loads(self._i_would_like_therapist or "[]")
+    def therapist_specializes_in(self):
+        return json.loads(self._therapist_specializes_in or "[]")
 
-    @i_would_like_therapist.setter
-    def i_would_like_therapist(self, preferences):
-        self._i_would_like_therapist = json.dumps(preferences)
+    @therapist_specializes_in.setter
+    def therapist_specializes_in(self, data):
+        self._therapist_specializes_in = json.dumps(data)
 
     @property
     def lived_experiences(self):
@@ -138,25 +139,26 @@ class ClientSignup(Base):
 
 
 def create_from_typeform_data(response_id: str, data: TypeformData) -> ClientSignup:
-    form = update_from_typeform_data(response_id, ClientSignup(), data)
-    form.email = data.get_value(TypeformIds.EMAIL)
-    return form
-
-
-def update_from_typeform_data(
-    response_id: str, client: ClientSignup, data: TypeformData
-) -> ClientSignup:
+    client = ClientSignup()
     client.response_id = response_id
 
     client.first_name = data.get_value(TypeformIds.FIRST_NAME)
     client.last_name = data.get_value(TypeformIds.LAST_NAME)
     client.phone = data.get_value(TypeformIds.PHONE)
+    client.email = data.get_value(TypeformIds.EMAIL)
     client.gender = data.get_value(TypeformIds.GENDER)
     client.age = data.get_value(TypeformIds.AGE)
-    client.state = statename_to_abbr.get(data.get_value(TypeformIds.STATE))
-    client.university = statename_to_abbr.get(data.get_value(TypeformIds.UNIVERSITY))
+    client.state = data.get_value(TypeformIds.STATE)
+    client.race = data.get_value(TypeformIds.RACE)
 
-    client.i_would_like_therapist = data.i_would_like_therapist
+    client.university = data.get_value(TypeformIds.UNIVERSITY)
+
+    client.therapist_identifies_as = data.get_value(
+        TypeformIds.I_WOULD_LIKE_THERAPIST_IDENTIFIES
+    )
+    client.therapist_specializes_in = data.get_value(
+        TypeformIds.I_WOULD_LIKE_THERAPIST_SPECIALIZES
+    )
 
     client.alcohol = data.get_value(TypeformIds.ALCOHOL)
     client.drugs = data.get_value(TypeformIds.DRUGS)
@@ -190,4 +192,7 @@ def update_from_typeform_data(
     )
 
     client.promo_code = data.get_value(TypeformIds.PROMO_CODE)
+    client.referred_by = data.get_value(TypeformIds.REFERRED_BY)
+
+    client.how_did_you_hear = data.how_did_you_heard
     return client

@@ -47,7 +47,7 @@ def set_cors_headers(response):
 )
 def typeform_webhook():
     print(request)
-    process_typeform_data(request.get_json(), request.base_url)
+    process_typeform_data(request.get_json())
     return jsonify({"success": True}), 200
 
 

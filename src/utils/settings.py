@@ -40,5 +40,8 @@ class Settings(Singleton):
 
         self.ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD")
 
+        self.BOT_LOG_URL = os.getenv("BOT_LOG_URL")
+        self.BOT_URL = os.getenv("BOT_URL")
+
 
 settings = Settings()

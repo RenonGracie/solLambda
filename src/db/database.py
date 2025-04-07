@@ -5,7 +5,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import sessionmaker
 
 from src.models.db.analytic_event import AnalyticEvent
-from src.models.db.clients import ClientSignup
+from src.models.db.signup_form import ClientSignup
 from src.models.db.therapist_videos import TherapistVideoModel
 from src.models.db.therapists import AppointmentModel, TherapistModel
 from src.utils.settings import settings

@@ -3,7 +3,7 @@ import json
 import pytest
 
 from src.models.api.therapists import Therapist
-from src.models.db.clients import ClientSignup
+from src.models.db.signup_form import ClientSignup
 from src.utils.matching_algorithm.algorithm import calculate_match_score
 
 
@@ -46,7 +46,8 @@ def sample_client():
         gender="Male",
         age="25",
         state="CA",
-        _i_would_like_therapist=json.dumps(["Is male", "Trauma", "Family Therapy"]),
+        _therapist_specializes_in=json.dumps(["Is male", "Trauma", "Family Therapy"]),
+        therapist_identifies_as="Male",
         pleasure_doing_things="Nearly every day",
         feeling_down="Several days",
         trouble_falling="More than half the days",
@@ -64,11 +65,9 @@ def sample_client():
         easily_annoyed="Not at all",
         feeling_afraid="Not at all",
         university="Some University",
-        what_brings_you="Anxiety and depression",
         _lived_experiences=json.dumps(
             ["Non-traditional", "Individualist", "Many places"]
         ),
-        best_time_for_first_session="Evenings",
         _how_did_you_hear_about_us=json.dumps(["Google"]),
     )
 
@@ -85,7 +84,7 @@ def test_hard_factor_state_mismatch(sample_client, sample_therapist):
 
 
 def test_hard_factor_gender_mismatch(sample_client, sample_therapist):
-    sample_client.i_would_like_therapist = ["Is female"]
+    sample_client.therapist_identifies_as = ["Female"]
     score, matched_diagnoses, matched_specialities = calculate_match_score(
         sample_client, sample_therapist
     )
@@ -122,7 +121,8 @@ def test_soft_factors(sample_client, sample_therapist):
 
 
 def test_no_matches(sample_client, sample_therapist):
-    sample_client.i_would_like_therapist = []
+    sample_client.therapist_specializes_in = []
+    sample_client.therapist_identifies_as = "Female"
     sample_client.lived_experiences = []
     score, matched_diagnoses, matched_specialities = calculate_match_score(
         sample_client, sample_therapist
@@ -141,13 +141,13 @@ def test_calculate_match_score_full_match(sample_client, sample_therapist):
         "Caretaker role",
         "Affected by social media",
     ]
-    sample_client.i_would_like_therapist = [
-        "Is male",
-        "Experienced with Anxiety",
+    sample_client.therapist_specializes_in = [
+        "Anxiety",
         "CBT-focused",
         "DBT skills based",
         "Trauma",
     ]
+    sample_client.therapist_identifies_as = "Male"
     sample_therapist.diagnoses = ["Anxiety", "Depression"]
     sample_therapist.specialities = ["Trauma"]
     sample_therapist.therapeutic_orientation = ["CBT", "DBT"]

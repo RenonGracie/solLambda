@@ -4,7 +4,7 @@ from typing import List
 from src.db.database import with_database
 from src.models.api.clients import ClientShort
 from src.models.api.therapists import Therapist
-from src.models.db.clients import ClientSignup
+from src.models.db.signup_form import ClientSignup
 from src.utils.matching_algorithm.algorithm import calculate_match_score
 from src.utils.therapists.therapist_data_utils import (
     provide_therapist_slots,
