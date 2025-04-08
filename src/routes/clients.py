@@ -38,7 +38,7 @@ def search_clients(query: ClientQueryModel):
 
 @client_api.patch("", responses={200: Client}, summary="Update client", doc_ui=False)
 def update_client(body: Client):
-    result = save_update_client(body)
+    result = save_update_client(body.dict())
     return jsonify(result.json()), result.status_code
 
 

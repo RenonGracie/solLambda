@@ -45,7 +45,7 @@ def sample_client():
         phone="1234567890",
         gender="Male",
         age="25",
-        state="CA",
+        state="California",
         _therapist_specializes_in=json.dumps(["Is male", "Trauma", "Family Therapy"]),
         therapist_identifies_as="Male",
         pleasure_doing_things="Nearly every day",

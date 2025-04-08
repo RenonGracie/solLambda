@@ -17,6 +17,7 @@ from src.models.api.base import EmailWithAdminPass
 from src.models.api.error import Error
 from src.models.db.signup_form import ClientSignup
 from src.utils.event_utils import send_ga_event, CALL_SCHEDULED_EVENT, USER_EVENT_TYPE
+from src.utils.intakeq.clients import search_client, reassign_client
 from src.utils.request_utils import (
     get_booking_settings,
     search_appointments,
@@ -25,7 +26,6 @@ from src.utils.request_utils import (
     update_appointment,
     appointment_cancellation,
 )
-from src.utils.request_utils import search_clients
 from src.utils.settings import settings
 from src.utils.therapists.appointments_utils import delete_all_appointments
 
@@ -94,34 +94,7 @@ def new_appointment(body: CreateAppointment):
 
     name = f"{form.first_name} {form.last_name}"
 
-    def find_client(clients) -> dict | None:
-        print(clients)
-        if len(clients) > 0:
-            try:
-                return next(
-                    item
-                    for item in clients
-                    if item["Email"] == form.email and item["Name"] == name
-                )
-            except StopIteration:
-                return None
-        else:
-            return None
-
-    print("searching clients", form.email)
-    result = search_clients({"search": form.email})
-    if result.status_code != 200:
-        return jsonify(result.json()), result.status_code
-    client = find_client(result.json())
-
-    print("client found", client is not None)
-    if not client:
-        print("searching clients", name)
-        result = search_clients({"search": name})
-        if result.status_code != 200:
-            return jsonify(result.json()), result.status_code
-        client = find_client(result.json())
-        print("client found", client is not None)
+    client = search_client(form.email, name)
 
     if not client:
         print(
@@ -159,6 +132,7 @@ def new_appointment(body: CreateAppointment):
             event_type=USER_EVENT_TYPE,
             email=form.email,
         )
+    reassign_client(client_id, therapist["Id"])
     return jsonify(json), result.status_code
 
 

@@ -4,7 +4,7 @@ import uuid
 from src.db.database import with_database
 from src.models.db.signup_form import create_from_typeform_data, ClientSignup
 from src.utils.event_utils import send_ga_event, REGISTRATION_EVENT, USER_EVENT_TYPE
-from src.utils.intakeq_bot.bot import create_new_form, create_client_model
+from src.utils.intakeq.bot.bot import create_new_form, create_client_model
 from src.utils.request_utils import intakeq, save_update_client
 from src.utils.settings import settings
 from src.utils.typeform.typeform_parser import TypeformData
@@ -35,7 +35,7 @@ def process_typeform_data(db, response_json: dict):
 
     form = create_from_typeform_data(response_id, data)
 
-    response = save_update_client(create_client_model(data))
+    response = save_update_client(create_client_model(data).dict())
 
     client_id = f"{random.randint(1000, 9999)}.{random.randint(1000, 9999)}"
     client_json = response.json()

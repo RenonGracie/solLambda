@@ -1,6 +1,5 @@
 import requests
 
-from src.models.api.clients import Client
 from src.utils.settings import settings
 
 
@@ -37,12 +36,12 @@ def _intakeq_put(path: str, data: dict):
     )
 
 
-def save_update_client(client: Client):
+def save_update_client(client: dict):
     if settings.TEST_USER_ID:
-        client.ClientId = settings.TEST_USER_ID
+        client["ClientId"] = settings.TEST_USER_ID
     if settings.TEST_PRACTITIONER_ID:
-        client.PractitionerId = settings.TEST_PRACTITIONER_ID
-    return _intakeq_post("/clients", data=client.dict())
+        client["PractitionerId"] = settings.TEST_PRACTITIONER_ID
+    return _intakeq_post("/clients", data=client)
 
 
 def search_clients(args: dict):
@@ -114,3 +113,19 @@ def sent_analytics_event(data: dict):
         },
         json=data,
     )
+
+
+def transfer_client_data(
+    source_practitioner_id: str, destination_practitioner_id: str, client_id: str
+):
+    """
+    Transfer client data between practitioners.
+
+    Args:
+        source_practitioner_id: ID of the current practitioner
+        destination_practitioner_id: ID of the practitioner to transfer to
+        client_id: ID of the client to transfer
+    """
+    path = f"/practitioners/{source_practitioner_id}/transferData/{destination_practitioner_id}"
+    data = {"ClientId": client_id}
+    return _intakeq_post(path, data)
