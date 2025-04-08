@@ -1,20 +1,14 @@
-import base64
-import json
-
 from googleapiclient.errors import HttpError
 
-from src.utils.settings import settings
 
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
 
 _SCOPES = ["https://www.googleapis.com/auth/calendar"]
 
-_creds_json = json.loads(
-    base64.b64decode(settings.GOOGLE_CALENDAR_CREDENTIALS).decode()
-)
-_creds = service_account.Credentials.from_service_account_info(
-    _creds_json, scopes=_SCOPES
+
+_creds = service_account.Credentials.from_service_account_file(
+    "src/utils/google/google_credentials.json", scopes=_SCOPES
 )
 _service = build("calendar", "v3", credentials=_creds)
 
