@@ -88,7 +88,7 @@ def appointment_cancellation(data: dict):
 
 
 def send_intake_form(data: dict):
-    return _intakeq_post("/intakes/send", data, timeout=1)
+    return _intakeq_post("/intakes/send", data)
 
 
 def intakeq(data: dict):
