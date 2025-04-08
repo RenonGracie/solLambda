@@ -105,7 +105,7 @@ def new_appointment(body: CreateAppointment):
                 error=f"Client with name '{form.first_name} {form.last_name}' not found on intakeQ"
             ).dict()
         ), 404
-    client_id = client["ClientNumber"]
+    client_id = client.get("ClientId") or client.get("ClientNumber")
 
     result = create_appointment(
         {
