@@ -71,5 +71,17 @@ def intakeq_hook():
     return "", 200
 
 
+@app.post(
+    "/intakeq_invoice_hook",
+    tags=[Tag(name="Webhook")],
+    summary="Webhook for IntakeQ Invoices",
+)
+def intakeq_invoice_hook():
+    # json = request.get_json()
+    # print(json)
+    # process_appointment(json)
+    return "", 200
+
+
 if __name__ == "__main__":
     app.run(host="127.0.0.1", port=5000, debug=True)
