@@ -10,8 +10,9 @@ from src.utils.request_utils import sent_analytics_event
 REGISTRATION_EVENT = "ClientCreated"
 CALL_SCHEDULED_EVENT = "CallScheduled"
 
-USER_EVENT_TYPE = "user"
-INTAKEQ_EVENT_TYPE = "intakeQ"
+USER_EVENT_TYPE = "User"
+APPOINTMENT_EVENT_TYPE = "Appointment"
+INVOICE_EVENT_TYPE = "Invoice"
 
 
 def _send_event(
@@ -84,6 +85,10 @@ def _send_event(
         params["utm_content"] = utm_content
     if utm_term:
         params["utm_term"] = utm_term
+    if var_1:
+        params["var_1"] = var_1
+    if var_2:
+        params["var_2"] = var_2
     if clid:
         params["clid"] = utm_term
 

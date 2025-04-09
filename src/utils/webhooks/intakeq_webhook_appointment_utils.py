@@ -5,7 +5,10 @@ from sqlalchemy import and_
 from src.db.database import with_database
 from src.models.db.signup_form import ClientSignup
 from src.models.db.therapists import TherapistModel, AppointmentModel
-from src.utils.event_utils import send_ga_event, INTAKEQ_EVENT_TYPE
+from src.utils.event_utils import (
+    send_ga_event,
+    APPOINTMENT_EVENT_TYPE,
+)
 
 
 def _create_appointment(db, therapist: TherapistModel, data: dict):
@@ -82,8 +85,10 @@ def process_appointment(db, data: dict):
             session_id=client.utm.get("session_id"),
             name=event,
             value=appointment.get("Id"),
+            var_2=appointment.get("FullCancellationReason"),
             params={
-                "therapist_id": appointment["PractitionerId"],
+                "ClientId": appointment["ClientId"],
+                "PractitionerId": appointment["PractitionerId"],
             },
-            event_type=INTAKEQ_EVENT_TYPE,
+            event_type=APPOINTMENT_EVENT_TYPE,
         )

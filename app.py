@@ -12,6 +12,7 @@ from src.routes import (
     events_api,
 )
 from src.utils.webhooks.intakeq_webhook_appointment_utils import process_appointment
+from src.utils.webhooks.intakeq_webhook_invoices_utils import process_invoice
 from src.utils.webhooks.typeform_webhook_utils import process_typeform_data
 
 __jwt = {"type": "http", "scheme": "bearer", "bearerFormat": "JWT"}
@@ -77,9 +78,9 @@ def intakeq_hook():
     summary="Webhook for IntakeQ Invoices",
 )
 def intakeq_invoice_hook():
-    # json = request.get_json()
-    # print(json)
-    # process_appointment(json)
+    json = request.get_json()
+    print(json)
+    process_invoice(json)
     return "", 200
 
 
