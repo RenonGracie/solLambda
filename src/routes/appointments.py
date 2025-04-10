@@ -74,8 +74,8 @@ def new_appointment(body: CreateAppointment):
         therapist = next(
             item
             for item in practitioners
-            if item["Email"] == body.therapist_email
-            or item["CompleteName"] == body.therapist_name
+            if str(item["Email"]).lower() == body.therapist_email.lower()
+            or (item["CompleteName"]).lower() == body.therapist_name.lower()
         )
     except StopIteration:
         therapist = None
