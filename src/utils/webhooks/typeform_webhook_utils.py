@@ -65,5 +65,6 @@ def process_typeform_data(db, response_json: dict):
             "user": user_data,
             "spreadsheet_id": settings.SPREADSHEET_ID,
             "form_url": settings.INTAKEQ_SIGNUP_FORM,
+            "env": "live" if settings.ENV == "prod" else settings.ENV,
         }
     )

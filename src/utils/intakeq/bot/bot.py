@@ -39,6 +39,7 @@ def create_new_form(data: ClientSignup) -> dict:
         "promocode": data.promo_code,
         "how_did_you_hear_about": data.how_did_you_hear,
         "referred_by": data.referred_by,
+        "therapist_name": data.therapist_name,
     }
 
 

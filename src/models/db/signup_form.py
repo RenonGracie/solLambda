@@ -72,6 +72,8 @@ class ClientSignup(Base):
 
     _utm = Column("utm_params", Text, nullable=True)
 
+    therapist_name = Column("therapist_name", Text)
+
     @property
     def race(self):
         return json.loads(self._race or "[]")
@@ -203,4 +205,6 @@ def create_from_typeform_data(response_id: str, data: TypeformData) -> ClientSig
     client.referred_by = data.get_value(TypeformIds.REFERRED_BY)
 
     client.how_did_you_hear = data.how_did_you_heard
+
+    client.therapist_name = data.get_value(TypeformIds.THERAPIST_YOU_WANT)
     return client

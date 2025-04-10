@@ -57,6 +57,7 @@ jobs:
       - name: Create .env file
         run: |
           touch .env
+          echo ENV=${{ env.DEPLOY_ENV }} >> .env
           echo INTAKEQ_AUTH_KEY=${{ secrets.INTAKEQ_AUTH_KEY }} >> .env
           echo INTAKEQ_SIGNUP_FORM=${{ vars.INTAKEQ_SIGNUP_FORM }} >> .env
           echo AIRTABLE_API_KEY=${{ secrets.AIRTABLE_API_KEY }} >> .env

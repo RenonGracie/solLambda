@@ -18,30 +18,41 @@ from src.utils.therapists.appointments_utils import get_appointments_for_therapi
 def match_client_with_therapists(
     db, response_id: str, therapists: list[Therapist], limit: int, last_index: int
 ) -> (ClientSignup | None, List[dict]):
-    form = db.query(ClientSignup).filter_by(response_id=response_id).first()
+    form: ClientSignup = (
+        db.query(ClientSignup).filter_by(response_id=response_id).first()
+    )
     if not form:
         return None, []
 
     matches = []
 
     for therapist in therapists:
-        score, matched_diagnoses, matched_specialities = calculate_match_score(
-            form, therapist
-        )
-        if score >= 0:
-            caseload = re.findall(r"\d+", therapist.max_caseload)
-            if len(caseload) > 0:
-                max_caseload = int(caseload[-1])
-                if max_caseload > 0:
-                    matches.append(
-                        {
-                            "therapist": therapist,
-                            "score": score,
-                            "matched_specialities": matched_specialities,
-                            "matched_diagnoses": matched_diagnoses,
-                            "max_caseload": max_caseload,
-                        }
-                    )
+        if form.therapist_name:
+            if therapist.intern_name == form.therapist_name:
+                matches.append(
+                    {
+                        "therapist": therapist,
+                    }
+                )
+                break
+        else:
+            score, matched_diagnoses, matched_specialities = calculate_match_score(
+                form, therapist
+            )
+            if score >= 0:
+                caseload = re.findall(r"\d+", therapist.max_caseload)
+                if len(caseload) > 0:
+                    max_caseload = int(caseload[-1])
+                    if max_caseload > 0:
+                        matches.append(
+                            {
+                                "therapist": therapist,
+                                "score": score,
+                                "matched_specialities": matched_specialities,
+                                "matched_diagnoses": matched_diagnoses,
+                                "max_caseload": max_caseload,
+                            }
+                        )
 
     matches = implement_age_factor(
         form.age,
@@ -55,7 +66,7 @@ def match_client_with_therapists(
     matched_therapists = []
     for match in matches:
         therapist = match["therapist"]
-        max_caseload = match["max_caseload"]
+        max_caseload = match.get("max_caseload")
         first_week_appointments, second_week_appointments = (
             get_appointments_for_therapist(db, therapist)
         )
@@ -66,12 +77,16 @@ def match_client_with_therapists(
             appointment.client_email for appointment in second_week_appointments
         }
 
-        if len(first_week_client_emails) > max_caseload:
+        if max_caseload and len(first_week_client_emails) > max_caseload:
             first_week_appointments = None
-        if len(second_week_client_emails) > max_caseload:
+        if max_caseload and len(second_week_client_emails) > max_caseload:
             second_week_appointments = None
 
-        if first_week_appointments is not None or second_week_appointments is not None:
+        if (
+            first_week_appointments is not None
+            or second_week_appointments is not None
+            or therapist.intern_name == form.therapist_name
+        ):
             therapist.available_slots = provide_therapist_slots(
                 first_week_appointments,
                 second_week_appointments,
@@ -80,9 +95,9 @@ def match_client_with_therapists(
                 matched_therapists.append(
                     {
                         "therapist": therapist,
-                        "score": match["score"],
-                        "matched_specialities": match["matched_specialities"],
-                        "matched_diagnoses": match["matched_diagnoses"],
+                        "score": match.get("score"),
+                        "matched_specialities": match.get("matched_specialities"),
+                        "matched_diagnoses": match.get("matched_diagnoses"),
                     }
                 )
         if len(matched_therapists) == limit + last_index:

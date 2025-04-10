@@ -8,6 +8,8 @@ from src.utils.singletone import Singleton
 class Settings(Singleton):
     def __init__(self):
         load_dotenv()
+        self.INTAKEQ_AUTH_KEY = os.getenv("ENV")
+
         self.INTAKEQ_AUTH_KEY = os.getenv("INTAKEQ_AUTH_KEY")
         self.INTAKEQ_BASE_URL = "https://intakeq.com/api/v1"
         self.INTAKEQ_SIGNUP_FORM = os.getenv("INTAKEQ_SIGNUP_FORM")

@@ -10,7 +10,6 @@ S3_BUCKET_NAME = "therapists-personal-data"
 
 
 def get_media_url(user_id: str, s3_media_type: S3MediaType, expiration=3600):
-    print("IS_AWS", settings.IS_AWS)
     if settings.IS_AWS is False:
         return None
 
