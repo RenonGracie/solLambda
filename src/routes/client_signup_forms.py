@@ -38,7 +38,7 @@ def all_clients(query: Email):
     items = []
     for form in forms:
         data = SignupForm(**form.__dict__)
-        data.i_would_like_therapist = form.i_would_like_therapist
+        data.therapist_specializes_in = form.therapist_specializes_in
         data.lived_experiences = form.lived_experiences
         items.append(data.dict())
     return jsonify({"forms": items}), 200
