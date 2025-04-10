@@ -10,6 +10,7 @@ from typing import Sequence, Union
 
 from alembic import op
 import sqlalchemy as sa
+from sqlalchemy import text
 
 from src.models.db.signup_form import ClientSignup
 
@@ -24,12 +25,14 @@ def upgrade() -> None:
     conn = op.get_bind()
     
     result = conn.execute(
-        f"""
-        SELECT column_name 
-        FROM information_schema.columns 
-        WHERE table_name = '{ClientSignup.__tablename__}' 
-        AND column_name = 'therapist_name'
-        """
+        text(
+            f"""
+            SELECT column_name 
+            FROM information_schema.columns 
+            WHERE table_name = '{ClientSignup.__tablename__}' 
+            AND column_name = 'therapist_name'
+            """
+        )
     ).fetchall()
     
     if not result:
