@@ -22,10 +22,17 @@ depends_on: Union[str, Sequence[str], None] = None
 
 def upgrade() -> None:
     conn = op.get_bind()
-    inspector = sa.inspect(conn)
-    columns = [col["name"] for col in inspector.get_columns(ClientSignup.__tablename__)]
-
-    if "therapist_name" not in columns:
+    
+    result = conn.execute(
+        f"""
+        SELECT column_name 
+        FROM information_schema.columns 
+        WHERE table_name = '{ClientSignup.__tablename__}' 
+        AND column_name = 'therapist_name'
+        """
+    ).fetchall()
+    
+    if not result:
         op.add_column(
             ClientSignup.__tablename__,
             sa.Column("therapist_name", sa.Text(), nullable=True),
