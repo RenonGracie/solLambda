@@ -74,6 +74,7 @@ jobs:
           echo TEST_GREETINGS_VIDEO=${{ vars.TEST_GREETINGS_VIDEO }} >> .env
           echo ADMIN_PASSWORD=${{ secrets.ADMIN_PASSWORD }} >> .env
           echo SPREADSHEET_ID=${{ vars.SPREADSHEET_ID }} >> .env
+          echo BOT_URL=${{ vars.BOT_URL }} >> .env
           cat .env
 
       - name: Create Google Calendar credentials file

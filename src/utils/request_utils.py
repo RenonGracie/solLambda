@@ -93,7 +93,7 @@ def send_intake_form(data: dict):
 def intakeq(data: dict):
     try:
         return requests.post(
-            url=f"{settings.BOT_URL}/production_form",
+            url=settings.BOT_URL,
             headers={
                 "X-Auth-Key": settings.INTAKEQ_AUTH_KEY,
                 "Content-type": "application/json",
