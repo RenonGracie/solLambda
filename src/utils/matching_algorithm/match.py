@@ -35,7 +35,7 @@ def match_client_with_therapists(
 
     state = statename_to_abbr.get(form.state)
 
-    therapist_models = (
+    therapists = (
         db.query(AirtableTherapist)
         .filter(
             AirtableTherapist.accepting_new_clients,
@@ -52,13 +52,6 @@ def match_client_with_therapists(
         )
         .all()
     )
-
-    if len(therapist_models) == 0:
-        therapists = [AirtableTherapist.from_airtable(item) for item in airtable.all()]
-        db.add_all(therapists)
-        therapists = [item for item in therapists if item.accepting_new_clients]
-    else:
-        therapists = therapist_models
 
     matches = []
 
