@@ -74,6 +74,13 @@ functions:
   migrate:
     handler: migrate.handler
     timeout: 15
+  updateTherapistsTable:
+    handler: cron_therapists_update.handler
+    timeout: 60
+    events:
+      - schedule:
+          rate: rate(2 hours)
+          enabled: true
 
 
 resources:
