@@ -162,11 +162,11 @@ def get_appointments_for_therapist(
 
         if fetched:
             appointments = [app for app in fetched if app]
-
+            
             for appointment in appointments:
                 appointment.therapist = therapist
-                db.add(appointment)
-
+            
+            db.add_all(appointments)
             db.flush()
 
             with ThreadPoolExecutor(max_workers=4) as executor:
