@@ -2,7 +2,7 @@ import json
 from uuid import uuid4
 from zoneinfo import ZoneInfo
 
-from sqlalchemy import Column, String, Text, Boolean
+from sqlalchemy import Column, String, Text
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 
@@ -10,19 +10,8 @@ from src.db.fields.custom import DateTimeAsString
 from src.models.db.base import Base
 
 
-class TherapistModel(Base):
-    __tablename__ = "therapists"
-
-    id = Column("id", UUID, primary_key=True, default=uuid4)
-    name = Column("name", Text)
-    email = Column("email", Text, unique=True)
-
-    calendar_fetched = Column("calendar_fetched", Boolean, default=False)
-    calendar_email = Column("calendar_email", Text, nullable=True)
-
-
 class AppointmentModel(Base):
-    __tablename__ = "appointments"
+    __tablename__ = "therapist_appointments"
 
     id = Column("id", UUID, primary_key=True, default=uuid4)
 
@@ -37,11 +26,11 @@ class AppointmentModel(Base):
 
     _recurrence = Column("recurrence", Text)
 
-    therapist_id = Column("therapist_id", UUID, nullable=True)
+    therapist_id = Column("therapist_id", String(100), nullable=True)
     therapist = relationship(
-        "TherapistModel",
+        "AirtableTherapist",
         foreign_keys=[therapist_id],
-        primaryjoin="TherapistModel.id == AppointmentModel.therapist_id",
+        primaryjoin="AirtableTherapist.id == AppointmentModel.therapist_id",
     )
 
     @property

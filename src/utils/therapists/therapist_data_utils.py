@@ -1,18 +1,14 @@
 from datetime import timedelta, datetime
 
 from dateutil.rrule import rrulestr
-from zoneinfo import ZoneInfo
 
 from src.models.api.therapist_s3 import S3MediaType
 from src.models.api.therapist_videos import VideoType
 from src.models.db.therapist_videos import TherapistVideoModel
-from src.models.db.therapists import AppointmentModel
+from src.models.db.appointments import AppointmentModel
 from src.utils import s3
 from src.utils.rrule_utils import get_start_date
 from src.utils.settings import settings
-
-
-_DEFAULT_ZONE = ZoneInfo("US/Eastern")
 
 
 def _rearrange_elements(elements, indices):
@@ -60,14 +56,17 @@ def implement_age_factor(age_str: str, matched: list[dict]) -> list[dict]:
         return matched
 
 
-def load_therapist_media(db, data: dict) -> dict:
-    therapist = data["therapist"]
+def load_therapist_media(videos: list[TherapistVideoModel], data: dict) -> dict:
+    therapist_model = data["therapist"]
     email = (
         settings.TEST_THERAPIST_EMAIL
         if settings.TEST_THERAPIST_EMAIL
-        else therapist.email
+        else therapist_model.email
     )
-    videos = db.query(TherapistVideoModel).filter_by(email=email).all()
+    therapist = therapist_model.to_therapist()
+    therapist.available_slots = data["available_slots"]
+    data.pop("available_slots")
+    videos = [item for item in videos if item.email == therapist.email]
     for video in videos:
         if video.type == VideoType.WELCOME.value:
             therapist.welcome_video_link = video.video_url
@@ -87,21 +86,16 @@ def load_therapist_media(db, data: dict) -> dict:
 
 
 def provide_therapist_slots(
+    now: datetime,
+    first_week_slots: list[datetime],
+    second_week_slots: list[datetime],
     first_week_appointments: list[AppointmentModel] | None,
     second_week_appointments: list[AppointmentModel] | None,
 ) -> list[datetime]:
-    first_week_slots = []
-    second_week_slots = []
-    now = datetime.now(tz=_DEFAULT_ZONE).replace(
-        hour=7, minute=0, second=0, microsecond=0
-    )
-    if first_week_appointments is not None or second_week_appointments is not None:
-        for day in range(7):
-            for hour in range(15):
-                if first_week_appointments is not None:
-                    first_week_slots.append(now + timedelta(hours=hour, days=day))
-                if second_week_appointments is not None:
-                    second_week_slots.append(now + timedelta(hours=hour, days=day + 7))
+    if first_week_appointments is None:
+        first_week_slots = []
+    if second_week_appointments is None:
+        second_week_slots = []
 
     def _check_slot(slot: datetime, start: datetime, end: datetime) -> bool:
         start = start.astimezone()

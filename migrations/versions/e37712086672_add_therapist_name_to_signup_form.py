@@ -23,7 +23,7 @@ depends_on: Union[str, Sequence[str], None] = None
 
 def upgrade() -> None:
     conn = op.get_bind()
-    
+
     result = conn.execute(
         text(
             f"""
@@ -34,7 +34,7 @@ def upgrade() -> None:
             """
         )
     ).fetchall()
-    
+
     if not result:
         op.add_column(
             ClientSignup.__tablename__,

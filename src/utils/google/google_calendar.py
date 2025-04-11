@@ -1,28 +1,31 @@
 from googleapiclient.errors import HttpError
 
 
-from google.oauth2 import service_account
 from googleapiclient.discovery import build
 
-_SCOPES = ["https://www.googleapis.com/auth/calendar"]
+from src.utils.google.credentials import get_credentials
 
 
-_creds = service_account.Credentials.from_service_account_file(
-    "src/utils/google/google_credentials.json", scopes=_SCOPES
-)
-_service = build("calendar", "v3", credentials=_creds)
+def _get_service():
+    creds = get_credentials()
+    return build("calendar", "v3", credentials=creds)
 
 
 def insert_email_to_gcalendar(calendar_id: str) -> None:
-    _service.calendarList().insert(body={"id": calendar_id}).execute()
+    service = _get_service()
+    try:
+        service.calendarList().insert(body={"id": calendar_id}).execute()
+    finally:
+        service.close()
 
 
 def gcalendar_list():
+    service = _get_service()
     try:
         page_token = None
         data = []
         while True:
-            calendars = _service.calendarList().list(pageToken=page_token).execute()
+            calendars = service.calendarList().list(pageToken=page_token).execute()
             data += calendars["items"]
             page_token = calendars.get("nextPageToken")
             if not page_token:
@@ -30,6 +33,8 @@ def gcalendar_list():
         return data
     except HttpError:
         return []
+    finally:
+        service.close()
 
 
 def get_events_from_gcalendar(
@@ -38,14 +43,15 @@ def get_events_from_gcalendar(
     time_max: str | None = None,
     max_results: int = 1000,
     raise_error: bool = False,
-) -> list[dict]:
+) -> list[dict] | None:
+    service = _get_service()
     try:
         insert_email_to_gcalendar(calendar_id)
         page_token = None
         data = []
         while True:
             events = (
-                _service.events()
+                service.events()
                 .list(
                     calendarId=calendar_id,
                     pageToken=page_token,
@@ -65,3 +71,5 @@ def get_events_from_gcalendar(
         if raise_error:
             raise e
         return []
+    finally:
+        service.close()

@@ -17,6 +17,7 @@ from src.models.api.client_match import MatchedTherapists, MatchQuery
 from src.models.api.error import Error
 from src.models.api.therapist_s3 import MediaQuery, MediaLink
 from src.models.api.therapists import Therapists, Therapist, AvailableSlots
+from src.utils.constants.contants import DEFAULT_ZONE
 from src.utils.google.calendar_event_parser import parse_calendar_events
 from src.utils.google.google_calendar import (
     get_events_from_gcalendar,
@@ -26,6 +27,7 @@ from src.utils.google.google_calendar import (
 from src.utils.matching_algorithm.match import match_client_with_therapists
 from src.utils.settings import settings
 from src.utils.s3 import get_media_url
+from src.utils.therapists.airtable import save_therapists
 from src.utils.therapists.appointments_utils import (
     process_appointments,
     events_from_calendar_to_appointments,
@@ -48,6 +50,7 @@ table = api.table(settings.AIRTABLE_BASE_ID, settings.AIRTABLE_TABLE_ID)
 @therapist_api.get("", responses={200: Therapists}, summary="Get therapists table")
 def get_therapists():
     therapists = list(map(lambda therapist: Therapist(therapist).dict(), table.all()))
+    save_therapists(therapists)
     return jsonify({"therapists": therapists}), 200
 
 
@@ -55,9 +58,8 @@ def get_therapists():
     "/match", responses={200: MatchedTherapists}, summary="Match client with therapists"
 )
 def match(query: MatchQuery):
-    therapists = list(map(lambda therapist: Therapist(therapist), table.all()))
     client, matched = match_client_with_therapists(
-        query.response_id, therapists, query.limit, query.last_index
+        table, query.response_id, query.limit, query.last_index
     )
     if client is None:
         return jsonify({"client": None, "therapists": []}), 200
@@ -147,5 +149,16 @@ def set_events(query: AdminPass, body: TherapistEvents):
 )
 def free_slots(query: Email):
     appointments = events_from_calendar_to_appointments(query.email)
-    slots = provide_therapist_slots(appointments, [])
+    first_week_slots = []
+    second_week_slots = []
+    now = datetime.now(tz=DEFAULT_ZONE).replace(
+        hour=7, minute=0, second=0, microsecond=0
+    )
+    for day in range(7):
+        for hour in range(15):
+            first_week_slots.append(now + timedelta(hours=hour, days=day))
+            second_week_slots.append(now + timedelta(hours=hour, days=day + 7))
+    slots = provide_therapist_slots(
+        now, first_week_slots, second_week_slots, appointments, []
+    )
     return jsonify({"available_slots": slots}), 200

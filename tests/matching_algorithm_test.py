@@ -2,14 +2,14 @@ import json
 
 import pytest
 
-from src.models.api.therapists import Therapist
+from src.models.db.airtable import AirtableTherapist
 from src.models.db.signup_form import ClientSignup
 from src.utils.matching_algorithm.algorithm import calculate_match_score
 
 
 @pytest.fixture
 def sample_therapist():
-    return Therapist(
+    return AirtableTherapist.from_airtable(
         {
             "id": "1",
             "fields": {

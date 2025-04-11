@@ -3,15 +3,16 @@ from datetime import datetime, UTC
 from sqlalchemy import and_
 
 from src.db.database import with_database
+from src.models.db.airtable import AirtableTherapist
 from src.models.db.signup_form import ClientSignup
-from src.models.db.therapists import TherapistModel, AppointmentModel
+from src.models.db.appointments import AppointmentModel
 from src.utils.event_utils import (
     send_ga_event,
     APPOINTMENT_EVENT_TYPE,
 )
 
 
-def _create_appointment(db, therapist: TherapistModel, data: dict):
+def _create_appointment(db, therapist: AirtableTherapist, data: dict):
     appointment = AppointmentModel()
     appointment.intakeq_id = data["Id"]
     appointment.start_date = datetime.fromtimestamp(data["StartDate"] / 1e3, UTC)
@@ -21,7 +22,7 @@ def _create_appointment(db, therapist: TherapistModel, data: dict):
     db.add(appointment)
 
 
-def _update_appointment(db, therapist: TherapistModel, data: dict):
+def _update_appointment(db, therapist: AirtableTherapist, data: dict):
     appointment = db.query(AppointmentModel).filter_by(intakeq_id=data["Id"]).first()
     if appointment is None:
         _create_appointment(db, therapist, data)
@@ -54,7 +55,7 @@ def _delete_appointment(db, data: dict):
 def process_appointment(db, data: dict):
     appointment = data["Appointment"]
     therapist_model = (
-        db.query(TherapistModel)
+        db.query(AirtableTherapist)
         .filter_by(email=appointment["PractitionerEmail"])
         .first()
     )
@@ -62,10 +63,7 @@ def process_appointment(db, data: dict):
     client = db.query(ClientSignup).filter_by(email=appointment["ClientEmail"]).first()
 
     if therapist_model is None:
-        therapist_model = TherapistModel()
-        therapist_model.name = appointment["PractitionerName"]
-        therapist_model.email = appointment["PractitionerEmail"]
-        db.add(therapist_model)
+        return
 
     event = data["EventType"]
     match event:

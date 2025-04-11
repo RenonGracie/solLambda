@@ -5,7 +5,7 @@ import pytest
 from datetime import datetime, timedelta
 
 from src.models.api.therapists import Therapist
-from src.models.db.therapists import AppointmentModel
+from src.models.db.appointments import AppointmentModel
 from src.utils.therapists.therapist_data_utils import provide_therapist_slots
 
 
@@ -17,6 +17,18 @@ def now():
     )
 
 
+# Fixture for current time (start of day)
+@pytest.fixture
+def slots(now):
+    first_week_slots = []
+    second_week_slots = []
+    for day in range(7):
+        for hour in range(15):
+            first_week_slots.append(now + timedelta(hours=hour, days=day))
+            second_week_slots.append(now + timedelta(hours=hour, days=day + 7))
+    return first_week_slots, second_week_slots
+
+
 # Fixture for the therapist
 @pytest.fixture
 def therapist():
@@ -24,13 +36,17 @@ def therapist():
 
 
 # Test 1: No assignments (empty lists)
-def test_no_appointments(now):
-    result = provide_therapist_slots(None, None)
+def test_no_appointments(now, slots):
+    first_week_slots, second_week_slots = slots
+    result = provide_therapist_slots(
+        now, first_week_slots, second_week_slots, None, None
+    )
     assert result == []
 
 
 # Test 2: Appointments for the first week only
-def test_first_week_appointments(now):
+def test_first_week_appointments(now, slots):
+    first_week_slots, second_week_slots = slots
     # Create test assignments
     appointment = AppointmentModel(
         start_date=now + timedelta(hours=5),  # 12:00
@@ -39,7 +55,13 @@ def test_first_week_appointments(now):
     first_week_appointments = [appointment]
     second_week_appointments = None
 
-    result = provide_therapist_slots(first_week_appointments, second_week_appointments)
+    result = provide_therapist_slots(
+        now,
+        first_week_slots,
+        second_week_slots,
+        first_week_appointments,
+        second_week_appointments,
+    )
 
     # We check that the slot from 12:00 to 12:01 is excluded
     assert (now + timedelta(hours=5)) not in result
@@ -49,7 +71,8 @@ def test_first_week_appointments(now):
 
 
 # Test 3: Appointments for the second week only
-def test_second_week_appointments(now):
+def test_second_week_appointments(now, slots):
+    first_week_slots, second_week_slots = slots
     # Create test assignments
     appointment = AppointmentModel(
         start_date=now + timedelta(days=7, hours=10),  # 17:00 in a week
@@ -58,7 +81,13 @@ def test_second_week_appointments(now):
     first_week_appointments = None
     second_week_appointments = [appointment]
 
-    result = provide_therapist_slots(first_week_appointments, second_week_appointments)
+    result = provide_therapist_slots(
+        now,
+        first_week_slots,
+        second_week_slots,
+        first_week_appointments,
+        second_week_appointments,
+    )
 
     # We check that the slot from 17:00 to 18:01 is excluded
     assert (now + timedelta(days=7, hours=10)) not in result
@@ -68,7 +97,8 @@ def test_second_week_appointments(now):
 
 
 # Test 4: Appointments for both weeks
-def test_both_weeks_appointments(now):
+def test_both_weeks_appointments(now, slots):
+    first_week_slots, second_week_slots = slots
     # Create test assignments
     first_week_appointment = AppointmentModel(
         start_date=now + timedelta(hours=3),  # 10:00
@@ -81,7 +111,13 @@ def test_both_weeks_appointments(now):
     first_week_appointments = [first_week_appointment]
     second_week_appointments = [second_week_appointment]
 
-    result = provide_therapist_slots(first_week_appointments, second_week_appointments)
+    result = provide_therapist_slots(
+        now,
+        first_week_slots,
+        second_week_slots,
+        first_week_appointments,
+        second_week_appointments,
+    )
 
     # Check that slots are excluded
     assert (now + timedelta(hours=3)) not in result
@@ -97,7 +133,8 @@ def test_both_weeks_appointments(now):
 
 
 # Test 5: Random Number of Occupied Slots
-def test_random_booked_slots(now):
+def test_random_booked_slots(now, slots):
+    first_week_slots, second_week_slots = slots
     # We generate a random number of occupied slots in the first and second weeks
     first_week_booked_slots = set(
         random.sample(range(15 * 7), random.randint(1, 15 * 7 - 1))
@@ -125,7 +162,13 @@ def test_random_booked_slots(now):
     ]
 
     # Calling the method
-    result = provide_therapist_slots(first_week_appointments, second_week_appointments)
+    result = provide_therapist_slots(
+        now,
+        first_week_slots,
+        second_week_slots,
+        first_week_appointments,
+        second_week_appointments,
+    )
 
     # Check that occupied slots are excluded
     for slot in first_week_booked_slots:
