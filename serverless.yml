@@ -33,6 +33,7 @@ provider:
   region: us-east-2
   architecture: x86_64
   timeout: 29
+  memorySize: 3008
   iam:
     role:
       statements:
