@@ -23,12 +23,14 @@ def _create_appointment(db, therapist: AirtableTherapist, data: dict):
 
 
 def _update_appointment(db, therapist: AirtableTherapist, data: dict):
-    appointment = db.query(AppointmentModel).filter_by(intakeq_id=data["Id"]).first()
-    if appointment is None:
-        _create_appointment(db, therapist, data)
-    else:
-        appointment.start_date = datetime.fromtimestamp(data["StartDate"] / 1e3, UTC)
-        appointment.end_date = datetime.fromtimestamp(data["EndDate"] / 1e3, UTC)
+    existing_appointment = (
+        db.query(AppointmentModel).filter_by(intakeq_id=data["Id"]).first()
+    )
+    if existing_appointment:
+        db.delete(existing_appointment)
+        db.flush()
+
+    _create_appointment(db, therapist, data)
 
 
 def _delete_appointment(db, data: dict):

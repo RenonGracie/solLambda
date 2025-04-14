@@ -1,3 +1,5 @@
+from datetime import timedelta
+
 from dateutil import parser
 
 from flask import jsonify
@@ -16,7 +18,9 @@ from src.models.api.appointments import (
 from src.models.api.base import EmailWithAdminPass
 from src.models.api.error import Error
 from src.models.db.signup_form import ClientSignup
+from src.utils.constants.contants import DATE_FORMAT
 from src.utils.event_utils import send_ga_event, CALL_SCHEDULED_EVENT, USER_EVENT_TYPE
+from src.utils.intakeq.appointments import check_therapist_availability
 from src.utils.intakeq.clients import search_client, reassign_client
 from src.utils.request_utils import (
     get_booking_settings,
@@ -27,7 +31,9 @@ from src.utils.request_utils import (
     appointment_cancellation,
 )
 from src.utils.settings import settings
-from src.utils.therapists.appointments_utils import delete_all_appointments
+from src.utils.therapists.appointments_utils import (
+    delete_all_appointments,
+)
 
 __tag = Tag(name="Appointments")
 appointment_api = APIBlueprint(
@@ -61,7 +67,7 @@ def appointment(path: AppointmentPath):
 
 @appointment_api.post(
     "",
-    responses={200: Appointment, 400: Error, 404: Error},
+    responses={200: Appointment, 400: Error, 404: Error, 409: Error},
     summary="Create a new appointment",
 )
 def new_appointment(body: CreateAppointment):
@@ -107,12 +113,29 @@ def new_appointment(body: CreateAppointment):
         ), 404
     client_id = client.get("ClientId") or client.get("ClientNumber")
 
+    therapist_email = therapist.get("Email")
+    slot_time = parser.parse(body.datetime)
+    result = search_appointments(
+        {
+            "practitionerEmail": therapist_email,
+            "startDate": (slot_time - timedelta(days=1)).strftime(DATE_FORMAT),
+            "endDate": (slot_time + timedelta(days=1)).strftime(DATE_FORMAT),
+        }
+    )
+    if result.status_code == 200:
+        appointments = result.json()
+    else:
+        appointments = []
+    error = check_therapist_availability(slot_time, appointments)
+    if error:
+        return jsonify(Error(error=error).dict()), 409
+
     result = create_appointment(
         {
             "PractitionerId": therapist["Id"],
             "ClientId": client_id,
             "LocationId": "1",
-            "UtcDateTime": int(parser.parse(body.datetime).timestamp() * 1000),
+            "UtcDateTime": int(slot_time.timestamp() * 1000),
             "ServiceId": "e818ad3d-5758-4a7d-a1f9-657af8ac4dc8"
             if form.promo_code and len(form.promo_code) > 1
             else "099e964f-c444-4c68-9668-00f734b95afd",
