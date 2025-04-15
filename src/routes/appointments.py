@@ -155,7 +155,7 @@ def new_appointment(body: CreateAppointment):
             event_type=USER_EVENT_TYPE,
             email=form.email,
         )
-    reassign_client(client_id, therapist["Id"])
+    reassign_client(client, therapist["Id"])
     return jsonify(json), result.status_code
 
 
