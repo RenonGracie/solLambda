@@ -1,5 +1,7 @@
 from flask import jsonify, request
 from flask_openapi3 import Tag, Info, OpenAPI
+import sentry_sdk
+from sentry_sdk.integrations.flask import FlaskIntegration
 
 from src.models.api.base import SuccessResponse
 from src.routes import (
@@ -11,9 +13,19 @@ from src.routes import (
     intakeq_forms_api,
     events_api,
 )
+from src.utils.settings import settings
 from src.utils.webhooks.intakeq_webhook_appointment_utils import process_appointment
 from src.utils.webhooks.intakeq_webhook_invoices_utils import process_invoice
 from src.utils.webhooks.typeform_webhook_utils import process_typeform_data
+
+# Initialize Sentry
+if settings.ENV != "dev":
+    sentry_sdk.init(
+        dsn=settings.SENTRY_DSN,  # Replace with your DSN from Sentry
+        integrations=[FlaskIntegration()],
+        traces_sample_rate=0.1,  # Sample 10% of transactions for performance monitoring
+        environment=settings.ENV,  # Change to "production" for production environment
+    )
 
 __jwt = {"type": "http", "scheme": "bearer", "bearerFormat": "JWT"}
 __security_schemes = {"jwt": __jwt}

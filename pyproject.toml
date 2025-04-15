@@ -23,6 +23,7 @@ dependencies = [
     "python-levenshtein>=0.26.1",
     "requests>=2.32.3",
     "ruff>=0.9.4",
+    "sentry-sdk[flask]>=2.26.1",
     "sqlalchemy>=2.0.37",
     "sqlalchemy-utils>=0.41.2",
     "tzdata>=2025.1",

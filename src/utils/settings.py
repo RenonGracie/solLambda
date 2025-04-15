@@ -43,5 +43,7 @@ class Settings(Singleton):
         self.SPREADSHEET_ID = os.getenv("SPREADSHEET_ID")
         self.BOT_URL = os.getenv("BOT_URL")
 
+        self.SENTRY_DSN = os.getenv("SENTRY_DSN")
+
 
 settings = Settings()
