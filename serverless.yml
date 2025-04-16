@@ -5,7 +5,7 @@ service: SolHealth-BE
 
 custom:
   wsgi:
-    app: app.app
+    app: src.app
   dotenv:
     logging: false
   pythonRequirements:

@@ -14,9 +14,12 @@ from src.models.db.airtable import AirtableTherapist
 from src.models.db.appointments import AppointmentModel
 from src.utils.google.google_calendar import get_events_from_gcalendar
 from src.utils.settings import settings
+from src.utils.logger import get_logger
 
 
 _BATCH_SIZE = 20
+
+logger = get_logger()
 
 
 def _is_offset_within_tolerance(dt, zone, max_diff_hours=1) -> bool:
@@ -198,7 +201,7 @@ def events_from_calendar_to_appointments(
     calendar_id: str, now: datetime = datetime.now()
 ) -> list[AppointmentModel | None]:
     _DATE_FORMAT = "%Y-%m-%d"
-    print("Fetch from calendar", calendar_id)
+    logger.debug("Fetching from calendar", extra={"calendar_id": calendar_id})
     now_str = now.strftime(_DATE_FORMAT)
     events = get_events_from_gcalendar(
         calendar_id=calendar_id,
@@ -235,13 +238,14 @@ def delete_all_appointments(db, therapist_email: str) -> None:
                 )
             )
             db.commit()
-            print(
-                "Therapist",
-                therapist_email,
-                "appointments count",
-                len(
-                    db.query(AppointmentModel)
-                    .filter_by(therapist_id=therapist.id)
-                    .all()
-                ),
+            logger.info(
+                "Therapist appointments count",
+                extra={
+                    "therapist_email": therapist_email,
+                    "count": len(
+                        db.query(AppointmentModel)
+                        .filter_by(therapist_id=therapist.id)
+                        .all()
+                    ),
+                },
             )

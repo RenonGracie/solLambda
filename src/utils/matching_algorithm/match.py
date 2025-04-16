@@ -13,6 +13,7 @@ from src.models.db.appointments import AppointmentModel
 from src.models.db.signup_form import ClientSignup
 from src.models.db.therapist_videos import TherapistVideoModel
 from src.utils.constants.contants import DEFAULT_ZONE, DATE_FORMAT
+from src.utils.logger import get_logger
 from src.utils.matching_algorithm.algorithm import calculate_match_score
 from src.utils.states_utils import statename_to_abbr
 from src.utils.therapists.therapist_data_utils import (
@@ -21,6 +22,9 @@ from src.utils.therapists.therapist_data_utils import (
     implement_age_factor,
 )
 from src.utils.therapists.appointments_utils import get_appointments_for_therapist
+
+
+logger = get_logger()
 
 
 @with_database
@@ -54,7 +58,11 @@ def match_client_with_therapists(
             .all()
         )
     else:
-        therapist = db.query(AirtableTherapist).filter(AirtableTherapist.intern_name==form.therapist_name).first()
+        therapist = (
+            db.query(AirtableTherapist)
+            .filter(AirtableTherapist.intern_name == form.therapist_name)
+            .first()
+        )
         if therapist:
             therapists = [therapist]
         else:
@@ -220,10 +228,10 @@ def match_client_with_therapists(
                                         "available_slots": available_slots,
                                     }
                                 )
-                                print("matched_therapists", len(matched))
+                                logger.info(f"matched_therapists, {len(matched)}")
 
                         if len(matched) == limit_value + last:
-                            print("limit reached")
+                            logger.info("limit reached")
                             stop_event.set()
                             for f in future_to_therapist:
                                 if not f.done():
@@ -236,13 +244,15 @@ def match_client_with_therapists(
                             if match and "therapist" in match
                             else "unknown"
                         )
-                        print(f"Error processing therapist {therapist_id}: {str(e)}")
+                        logger.info(
+                            f"Error processing therapist {therapist_id}: {str(e)}"
+                        )
                         continue
 
         return matched
 
     matched_therapists = process_matches(db, matches, form, limit, last_index)
-    print("next steps")
+    logger.info("next steps")
     matched_therapists = implement_age_factor(
         form.age,
         sorted(

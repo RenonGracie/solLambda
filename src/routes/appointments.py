@@ -34,6 +34,7 @@ from src.utils.settings import settings
 from src.utils.therapists.appointments_utils import (
     delete_all_appointments,
 )
+from src.utils.logger import get_logger
 
 __tag = Tag(name="Appointments")
 appointment_api = APIBlueprint(
@@ -43,6 +44,8 @@ appointment_api = APIBlueprint(
     abp_security=[{"jwt": []}],
     url_prefix="/appointments",
 )
+
+logger = get_logger()
 
 
 @appointment_api.get(
@@ -73,7 +76,7 @@ def appointment(path: AppointmentPath):
 def new_appointment(body: CreateAppointment):
     result = get_booking_settings()
     if not result:
-        print("Unable to get booking settings")
+        logger.error("Unable to get booking settings")
         return jsonify(Error(error="Unable to get booking settings").dict()), 400
     practitioners = result.json()["Practitioners"]
     try:
@@ -86,12 +89,15 @@ def new_appointment(body: CreateAppointment):
     except StopIteration:
         therapist = None
     if not therapist:
-        print("Therapist not found")
+        logger.error("Therapist not found")
         return jsonify(Error(error="Therapist not found").dict()), 404
 
     form = db.query(ClientSignup).filter_by(response_id=body.client_response_id).first()
     if not form:
-        print(f"Signup form with id '{body.client_response_id}' not found")
+        logger.error(
+            "Signup form not found",
+            extra={"client_response_id": body.client_response_id},
+        )
         return jsonify(
             Error(
                 error=f"Signup form with id '{body.client_response_id}' not found"
@@ -103,7 +109,7 @@ def new_appointment(body: CreateAppointment):
     client = search_client(form.email, name)
 
     if not client:
-        print(
+        logger.error(
             f"Client with name '{form.first_name} {form.last_name}' not found on intakeQ"
         )
         return jsonify(

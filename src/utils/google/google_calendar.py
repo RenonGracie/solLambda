@@ -4,6 +4,9 @@ from googleapiclient.errors import HttpError
 from googleapiclient.discovery import build
 
 from src.utils.google.credentials import get_credentials
+from src.utils.logger import get_logger
+
+logger = get_logger()
 
 
 def _get_service():
@@ -67,7 +70,9 @@ def get_events_from_gcalendar(
                 break
         return data
     except HttpError as e:
-        print("Fetch calendar error", calendar_id, str(e))
+        logger.error(
+            "Fetch calendar error", extra={"calendar_id": calendar_id, "error": str(e)}
+        )
         if raise_error:
             raise e
         return []

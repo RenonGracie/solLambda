@@ -1,4 +1,7 @@
 from src.utils.request_utils import search_clients, save_update_client
+from src.utils.logger import get_logger
+
+logger = get_logger()
 
 
 def search_client(email: str, name: str) -> dict | None:
@@ -18,22 +21,28 @@ def search_client(email: str, name: str) -> dict | None:
         else:
             return None
 
-    print("searching clients", email)
+    logger.debug("Searching clients", extra={"email": email})
     result = search_clients({"search": email, "includeProfile": True})
     if result.status_code == 200:
         client = find_client(result.json())
     else:
-        print(result.json(), result.status_code)
+        logger.debug(
+            "Search result",
+            extra={"response": result.json(), "status": result.status_code},
+        )
 
-    print("client found", client is not None)
+    logger.debug("Client search result", extra={"found": client is not None})
     if not client:
-        print("searching clients", name)
+        logger.debug("Searching clients", extra={"name": name})
         result = search_clients({"search": name, "includeProfile": True})
         if result.status_code != 200:
-            print(result.json(), result.status_code)
+            logger.debug(
+                "Search result",
+                extra={"response": result.json(), "status": result.status_code},
+            )
         else:
             client = find_client(result.json())
-    print("client found", client is not None)
+    logger.debug("Client search result", extra={"found": client is not None})
 
     return client
 
@@ -51,4 +60,4 @@ def reassign_client(client: dict, therapist_id: str):
             client["PractitionerId"] = therapist_id
             save_update_client(client)
     except Exception as e:
-        print(e)
+        logger.error("Client search error", extra={"error": str(e)})

@@ -8,6 +8,9 @@ from src.utils.intakeq.bot.bot import create_new_form, create_client_model
 from src.utils.request_utils import intakeq, save_update_client
 from src.utils.settings import settings
 from src.utils.typeform.typeform_parser import TypeformData
+from src.utils.logger import get_logger
+
+logger = get_logger()
 
 
 @with_database
@@ -49,7 +52,7 @@ def process_typeform_data(db, response_json: dict):
         "session_id": session_id,
     }
 
-    print(response.json())
+    logger.debug("Typeform webhook response", extra={"response": response.json()})
     send_ga_event(
         database=db,
         client_id=client_id,

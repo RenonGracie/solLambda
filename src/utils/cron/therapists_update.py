@@ -1,11 +1,11 @@
-import logging
 from pyairtable import Api
 
 from src.utils.settings import settings
 from src.utils.therapists.airtable import save_therapists
 from src.models.api.therapists import Therapist
+from src.utils.logger import get_logger
 
-logger = logging.getLogger(__name__)
+logger = get_logger()
 
 
 def update_therapists_table():

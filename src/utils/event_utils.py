@@ -5,6 +5,7 @@ from src.db.database import with_database
 from src.models.api.events import AnalyticsEvent
 from src.models.db.analytic_event import AnalyticEvent
 from src.utils.request_utils import sent_analytics_event
+from src.utils.logger import get_logger
 
 
 REGISTRATION_EVENT = "ClientCreated"
@@ -13,6 +14,8 @@ CALL_SCHEDULED_EVENT = "CallScheduled"
 USER_EVENT_TYPE = "User"
 APPOINTMENT_EVENT_TYPE = "Appointment"
 INVOICE_EVENT_TYPE = "Invoice"
+
+logger = get_logger()
 
 
 def _send_event(
@@ -97,9 +100,9 @@ def _send_event(
         "user_id": str(user_id),
         "events": [{"name": name, "params": params}],
     }
-    print("GA event:", event)
+    logger.debug("Google Analytics event", extra={"event": event})
     response = sent_analytics_event(event)
-    print("GA event response:", response)
+    logger.debug("Google Analytics response", extra={"response": response})
 
 
 def send_ga_event(

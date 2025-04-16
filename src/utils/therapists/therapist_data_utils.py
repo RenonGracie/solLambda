@@ -9,6 +9,9 @@ from src.models.db.appointments import AppointmentModel
 from src.utils import s3
 from src.utils.rrule_utils import get_start_date
 from src.utils.settings import settings
+from src.utils.logger import get_logger
+
+logger = get_logger()
 
 
 def _rearrange_elements(elements, indices):
@@ -124,7 +127,7 @@ def provide_therapist_slots(
                     duration = appointment.end - start
                     for rule_str in recurrence:
                         if start.tzinfo is None:
-                            print("Parsing rrule", rule_str)
+                            logger.debug("Parsing rrule", extra={"rule": rule_str})
                             occurrences = rrulestr(rule_str, dtstart=start).between(
                                 now.replace(tzinfo=None),
                                 now.replace(tzinfo=None)

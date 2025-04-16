@@ -11,8 +11,12 @@ from src.models.db.therapist_videos import TherapistVideoModel
 from src.models.db.appointments import AppointmentModel
 from src.utils.settings import settings
 from src.utils.singletone import Singleton
+from src.utils.logger import get_logger
 
 import boto3
+
+
+logger = get_logger()
 
 
 def with_database(func):
@@ -25,7 +29,7 @@ def with_database(func):
             return result
         except SQLAlchemyError as e:
             session.rollback()
-            print(f"An error occurred: {e}")
+            logger.error("Database error", extra={"error": str(e)})
             raise
         finally:
             session.close()

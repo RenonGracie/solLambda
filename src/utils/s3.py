@@ -3,17 +3,20 @@ from botocore.exceptions import ClientError
 
 from src.models.api.therapist_s3 import S3MediaType
 from src.utils.settings import settings
+from src.utils.logger import get_logger
 
 _s3_client = boto3.client("s3")
 
 S3_BUCKET_NAME = "therapists-personal-data"
+
+logger = get_logger()
 
 
 def get_media_url(user_id: str, s3_media_type: S3MediaType, expiration=3600):
     if settings.IS_AWS is False:
         return None
 
-    print("s3_media_type", s3_media_type)
+    logger.debug("S3 media type", extra={"type": s3_media_type})
     match s3_media_type:
         case S3MediaType.IMAGE:
             link = f"images/{user_id}"
@@ -32,5 +35,5 @@ def get_media_url(user_id: str, s3_media_type: S3MediaType, expiration=3600):
             ExpiresIn=expiration,
         )
     except ClientError as e:
-        print("S3 error", e)
+        logger.error("S3 error", extra={"error": str(e)})
         return None

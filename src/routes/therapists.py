@@ -33,6 +33,7 @@ from src.utils.therapists.appointments_utils import (
     events_from_calendar_to_appointments,
 )
 from src.utils.therapists.therapist_data_utils import provide_therapist_slots
+from src.utils.logger import get_logger
 
 __tag = Tag(name="Therapists")
 therapist_api = APIBlueprint(
@@ -45,6 +46,8 @@ therapist_api = APIBlueprint(
 
 api = Api(settings.AIRTABLE_API_KEY)
 table = api.table(settings.AIRTABLE_BASE_ID, settings.AIRTABLE_TABLE_ID)
+
+logger = get_logger()
 
 
 @therapist_api.get("", responses={200: Therapists}, summary="Get therapists table")
@@ -118,10 +121,10 @@ def with_calendar():
             try:
                 insert_email_to_gcalendar(email)
                 shared.append(email)
-                print("Email added", email)
+                logger.info("Email added successfully", extra={"email": email})
                 sleep(0.5)
             except HttpError as e:
-                print("Email error", email, e)
+                logger.error("Email error", extra={"email": email, "error": str(e)})
                 errors.append({"email": email, "error": str(e)})
                 sleep(0.5)
                 pass
