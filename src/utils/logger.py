@@ -61,6 +61,3 @@ def add_request_id():
     if not hasattr(request, 'id'):
         request.id = request.headers.get('X-Request-ID', '')
     return request.id
-
-
-logger = setup_logger(app)
