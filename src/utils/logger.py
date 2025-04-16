@@ -32,30 +32,6 @@ class ConsoleFormatter(logging.Formatter):
         return message
 
 
-def setup_logger(app):
-    """Setup application logging"""
-    # Remove default handlers
-    app.logger.handlers = []
-
-    # Create console handler
-    console_handler = logging.StreamHandler()
-
-    formatter = ConsoleFormatter()
-    console_handler.setFormatter(formatter)
-
-    # Add handler to the logger
-    app.logger.addHandler(console_handler)
-
-    # Set log level based on environment
-    app.logger.setLevel(logging.DEBUG)
-
-    # Disable werkzeug default logger in production
-    if settings.ENV != "dev":
-        logging.getLogger("werkzeug").setLevel(logging.ERROR)
-
-    return app.logger
-
-
 # Create a function to add request ID to all requests
 def add_request_id():
     """Add request ID to all requests"""
@@ -68,15 +44,17 @@ def add_request_id():
 logger = None
 
 
-def init_logger(app):
-    """Initialize global logger"""
-    global logger
-    logger = setup_logger(app)
-    return logger
-
-
 def get_logger():
+    global logger
     """Get global logger instance"""
     if logger is None:
-        raise RuntimeError("Logger not initialized. Call init_logger(app) first")
+        logger = logging.getLogger(__name__)
+        logger.setLevel(logging.INFO)
+
+        # Create console handler with formatting
+        if not logger.handlers:
+            console_handler = logging.StreamHandler()
+            console_handler.setLevel(logging.INFO)
+            console_handler.setFormatter(ConsoleFormatter())
+            logger.addHandler(console_handler)
     return logger

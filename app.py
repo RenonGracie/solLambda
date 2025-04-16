@@ -1,10 +1,7 @@
 from flask import jsonify, request
-from flask_openapi3 import Tag
+from flask_openapi3 import Tag, Info, OpenAPI
 import sentry_sdk
 from sentry_sdk.integrations.flask import FlaskIntegration
-
-from src.utils.logger import add_request_id
-from src import app, logger
 
 from src.models.api.base import SuccessResponse
 from src.routes import (
@@ -20,6 +17,7 @@ from src.utils.settings import settings
 from src.utils.webhooks.intakeq_webhook_appointment_utils import process_appointment
 from src.utils.webhooks.intakeq_webhook_invoices_utils import process_invoice
 from src.utils.webhooks.typeform_webhook_utils import process_typeform_data
+from src.utils.logger import add_request_id, get_logger
 
 # Initialize Sentry
 if settings.ENV != "dev":
@@ -30,12 +28,20 @@ if settings.ENV != "dev":
         environment=settings.ENV,  # Change to "production" for production environment
     )
 
+__jwt = {"type": "http", "scheme": "bearer", "bearerFormat": "JWT"}
+__security_schemes = {"jwt": __jwt}
+
+info = Info(title="SolHealth API", version="1.0.0")
+app = OpenAPI(__name__, info=info, security_schemes=__security_schemes)
+app.json.sort_keys = False
+
+# Setup logging
+logger = get_logger()
 
 # Add request ID middleware
 @app.before_request
 def before_request():
     add_request_id()
-
 
 app.register_api(client_api)
 app.register_api(client_signup_api)
@@ -62,10 +68,10 @@ def set_cors_headers(response):
     summary="Webhook for typeform",
 )
 def typeform_webhook():
-    logger.info(
-        "Received typeform webhook",
-        extra={"type": "typeform_webhook", "data": request.get_json()},
-    )
+    logger.info("Received typeform webhook", extra={
+        "type": "typeform_webhook",
+        "data": request.get_json()
+    })
     process_typeform_data(request.get_json())
     return jsonify({"success": True}), 200
 
@@ -77,10 +83,10 @@ def typeform_webhook():
 )
 def intakeq_hook():
     data = request.get_json()
-    logger.info(
-        "Received IntakeQ appointment webhook",
-        extra={"type": "intakeq_appointment_hook", "data": data},
-    )
+    logger.info("Received IntakeQ appointment webhook", extra={
+        "type": "intakeq_appointment_hook",
+        "data": data
+    })
     process_appointment(data)
     return "", 200
 
@@ -92,10 +98,10 @@ def intakeq_hook():
 )
 def intakeq_invoice_hook():
     data = request.get_json()
-    logger.info(
-        "Received IntakeQ invoice webhook",
-        extra={"type": "intakeq_invoice_hook", "data": data},
-    )
+    logger.info("Received IntakeQ invoice webhook", extra={
+        "type": "intakeq_invoice_hook",
+        "data": data
+    })
     process_invoice(data)
     return "", 200
 
