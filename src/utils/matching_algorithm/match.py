@@ -25,7 +25,7 @@ from src.utils.therapists.appointments_utils import get_appointments_for_therapi
 
 @with_database
 def match_client_with_therapists(
-    db, airtable, response_id: str, limit: int, last_index: int
+    db, response_id: str, limit: int, last_index: int
 ) -> (ClientSignup | None, List[dict]):
     form: ClientSignup = (
         db.query(ClientSignup).filter_by(response_id=response_id).first()
@@ -35,23 +35,30 @@ def match_client_with_therapists(
 
     state = statename_to_abbr.get(form.state)
 
-    therapists = (
-        db.query(AirtableTherapist)
-        .filter(
-            AirtableTherapist.accepting_new_clients,
-            Column("states", Text).like(f'%"{state}"%') if state else True,
-            AirtableTherapist.gender.in_(
-                ["Male"]
-                if "Male" in form.therapist_identifies_as
-                else ["Female"]
-                if "Female" in form.therapist_identifies_as
-                else ["Male", "Female"]
-                if "No preference" in form.therapist_identifies_as
-                else []
-            ),
+    if not form.therapist_name:
+        therapists = (
+            db.query(AirtableTherapist)
+            .filter(
+                AirtableTherapist.accepting_new_clients,
+                Column("states", Text).like(f'%"{state}"%') if state else True,
+                AirtableTherapist.gender.in_(
+                    ["Male"]
+                    if "Male" in form.therapist_identifies_as
+                    else ["Female"]
+                    if "Female" in form.therapist_identifies_as
+                    else ["Male", "Female"]
+                    if "No preference" in form.therapist_identifies_as
+                    else []
+                ),
+            )
+            .all()
         )
-        .all()
-    )
+    else:
+        therapist = db.query(AirtableTherapist).filter(AirtableTherapist.intern_name==form.therapist_name).first()
+        if therapist:
+            therapists = [therapist]
+        else:
+            therapists = []
 
     matches = []
 

@@ -17,6 +17,7 @@ from src.utils.settings import settings
 from src.utils.webhooks.intakeq_webhook_appointment_utils import process_appointment
 from src.utils.webhooks.intakeq_webhook_invoices_utils import process_invoice
 from src.utils.webhooks.typeform_webhook_utils import process_typeform_data
+from src.utils.logger import setup_logger, add_request_id
 
 # Initialize Sentry
 if settings.ENV != "dev":
@@ -33,6 +34,14 @@ __security_schemes = {"jwt": __jwt}
 info = Info(title="SolHealth API", version="1.0.0")
 app = OpenAPI(__name__, info=info, security_schemes=__security_schemes)
 app.json.sort_keys = False
+
+# Setup logging
+logger = setup_logger(app)
+
+# Add request ID middleware
+@app.before_request
+def before_request():
+    add_request_id()
 
 app.register_api(client_api)
 app.register_api(client_signup_api)
@@ -59,7 +68,10 @@ def set_cors_headers(response):
     summary="Webhook for typeform",
 )
 def typeform_webhook():
-    print(request)
+    logger.info("Received typeform webhook", extra={
+        "type": "typeform_webhook",
+        "data": request.get_json()
+    })
     process_typeform_data(request.get_json())
     return jsonify({"success": True}), 200
 
@@ -70,9 +82,12 @@ def typeform_webhook():
     summary="Webhook for IntakeQ Appointments",
 )
 def intakeq_hook():
-    json = request.get_json()
-    print(json)
-    process_appointment(json)
+    data = request.get_json()
+    logger.info("Received IntakeQ appointment webhook", extra={
+        "type": "intakeq_appointment_hook",
+        "data": data
+    })
+    process_appointment(data)
     return "", 200
 
 
@@ -82,9 +97,12 @@ def intakeq_hook():
     summary="Webhook for IntakeQ Invoices",
 )
 def intakeq_invoice_hook():
-    json = request.get_json()
-    print(json)
-    process_invoice(json)
+    data = request.get_json()
+    logger.info("Received IntakeQ invoice webhook", extra={
+        "type": "intakeq_invoice_hook",
+        "data": data
+    })
+    process_invoice(data)
     return "", 200
 
 

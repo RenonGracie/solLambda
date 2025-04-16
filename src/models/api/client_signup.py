@@ -46,10 +46,11 @@ class ClientSignup(BaseModel):
 
     what_brings_you: str | None
     lived_experiences: list[str] | None
-    best_time_for_first_session: str | None
 
     promo_code: str | None
     referred_by: str | None
+
+    therapist_name: str | None
 
 
 class ClientSignupForms(BaseModel):
