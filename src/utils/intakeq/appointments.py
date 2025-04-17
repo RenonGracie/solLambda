@@ -1,12 +1,11 @@
 from datetime import datetime, timedelta, UTC
-from typing import List, Dict, Optional
 
 from src.utils.constants.contants import DEFAULT_ZONE
 
 
 def check_therapist_availability(
-    slot: datetime, appointments: List[Dict]
-) -> Optional[str]:
+    slot: datetime, appointments: list[dict]
+) -> (dict | None, str | None):
     """
     Checks therapist availability for the specified time slot.
 
@@ -21,7 +20,7 @@ def check_therapist_availability(
     slot = slot.astimezone(DEFAULT_ZONE)
 
     if slot < next_day:
-        return "You cannot book an appointment less than 24 hours in advance."
+        return None, "You cannot book an appointment less than 24 hours in advance."
 
     if 7 <= slot.hour < 22:
         for data in appointments:
@@ -30,7 +29,7 @@ def check_therapist_availability(
             ).astimezone()
             end_date = datetime.fromtimestamp(data["EndDate"] / 1e3, UTC).astimezone()
             if start_date <= slot < end_date:
-                return "This time slot is already taken."
-        return None
+                return data, "This time slot is already taken."
+        return None, None
     else:
-        return "You can't book an appointment outside of working hours."
+        return None, "You can't book an appointment outside of working hours."

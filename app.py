@@ -38,10 +38,12 @@ app.json.sort_keys = False
 # Setup logging
 logger = get_logger()
 
+
 # Add request ID middleware
 @app.before_request
 def before_request():
     add_request_id()
+
 
 app.register_api(client_api)
 app.register_api(client_signup_api)
@@ -68,10 +70,10 @@ def set_cors_headers(response):
     summary="Webhook for typeform",
 )
 def typeform_webhook():
-    logger.info("Received typeform webhook", extra={
-        "type": "typeform_webhook",
-        "data": request.get_json()
-    })
+    logger.info(
+        "Received typeform webhook",
+        extra={"type": "typeform_webhook", "data": request.get_json()},
+    )
     process_typeform_data(request.get_json())
     return jsonify({"success": True}), 200
 
@@ -83,10 +85,10 @@ def typeform_webhook():
 )
 def intakeq_hook():
     data = request.get_json()
-    logger.info("Received IntakeQ appointment webhook", extra={
-        "type": "intakeq_appointment_hook",
-        "data": data
-    })
+    logger.info(
+        "Received IntakeQ appointment webhook",
+        extra={"type": "intakeq_appointment_hook", "data": data},
+    )
     process_appointment(data)
     return "", 200
 
@@ -98,10 +100,10 @@ def intakeq_hook():
 )
 def intakeq_invoice_hook():
     data = request.get_json()
-    logger.info("Received IntakeQ invoice webhook", extra={
-        "type": "intakeq_invoice_hook",
-        "data": data
-    })
+    logger.info(
+        "Received IntakeQ invoice webhook",
+        extra={"type": "intakeq_invoice_hook", "data": data},
+    )
     process_invoice(data)
     return "", 200
 

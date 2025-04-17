@@ -19,7 +19,7 @@ def test_check_therapist_availability_less_than_24_hours():
     with patch("src.utils.intakeq.appointments.datetime") as mock_datetime:
         mock_datetime.now.return_value = mock_now
         mock_datetime.fromtimestamp = datetime.fromtimestamp
-        result = check_therapist_availability(slot, [])
+        appointment, result = check_therapist_availability(slot, [])
         assert result == "You cannot book an appointment less than 24 hours in advance."
 
 
@@ -39,7 +39,7 @@ def test_check_therapist_availability_more_than_24_hours():
     with patch("src.utils.intakeq.appointments.datetime") as mock_datetime:
         mock_datetime.now.return_value = mock_now
         mock_datetime.fromtimestamp = datetime.fromtimestamp
-        result = check_therapist_availability(slot, [])
+        appointment, result = check_therapist_availability(slot, [])
         assert result is None
 
 
@@ -62,11 +62,11 @@ def test_check_therapist_availability_outside_working_hours():
         mock_datetime.fromtimestamp = datetime.fromtimestamp
 
         # Test early slot (6 AM)
-        result = check_therapist_availability(early_slot, [])
+        appointment, result = check_therapist_availability(early_slot, [])
         assert result == "You can't book an appointment outside of working hours."
 
         # Test late slot (10 PM)
-        result = check_therapist_availability(late_slot, [])
+        appointment, result = check_therapist_availability(late_slot, [])
         assert result == "You can't book an appointment outside of working hours."
 
 
@@ -101,7 +101,7 @@ def test_check_therapist_availability_conflict():
     with patch("src.utils.intakeq.appointments.datetime") as mock_datetime:
         mock_datetime.now.return_value = mock_now
         mock_datetime.fromtimestamp = datetime.fromtimestamp
-        result = check_therapist_availability(slot, appointments)
+        appointment, result = check_therapist_availability(slot, appointments)
         assert result == "This time slot is already taken."
 
 
@@ -136,5 +136,5 @@ def test_check_therapist_availability_no_conflict():
     with patch("src.utils.intakeq.appointments.datetime") as mock_datetime:
         mock_datetime.now.return_value = mock_now
         mock_datetime.fromtimestamp = datetime.fromtimestamp
-        result = check_therapist_availability(slot, appointments)
+        appointment, result = check_therapist_availability(slot, appointments)
         assert result is None

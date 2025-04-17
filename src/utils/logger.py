@@ -3,8 +3,6 @@ import logging
 
 from flask import request
 
-from src.utils.settings import settings
-
 
 class ConsoleFormatter(logging.Formatter):
     """Simple console formatter for development"""

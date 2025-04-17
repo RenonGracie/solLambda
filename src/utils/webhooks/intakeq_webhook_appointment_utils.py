@@ -22,15 +22,22 @@ def _create_appointment(db, therapist: AirtableTherapist, data: dict):
     db.add(appointment)
 
 
-def _update_appointment(db, therapist: AirtableTherapist, data: dict):
+def _update_appointment(
+    db, therapist: AirtableTherapist, data: dict, skip_if_exists=False
+):
     existing_appointment = (
         db.query(AppointmentModel).filter_by(intakeq_id=data["Id"]).first()
     )
-    if existing_appointment:
+    if existing_appointment and not skip_if_exists:
         db.delete(existing_appointment)
         db.flush()
 
     _create_appointment(db, therapist, data)
+
+
+@with_database
+def update_appointment_with_db(db, therapist: AirtableTherapist, data: dict):
+    return _update_appointment(db, therapist, data)
 
 
 def _delete_appointment(db, data: dict):
@@ -70,7 +77,7 @@ def process_appointment(db, data: dict):
     event = data["EventType"]
     match event:
         case "AppointmentCreated":
-            _create_appointment(db, therapist_model, appointment)
+            _update_appointment(db, therapist_model, appointment, True)
         case "AppointmentRescheduled":
             _update_appointment(db, therapist_model, appointment)
         case "AppointmentDeleted":
