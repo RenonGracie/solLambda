@@ -10,6 +10,7 @@ from src.models.api.error import Error
 from src.models.db.airtable import AirtableTherapist
 from src.models.db.signup_form import ClientSignup
 from src.utils.constants.contants import DATE_FORMAT
+from src.utils.email_sender import EmailSender
 from src.utils.event_utils import send_ga_event, CALL_SCHEDULED_EVENT, USER_EVENT_TYPE
 from src.utils.intakeq.appointments import check_therapist_availability
 from src.utils.intakeq.clients import search_client, reassign_client
@@ -24,6 +25,8 @@ from src.utils.webhooks.intakeq_webhook_appointment_utils import (
 )
 
 logger = get_logger()
+
+email_sender = EmailSender()
 
 
 def book_appointment(body: CreateAppointment):
@@ -98,6 +101,8 @@ def book_appointment(body: CreateAppointment):
         .first()
     )
 
+    utm = form.utm
+    email = form.email
     if appointment and therapist_model:
         update_appointment_with_db(therapist_model, appointment)
 
@@ -125,13 +130,22 @@ def book_appointment(body: CreateAppointment):
             update_appointment_with_db(therapist_model, json)
 
         send_ga_event(
-            client_id=form.utm.get("client_id"),
+            client_id=utm.get("client_id"),
             name=CALL_SCHEDULED_EVENT,
             value=json.get("Id"),
-            user_id=form.utm.get("user_id"),
-            session_id=form.utm.get("session_id"),
+            user_id=utm.get("user_id"),
+            session_id=utm.get("session_id"),
             event_type=USER_EVENT_TYPE,
-            email=form.email,
+            email=email,
         )
     reassign_client(client, therapist["Id"])
+
+    email_sender.send_email(
+        therapist_name=f"{therapist.get('FirstName')} {therapist.get('LastName')[:1]}",
+        therapist_email=therapist_email,
+        client_name=f"{client.get('FirstName')[:1]}.{(client.get('LastName') or ' ')[:1]}",
+        client_email=client.get("Email"),
+        start_time=slot_time,
+    )
+
     return jsonify(json), result.status_code

@@ -13,19 +13,29 @@ class ConsoleFormatter(logging.Formatter):
 
         message += f"\n  Module: {record.module}.{record.funcName}:{record.lineno}"
 
-        # Add extra fields if present
-        if hasattr(record, "extra"):
-            message += f"\n  Extra: {json.dumps(record.extra, indent=2)}"
-
-        if hasattr(record, "type"):
-            message += f"\n  Type: {record.type}"
-
-        if hasattr(record, "data"):
-            message += f"\n  Data: {json.dumps(record.data, indent=2)}"
-
-        # Add exception info if present
-        if record.exc_info:
-            message += f"\n  Exception: {self.formatException(record.exc_info)}"
+        keys_to_remove = {
+            "pathname",
+            "processName",
+            "relativeCreated",
+            "name",
+            "module",
+            "funcName",
+            "levelno",
+            "lineno",
+            "levelname",
+            "args",
+            "filename",
+            "msecs",
+            "thread",
+            "threadName",
+            "process",
+        }
+        filtered_dict = {
+            k: v
+            for k, v in record.__dict__.items()
+            if v is not None and k not in keys_to_remove
+        }
+        message += f"\n  Extra: {json.dumps(filtered_dict, indent=2)}"
 
         return message
 

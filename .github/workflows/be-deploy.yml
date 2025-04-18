@@ -76,6 +76,7 @@ jobs:
           echo SPREADSHEET_ID=${{ vars.SPREADSHEET_ID }} >> .env
           echo BOT_URL=${{ vars.BOT_URL }} >> .env
           echo SENTRY_DSN=${{ secrets.SENTRY_DSN }} >> .env
+          echo SES_FROM_EMAIL=${{ vars.SES_FROM_EMAIL }} >> .env
           cat .env
 
       - name: Create Google Calendar credentials file

@@ -45,5 +45,7 @@ class Settings(Singleton):
 
         self.SENTRY_DSN = os.getenv("SENTRY_DSN")
 
+        self.SES_FROM_EMAIL = os.getenv("SES_FROM_EMAIL")
+
 
 settings = Settings()

@@ -50,6 +50,12 @@ provider:
             - 'dsql:DbConnectAdmin'
           Resource:
             - ${env:AURORA_DSQL_ARN}
+        # Allow functions to send emails via SES
+        - Effect: Allow
+          Action:
+            - 'ses:SendEmail'
+            - 'ses:SendRawEmail'
+          Resource: '*'
 
 package:
   exclude:
