@@ -44,7 +44,6 @@ class Settings(Singleton):
         self.BOT_URL = os.getenv("BOT_URL")
 
         self.SENTRY_DSN = os.getenv("SENTRY_DSN")
-
         self.SES_FROM_EMAIL = os.getenv("SES_FROM_EMAIL")
 
 

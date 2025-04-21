@@ -1,16 +1,24 @@
 from datetime import datetime
 from email import encoders
 from email.mime.base import MIMEBase
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
 
 import boto3
 from botocore.exceptions import ClientError
-from email.mime.multipart import MIMEMultipart
 
+from src.db.database import db
+from src.models.db.unsubscribed_emails import UnsubscribedEmail
 from src.utils.calendar_utils import create_calendar_event
+from src.utils.constants.contants import DEFAULT_ZONE
 from src.utils.logger import get_logger
 from src.utils.settings import settings
 
 logger = get_logger()
+
+
+def _is_unsubscribed(email: str) -> bool:
+    return db.query(UnsubscribedEmail).filter_by(email=email).first() is not None
 
 
 class EmailSender:
@@ -30,6 +38,7 @@ class EmailSender:
 
     def send_email(
         self,
+        base_url: str,
         therapist_name: str,
         therapist_email: str,
         client_name: str,
@@ -37,12 +46,57 @@ class EmailSender:
         start_time: datetime,
         duration: int = 45,
     ) -> bool:
+        if _is_unsubscribed(client_email):
+            logger.info(
+                "Skipping email send - recipient unsubscribed",
+                extra={"to": client_email},
+            )
+            return False
+
         try:
             msg = MIMEMultipart("alternative")
             msg["Subject"] = "Sol Health Appointment"
             msg["From"] = f'"{self.from_name}" <{self.from_email}>'
-            msg["To"] = ", ".join([client_email])
+            msg["To"] = client_email
+            msg["List-Unsubscribe"] = f"<{base_url}/unsubscribe?email={client_email}>"
 
+            start_time = start_time.astimezone(DEFAULT_ZONE)
+            # Create HTML body
+            html_body = f"""
+            <html>
+            <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+                <h2>Your Therapy Session is Confirmed</h2>
+                <p>Your appointment details have been added to the attached calendar invitation.</p>
+                
+                <h3>Session Details:</h3>
+                <ul>
+                    <li>Provider: {therapist_name}</li>
+                    <li>Date: {start_time.strftime("%B %d, %Y")}</li>
+                    <li>Time: {start_time.strftime("%I:%M %p")} ({start_time.strftime("%Z")})</li>
+                    <li>Duration: {duration} minutes</li>
+                </ul>
+
+                <h3>Important Information:</h3>
+                <p><strong>Manage your appointment or contact your Provider:</strong><br>
+                Access your <a href="https://solhealth.intakeq.com/portal">Client Portal</a> to manage sessions or send messages.<br>
+                You can also reach your Provider directly at <a href="mailto:{therapist_email}">{therapist_email}</a></p>
+
+                <p><strong>Cancellation Policy:</strong><br>
+                Please reschedule or cancel your session at least 24 hours in advance to avoid a no-show fee equal to our session cost.</p>
+
+                <p><strong>Need Help?</strong><br>
+                Email us at <a href="mailto:contact@solhealth.co">contact@solhealth.co</a></p>
+
+                <hr style="margin: 20px 0; border: none; border-top: 1px solid #ddd;">
+                <p style="font-size: 12px; color: #666;">
+                    To unsubscribe from these emails, <a href="{base_url}/unsubscribe?email={client_email}">click here</a>
+                </p>
+            </body>
+            </html>
+            """
+            msg.attach(MIMEText(html_body, "html"))
+
+            # Create calendar event without unsubscribe link in description
             ics_content = create_calendar_event(
                 summary=f"Sol Health Appointment: {therapist_name} <> {client_name}",
                 start_time=start_time,
@@ -72,7 +126,7 @@ class EmailSender:
 
             # Send email
             self.ses_client.send_raw_email(
-                Source=msg["From"],  # Use the formatted From address
+                Source=msg["From"],
                 Destinations=[client_email],
                 RawMessage={"Data": msg.as_string()},
             )

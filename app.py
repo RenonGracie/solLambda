@@ -12,6 +12,7 @@ from src.routes import (
     therapist_video_api,
     intakeq_forms_api,
     events_api,
+    emails_api,
 )
 from src.utils.settings import settings
 from src.utils.webhooks.intakeq_webhook_appointment_utils import process_appointment
@@ -52,6 +53,7 @@ app.register_api(therapist_api)
 app.register_api(therapist_video_api)
 app.register_api(intakeq_forms_api)
 app.register_api(events_api)
+app.register_blueprint(emails_api)
 
 
 @app.after_request

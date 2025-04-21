@@ -29,7 +29,7 @@ logger = get_logger()
 email_sender = EmailSender()
 
 
-def book_appointment(body: CreateAppointment):
+def book_appointment(base_url: str, body: CreateAppointment):
     result = get_booking_settings()
     if not result:
         logger.error("Unable to get booking settings")
@@ -141,6 +141,7 @@ def book_appointment(body: CreateAppointment):
     reassign_client(client, therapist["Id"])
 
     email_sender.send_email(
+        base_url,
         therapist_name=f"{therapist.get('FirstName')} {therapist.get('LastName')[:1]}",
         therapist_email=therapist_email,
         client_name=f"{client.get('FirstName')[:1]}.{(client.get('LastName') or ' ')[:1]}",

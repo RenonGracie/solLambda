@@ -1,4 +1,4 @@
-from flask import jsonify
+from flask import jsonify, request
 from flask_openapi3 import Tag, APIBlueprint
 
 from src.models.api.appointments import (
@@ -62,7 +62,7 @@ def appointment(path: AppointmentPath):
     summary="Create a new appointment",
 )
 def new_appointment(body: CreateAppointment):
-    return book_appointment(body)
+    return book_appointment(request.url_root, body)
 
 
 @appointment_api.put(
