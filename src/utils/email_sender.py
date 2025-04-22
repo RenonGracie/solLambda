@@ -87,6 +87,7 @@ class EmailSender:
             start_time = start_time.astimezone(DEFAULT_ZONE)
 
             invitation_code = extract_invitation_code(telehealth_info["Invitation"])
+            join_url = telehealth_info["JoinUrl"]
 
             # Create HTML body
             html_body = f"""
@@ -106,7 +107,7 @@ class EmailSender:
                 </ul>
                 
                 {
-                f"<h3>Join Your Session:</h3><p>Click here to <a href='{telehealth_info['JoinUrl']}'>join your session</a>"
+                f"<h3>Join Your Session:</h3><p>Click here to <a href='{join_url}'>join your session</a>"
                 + f"<br>Invitation code: {invitation_code}</p>"
                 if telehealth_info
                 else ""
@@ -144,7 +145,7 @@ class EmailSender:
                 description="<b>Join your Therapy session</b>"
                 f"{
                     '<br><br><b>Use the link below to join your scheduled session:</b>'
-                    + f"<br><a href='{telehealth_info['JoinUrl']}'>Join Session</a>"
+                    + f"<br><a href='{join_url}'>Join Session</a>"
                     + f'<br><br><b>Invitation code:</b> {invitation_code}'
                     if telehealth_info
                     else ''
