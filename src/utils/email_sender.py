@@ -1,3 +1,4 @@
+import re
 from datetime import datetime
 from email import encoders
 from email.mime.base import MIMEBase
@@ -19,6 +20,28 @@ logger = get_logger()
 
 def _is_unsubscribed(email: str) -> bool:
     return db.query(UnsubscribedEmail).filter_by(email=email).first() is not None
+
+
+def extract_invitation_code(invitation_text: str | None) -> str | None:
+    """
+    Extract invitation code from invitation text
+
+    Args:
+        invitation_text: Full invitation text containing the code
+
+    Returns:
+        str: Extracted invitation code or None if not found
+    """
+    # Pattern to match "Invitation Code: " followed by any characters until the end of line
+    if not invitation_text:
+        return None
+
+    pattern = r"Invitation Code:\s*(\S+)"
+    match = re.search(pattern, invitation_text)
+
+    if match:
+        return match.group(1)
+    return None
 
 
 class EmailSender:
@@ -44,6 +67,7 @@ class EmailSender:
         client_name: str,
         client_email: str,
         start_time: datetime,
+        telehealth_info: dict | None,
         duration: int = 45,
     ) -> bool:
         if _is_unsubscribed(client_email):
@@ -61,6 +85,9 @@ class EmailSender:
             msg["List-Unsubscribe"] = f"<{base_url}/unsubscribe?email={client_email}>"
 
             start_time = start_time.astimezone(DEFAULT_ZONE)
+
+            invitation_code = extract_invitation_code(telehealth_info["Invitation"])
+
             # Create HTML body
             html_body = f"""
             <html>
@@ -72,14 +99,25 @@ class EmailSender:
                 <ul>
                     <li>Provider: {therapist_name}</li>
                     <li>Date: {start_time.strftime("%B %d, %Y")}</li>
-                    <li>Time: {start_time.strftime("%I:%M %p")} ({start_time.strftime("%Z")})</li>
+                    <li>Time: {start_time.strftime("%I:%M %p")} ({
+                start_time.strftime("%Z")
+            })</li>
                     <li>Duration: {duration} minutes</li>
                 </ul>
-
+                
+                {
+                f"<h3>Join Your Session:</h3><p>Click here to <a href='{telehealth_info['JoinUrl']}'>join your session</a>"
+                + f"<br>Invitation code: {invitation_code}</p>"
+                if telehealth_info
+                else ""
+            }
+                
                 <h3>Important Information:</h3>
                 <p><strong>Manage your appointment or contact your Provider:</strong><br>
                 Access your <a href="https://solhealth.intakeq.com/portal">Client Portal</a> to manage sessions or send messages.<br>
-                You can also reach your Provider directly at <a href="mailto:{therapist_email}">{therapist_email}</a></p>
+                You can also reach your Provider directly at <a href="mailto:{
+                therapist_email
+            }">{therapist_email}</a></p>
 
                 <p><strong>Cancellation Policy:</strong><br>
                 Please reschedule or cancel your session at least 24 hours in advance to avoid a no-show fee equal to our session cost.</p>
@@ -89,7 +127,9 @@ class EmailSender:
 
                 <hr style="margin: 20px 0; border: none; border-top: 1px solid #ddd;">
                 <p style="font-size: 12px; color: #666;">
-                    To unsubscribe from these emails, <a href="{base_url}/unsubscribe?email={client_email}">click here</a>
+                    To unsubscribe from these emails, <a href="{
+                base_url
+            }/unsubscribe?email={client_email}">click here</a>
                 </p>
             </body>
             </html>
@@ -102,6 +142,13 @@ class EmailSender:
                 start_time=start_time,
                 duration_minutes=duration,
                 description="<b>Join your Therapy session</b>"
+                f"{
+                    '<br><br><b>Use the link below to join your scheduled session:</b>'
+                    + f"<br><a href='{telehealth_info['JoinUrl']}'>Join Session</a>"
+                    + f'<br><br><b>Invitation code:</b> {invitation_code}'
+                    if telehealth_info
+                    else ''
+                }"
                 "<br><br><b>Manage your appointment on contact your Provider</b>"
                 "<br>Access your <a href='https://solhealth.intakeq.com/portal'>Client Portal</a> to manage sessions or send messages"
                 f"<br>You can also reach your Provider directly <a href='mailto:{therapist_email}'>{therapist_email}</a>"
