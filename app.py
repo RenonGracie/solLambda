@@ -72,10 +72,6 @@ def set_cors_headers(response):
     summary="Webhook for typeform",
 )
 def typeform_webhook():
-    logger.info(
-        "Received typeform webhook",
-        extra={"type": "typeform_webhook", "data": request.get_json()},
-    )
     process_typeform_data(request.get_json())
     return jsonify({"success": True}), 200
 

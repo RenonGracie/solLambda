@@ -13,6 +13,7 @@ def _value_to_list(value):
 
 class TypeformData:
     _data: dict = {}
+    variables: list[dict] = []
 
     @property
     def first_name(self):
@@ -26,8 +27,15 @@ class TypeformData:
     def email(self):
         return self.get_value(TypeformIds.EMAIL)
 
-    def __init__(self, data: dict) -> None:
+    def __init__(self, data: dict, variables: list[dict] | None) -> None:
         self._data = data
+        self.variables = variables or {}
+
+    def get_var(self, var_name: str):
+        for var in self.variables:
+            if var["key"] == var_name:
+                return var[var["type"]]
+        return None
 
     @property
     def lived_experiences(self):

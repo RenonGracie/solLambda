@@ -148,6 +148,14 @@ class ClientSignup(Base):
         return _calc_points(self.suicidal_thoughts)
 
 
+def remove_underscores(text):
+    if text.startswith("_"):
+        text = text[1:]
+    if text.endswith("_"):
+        text = text[:-1]
+    return text
+
+
 def create_from_typeform_data(response_id: str, data: TypeformData) -> ClientSignup:
     client = ClientSignup()
     client.response_id = response_id
@@ -159,7 +167,7 @@ def create_from_typeform_data(response_id: str, data: TypeformData) -> ClientSig
     client.gender = data.get_value(TypeformIds.GENDER)
     client.age = data.get_value(TypeformIds.AGE)
     client.state = data.get_value(TypeformIds.STATE)
-    client.race = data.get_value(TypeformIds.RACE)
+    client.race = [remove_underscores(s) for s in data.get_value(TypeformIds.RACE)]
 
     client.university = data.get_value(TypeformIds.UNIVERSITY)
 
@@ -201,7 +209,8 @@ def create_from_typeform_data(response_id: str, data: TypeformData) -> ClientSig
         )
     )
 
-    client.promo_code = data.get_value(TypeformIds.PROMO_CODE)
+    if data.get_var("promocode").lower() == "true":
+        client.promo_code = data.get_value(TypeformIds.PROMO_CODE)
     client.referred_by = data.get_value(TypeformIds.REFERRED_BY)
 
     client.how_did_you_hear = data.how_did_you_heard

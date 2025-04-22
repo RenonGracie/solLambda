@@ -20,9 +20,10 @@ def process_typeform_data(db, response_json: dict):
     if db.query(ClientSignup).filter_by(response_id=response_id).first():
         return
 
-    questions_json = response_json["form_response"]["definition"]["fields"]
+    form_response = response_json["form_response"]
+    questions_json = form_response["definition"]["fields"]
     questions = dict(map(lambda item: (item["ref"], item), questions_json))
-    answers = response_json["form_response"]["answers"]
+    answers = form_response["answers"]
     json: dict = {}
     for answer in answers:
         question = questions[answer["field"]["ref"]]
@@ -34,7 +35,7 @@ def process_typeform_data(db, response_json: dict):
             "title": question["title"],
             "type": question["type"],
         }
-    data = TypeformData(json)
+    data = TypeformData(json, form_response.get("variables"))
 
     form = create_from_typeform_data(response_id, data)
     if form.state.__eq__("I don't see my state"):
@@ -52,7 +53,7 @@ def process_typeform_data(db, response_json: dict):
         "session_id": session_id,
     }
 
-    logger.debug("Typeform webhook response", extra={"response": response.json()})
+    logger.debug("intakeQ response", extra={"response": response.json()})
     send_ga_event(
         database=db,
         client_id=client_id,
