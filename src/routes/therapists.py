@@ -1,39 +1,33 @@
 from datetime import datetime, timedelta
-from time import sleep
 
 from flask import jsonify
 from flask_openapi3 import Tag, APIBlueprint
 from googleapiclient.errors import HttpError
 from pyairtable import Api
 
-from src.models.api.base import AdminPass, Email
+from src.models.api.base import Email
 from src.models.api.calendar import (
     CalendarEvents,
     EventQuery,
-    TherapistEmails,
-    TherapistEvents,
 )
 from src.models.api.client_match import MatchedTherapists, MatchQuery
 from src.models.api.error import Error
 from src.models.api.therapist_s3 import MediaQuery, MediaLink
 from src.models.api.therapists import Therapists, Therapist, AvailableSlots
-from src.utils.constants.contants import DEFAULT_ZONE
+from src.utils.constants.contants import DEFAULT_ZONE, DATE_FORMAT
 from src.utils.google.calendar_event_parser import parse_calendar_events
 from src.utils.google.google_calendar import (
     get_events_from_gcalendar,
-    insert_email_to_gcalendar,
-    gcalendar_list,
+    get_busy_events_from_gcalendar,
 )
-from src.utils.matching_algorithm.match import match_client_with_therapists
-from src.utils.settings import settings
-from src.utils.s3 import get_media_url
-from src.utils.therapists.airtable import save_therapists
-from src.utils.therapists.appointments_utils import (
-    process_appointments,
-    events_from_calendar_to_appointments,
-)
-from src.utils.therapists.therapist_data_utils import provide_therapist_slots
 from src.utils.logger import get_logger
+from src.utils.matching_algorithm.match import (
+    match_client_with_therapists,
+    provide_therapist_slots,
+)
+from src.utils.s3 import get_media_url
+from src.utils.settings import settings
+from src.utils.therapists.airtable import save_therapists
 
 __tag = Tag(name="Therapists")
 therapist_api = APIBlueprint(
@@ -87,9 +81,12 @@ def get_events(query: EventQuery):
         )
         return jsonify({"data": parse_calendar_events(events)}), 200
     except HttpError as e:
-        return jsonify(
-            Error(error=e.reason, details=e.error_details).dict()
-        ), e.status_code
+        details = []
+        if isinstance(e.error_details, list):
+            details = e.error_details
+        else:
+            details.append(e.error_details)
+        return jsonify(Error(error=e.reason, details=details).dict()), e.status_code
 
 
 @therapist_api.get("/media", responses={200: MediaLink}, summary="Get the media link")
@@ -99,59 +96,18 @@ def get_video_link(query: MediaQuery):
 
 
 @therapist_api.get(
-    "with_calendar",
-    responses={200: TherapistEmails},
-    summary="Get therapists who shared their calendar",
-)
-def with_calendar():
-    emails = list(
-        map(
-            lambda therapist: therapist["fields"].get("Calendar")
-            or therapist["fields"].get("Email")
-            or therapist["fields"].get("Notes"),
-            table.all(),
-        )
-    )
-    shared = []
-    errors = []
-    items = gcalendar_list()
-    items = {item["id"] for item in items}
-    for email in emails:
-        if items.__contains__(email) is False:
-            try:
-                insert_email_to_gcalendar(email)
-                shared.append(email)
-                logger.info("Email added successfully", extra={"email": email})
-                sleep(0.5)
-            except HttpError as e:
-                logger.error("Email error", extra={"email": email, "error": str(e)})
-                errors.append({"email": email, "error": str(e)})
-                sleep(0.5)
-                pass
-    return jsonify({"emails": list(items) + shared, "errors": errors}), 200
-
-
-@therapist_api.post(
-    "set_events",
-    responses={204: None},
-    summary="Save therapist's calendar events",
-    doc_ui=False,
-)
-def set_events(query: AdminPass, body: TherapistEvents):
-    if not query.admin_password.__eq__(settings.ADMIN_PASSWORD):
-        return jsonify({}), 401
-    else:
-        process_appointments(body)
-        return jsonify({}), 204
-
-
-@therapist_api.get(
     "slots",
     responses={200: AvailableSlots},
     summary="Get therapist's available slots by calendar email",
 )
 def free_slots(query: Email):
-    appointments = events_from_calendar_to_appointments(query.email)
+    now = datetime.now(tz=DEFAULT_ZONE).replace(
+        hour=7, minute=0, second=0, microsecond=0
+    )
+    now_2_weeks = now + timedelta(weeks=2)
+    now_str = now.strftime(DATE_FORMAT)
+    now_2_weeks_str = now_2_weeks.strftime(DATE_FORMAT)
+    busy = get_busy_events_from_gcalendar([query.email], now_str, now_2_weeks_str)
     first_week_slots = []
     second_week_slots = []
     now = datetime.now(tz=DEFAULT_ZONE).replace(
@@ -161,7 +117,12 @@ def free_slots(query: Email):
         for hour in range(15):
             first_week_slots.append(now + timedelta(hours=hour, days=day))
             second_week_slots.append(now + timedelta(hours=hour, days=day + 7))
-    slots = provide_therapist_slots(
-        now, first_week_slots, second_week_slots, appointments, []
-    )
+    slots = busy.get(query.email)
+    busy_slots = slots.get("busy")
+    if busy_slots:
+        slots = provide_therapist_slots(
+            first_week_slots + second_week_slots, busy_slots
+        )
+    else:
+        slots = first_week_slots + second_week_slots
     return jsonify({"available_slots": slots}), 200

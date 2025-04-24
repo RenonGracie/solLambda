@@ -2,12 +2,10 @@ from datetime import timedelta
 
 from dateutil import parser
 from flask import jsonify
-from sqlalchemy import or_
 
 from src.db.database import db
 from src.models.api.appointments import CreateAppointment
 from src.models.api.error import Error
-from src.models.db.airtable import AirtableTherapist
 from src.models.db.signup_form import ClientSignup
 from src.utils.constants.contants import DATE_FORMAT
 from src.utils.email_sender import EmailSender
@@ -19,9 +17,6 @@ from src.utils.request_utils import (
     get_booking_settings,
     search_appointments,
     create_appointment,
-)
-from src.utils.webhooks.intakeq_webhook_appointment_utils import (
-    update_appointment_with_db,
 )
 
 logger = get_logger()
@@ -90,22 +85,8 @@ def book_appointment(base_url: str, body: CreateAppointment):
         appointments = []
     appointment, error = check_therapist_availability(slot_time, appointments)
 
-    therapist_model = (
-        db.query(AirtableTherapist)
-        .filter(
-            or_(
-                AirtableTherapist.email == therapist_email,
-                AirtableTherapist.intern_name == body.therapist_name,
-            )
-        )
-        .first()
-    )
-
     utm = form.utm
     email = form.email
-    if appointment and therapist_model:
-        update_appointment_with_db(therapist_model, appointment)
-
     if error:
         return jsonify(Error(error=error).dict()), 409
 
@@ -126,9 +107,6 @@ def book_appointment(base_url: str, body: CreateAppointment):
     json = result.json()
 
     if result.status_code == 200:
-        if therapist_model:
-            update_appointment_with_db(therapist_model, json)
-
         send_ga_event(
             client_id=utm.get("client_id"),
             name=CALL_SCHEDULED_EVENT,

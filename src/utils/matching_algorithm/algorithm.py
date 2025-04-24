@@ -1,12 +1,12 @@
 from fuzzywuzzy import fuzz
 
-from src.models.api.therapists import Therapist
+from src.models.db.airtable import AirtableTherapist
 from src.models.db.signup_form import ClientSignup
 from src.utils.states_utils import statename_to_abbr
 
 
 def calculate_match_score(
-    data: ClientSignup, therapist: Therapist
+    data: ClientSignup, therapist: AirtableTherapist
 ) -> (int, list, list):
     # Hard factor #0
     if therapist.accepting_new_clients is not True:

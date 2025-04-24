@@ -8,7 +8,6 @@ from src.models.db.airtable import AirtableTherapist
 from src.models.db.analytic_event import AnalyticEvent
 from src.models.db.signup_form import ClientSignup
 from src.models.db.therapist_videos import TherapistVideoModel
-from src.models.db.appointments import AppointmentModel
 from src.models.db.unsubscribed_emails import UnsubscribedEmail
 from src.utils.settings import settings
 from src.utils.singletone import Singleton
@@ -77,7 +76,6 @@ class _Database(Singleton):
         )
 
         ClientSignup.__table__.create(self._engine, checkfirst=True)
-        AppointmentModel.__table__.create(self._engine, checkfirst=True)
         TherapistVideoModel.__table__.create(self._engine, checkfirst=True)
         AnalyticEvent.__table__.create(self._engine, checkfirst=True)
         AirtableTherapist.__table__.create(self._engine, checkfirst=True)
@@ -86,14 +84,6 @@ class _Database(Singleton):
         session_maker = sessionmaker(bind=self._engine)
         self.session = session_maker()
 
-    def drop_appointments(self):
-        AppointmentModel.__table__.drop(self._engine)
-        AppointmentModel.__table__.create(self._engine, checkfirst=True)
-
 
 _database = _Database()
 db = _database.session
-
-
-def drop_appointments():
-    _database.drop_appointments()

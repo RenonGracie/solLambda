@@ -1,15 +1,9 @@
-from datetime import timedelta, datetime
-
-from dateutil.rrule import rrulestr
-
 from src.models.api.therapist_s3 import S3MediaType
 from src.models.api.therapist_videos import VideoType
 from src.models.db.therapist_videos import TherapistVideoModel
-from src.models.db.appointments import AppointmentModel
 from src.utils import s3
-from src.utils.rrule_utils import get_start_date
-from src.utils.settings import settings
 from src.utils.logger import get_logger
+from src.utils.settings import settings
 
 logger = get_logger()
 
@@ -86,73 +80,3 @@ def load_therapist_media(videos: list[TherapistVideoModel], data: dict) -> dict:
     )
     data["therapist"] = therapist.dict()
     return data
-
-
-def provide_therapist_slots(
-    now: datetime,
-    first_week_slots: list[datetime],
-    second_week_slots: list[datetime],
-    first_week_appointments: list[AppointmentModel] | None,
-    second_week_appointments: list[AppointmentModel] | None,
-) -> list[datetime]:
-    if first_week_appointments is None:
-        first_week_slots = []
-    if second_week_appointments is None:
-        second_week_slots = []
-
-    def _check_slot(slot: datetime, start: datetime, end: datetime) -> bool:
-        start = start.astimezone()
-        slot = slot.astimezone()
-        end = end.astimezone()
-        if start <= slot < end:
-            return True
-        if start <= slot + timedelta(minutes=45) < end:
-            return True
-        return False
-
-    def filter_slots(
-        slots: list[datetime], appointments: set[AppointmentModel]
-    ) -> list[datetime]:
-        filtered = slots
-        for appointment in appointments:
-            if appointment is not None:
-                recurrence = appointment.recurrence
-                start = appointment.start
-                if recurrence is None or len(recurrence) == 0:
-                    end = appointment.end
-                    filtered = [
-                        dt for dt in filtered if not _check_slot(dt, start, end)
-                    ]
-                else:
-                    duration = appointment.end - start
-                    for rule_str in recurrence:
-                        if start.tzinfo is None:
-                            logger.debug("Parsing rrule", extra={"rule": rule_str})
-                            occurrences = rrulestr(rule_str, dtstart=start).between(
-                                now.replace(tzinfo=None),
-                                now.replace(tzinfo=None)
-                                + duration
-                                + timedelta(days=15),
-                            )
-                        else:
-                            occurrences = rrulestr(
-                                rule_str, dtstart=get_start_date(start, rule_str)
-                            ).between(
-                                now.astimezone(),
-                                now.astimezone() + duration + timedelta(days=15),
-                            )
-                        for occurrence_start in occurrences:
-                            occurrence_end = occurrence_start + duration
-                            filtered = [
-                                dt
-                                for dt in filtered
-                                if not _check_slot(dt, occurrence_start, occurrence_end)
-                            ]
-
-        return filtered
-
-    available_slots = filter_slots(
-        first_week_slots + second_week_slots,
-        set((first_week_appointments or []) + (second_week_appointments or [])),
-    )
-    return available_slots

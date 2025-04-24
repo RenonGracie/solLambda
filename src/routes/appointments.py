@@ -10,7 +10,6 @@ from src.models.api.appointments import (
     CancelAppointment,
     CreateAppointment,
 )
-from src.models.api.base import EmailWithAdminPass
 from src.models.api.error import Error
 from src.utils.intakeq.booking import (
     book_appointment,
@@ -20,10 +19,6 @@ from src.utils.request_utils import (
     get_appointment,
     update_appointment,
     appointment_cancellation,
-)
-from src.utils.settings import settings
-from src.utils.therapists.appointments_utils import (
-    delete_all_appointments,
 )
 
 __tag = Tag(name="Appointments")
@@ -85,16 +80,3 @@ def update_existing_appointment(body: AppointmentsShort):
 def cancel_appointment(body: CancelAppointment):
     result = appointment_cancellation(body.dict())
     return jsonify(result.json()), result.status_code
-
-
-@appointment_api.delete(
-    "all",
-    responses={204: None},
-    summary="Delete all appointments by therapist email from db",
-)
-def delete_therapist_appointments(query: EmailWithAdminPass):
-    if not query.admin_password.__eq__(settings.ADMIN_PASSWORD):
-        return jsonify({}), 401
-    else:
-        delete_all_appointments(query.email)
-        return jsonify({}), 204

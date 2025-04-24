@@ -142,6 +142,7 @@ class EmailSender:
                 summary=f"Sol Health Appointment: {therapist_name} <> {client_name}",
                 start_time=start_time,
                 duration_minutes=duration,
+                location=join_url,
                 description="<b>Join your Therapy session</b>"
                 f"{
                     '<br><br><b>Use the link below to join your scheduled session:</b>'

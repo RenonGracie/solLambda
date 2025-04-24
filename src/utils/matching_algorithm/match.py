@@ -1,28 +1,24 @@
 import re
 from datetime import datetime, timedelta
 from typing import List
-from concurrent.futures import ThreadPoolExecutor, as_completed
-from threading import Event
 
-from sqlalchemy import Column, Text, column
+from dateutil import parser
+from sqlalchemy import Column, Text
 
 from src.db.database import with_database
 from src.models.api.clients import ClientShort
 from src.models.db.airtable import AirtableTherapist
-from src.models.db.appointments import AppointmentModel
 from src.models.db.signup_form import ClientSignup
 from src.models.db.therapist_videos import TherapistVideoModel
 from src.utils.constants.contants import DEFAULT_ZONE, DATE_FORMAT
+from src.utils.google.google_calendar import get_busy_events_from_gcalendar
 from src.utils.logger import get_logger
 from src.utils.matching_algorithm.algorithm import calculate_match_score
 from src.utils.states_utils import statename_to_abbr
 from src.utils.therapists.therapist_data_utils import (
-    provide_therapist_slots,
     load_therapist_media,
     implement_age_factor,
 )
-from src.utils.therapists.appointments_utils import get_appointments_for_therapist
-
 
 logger = get_logger()
 
@@ -40,7 +36,7 @@ def match_client_with_therapists(
     state = statename_to_abbr.get(form.state)
 
     if not form.therapist_name:
-        therapists = (
+        therapists: list[AirtableTherapist] = (
             db.query(AirtableTherapist)
             .filter(
                 AirtableTherapist.accepting_new_clients,
@@ -58,7 +54,7 @@ def match_client_with_therapists(
             .all()
         )
     else:
-        therapist = (
+        therapist: AirtableTherapist | None = (
             db.query(AirtableTherapist)
             .filter(AirtableTherapist.intern_name == form.therapist_name)
             .first()
@@ -121,142 +117,32 @@ def match_client_with_therapists(
     now_str = now.strftime(DATE_FORMAT)
     now_2_weeks_str = now_2_weeks.strftime(DATE_FORMAT)
 
-    therapist_ids = [value["therapist"].id for value in matches]
+    therapist_emails = [
+        value["therapist"].calendar_email or value["therapist"].email
+        for value in matches
+    ]
 
-    all_appointments = (
-        db.query(AppointmentModel)
-        .filter(AppointmentModel.therapist_id.in_(therapist_ids))
-        .filter(
-            (AppointmentModel.start_date.between(now_str, now_2_weeks_str))
-            | (column("recurrence").isnot(None))
-        )
-        .all()
-    )
+    busy = get_busy_events_from_gcalendar(therapist_emails, now_str, now_2_weeks_str)
+    for index in reversed(range(len(matches))):
+        therapist = matches[index]["therapist"]
+        if therapist:
+            slots = busy.get(therapist.calendar_email or therapist.email)
+            busy_slots = slots.get("busy")
+            if busy_slots:
+                available_slots = provide_therapist_slots(
+                    first_week_slots + second_week_slots, busy_slots
+                )
+                if len(available_slots) == 0:
+                    del matches[index]
+                else:
+                    matches[index]["available_slots"] = available_slots
+            else:
+                matches[index]["available_slots"] = first_week_slots + second_week_slots
 
-    def get_therapist_appointments_async(session, therapist_item):
-        appointments = [
-            appointment
-            for appointment in all_appointments
-            if appointment.therapist_id == therapist_item.id
-        ]
-        first_week_appointments, second_week_appointments = (
-            get_appointments_for_therapist(session, now, therapist_item, appointments)
-        )
-        first_week_client_emails = {
-            appointment.client_email for appointment in first_week_appointments
-        }
-        second_week_client_emails = {
-            appointment.client_email for appointment in second_week_appointments
-        }
-        return {
-            "therapist": therapist_item,
-            "first_week_appointments": first_week_appointments,
-            "second_week_appointments": second_week_appointments,
-            "first_week_client_emails": first_week_client_emails,
-            "second_week_client_emails": second_week_client_emails,
-        }
-
-    def process_matches(session, matches_data, signup_form, limit_value, last):
-        """Process matches using ThreadPoolExecutor"""
-        matched = []
-        stop_event = Event()
-
-        if matches_data:
-            with ThreadPoolExecutor(max_workers=min(10, len(matches_data))) as executor:
-                # Create future for each therapist
-                future_to_therapist = {
-                    executor.submit(
-                        get_therapist_appointments_async, session, match["therapist"]
-                    ): match
-                    for match in matches_data
-                }
-
-                # Process results as they complete
-                for future in as_completed(future_to_therapist):
-                    if stop_event.is_set():
-                        break
-
-                    match = future_to_therapist[future]
-                    try:
-                        therapist_data = future.result()
-                        therapist_item = therapist_data["therapist"]
-                        caseload_value = match.get("max_caseload")
-
-                        first_week_appointments: list | None = therapist_data[
-                            "first_week_appointments"
-                        ]
-                        second_week_appointments: list | None = therapist_data[
-                            "second_week_appointments"
-                        ]
-
-                        if (
-                            caseload_value
-                            and len(therapist_data["first_week_client_emails"])
-                            > caseload_value
-                        ):
-                            first_week_appointments = None
-                        if (
-                            caseload_value
-                            and len(therapist_data["second_week_client_emails"])
-                            > caseload_value
-                        ):
-                            second_week_appointments = None
-
-                        if (
-                            first_week_appointments is not None
-                            or second_week_appointments is not None
-                            or therapist_item.intern_name == signup_form.therapist_name
-                        ):
-                            available_slots = provide_therapist_slots(
-                                now,
-                                first_week_slots,
-                                second_week_slots,
-                                first_week_appointments,
-                                second_week_appointments,
-                            )
-                            if len(available_slots) > 0:
-                                matched.append(
-                                    {
-                                        "therapist": therapist_item,
-                                        "score": match.get("score"),
-                                        "matched_specialities": match.get(
-                                            "matched_specialities"
-                                        ),
-                                        "matched_diagnoses": match.get(
-                                            "matched_diagnoses"
-                                        ),
-                                        "available_slots": available_slots,
-                                    }
-                                )
-                                logger.info(f"matched_therapists, {len(matched)}")
-
-                        if len(matched) == limit_value + last:
-                            logger.info("limit reached")
-                            stop_event.set()
-                            for f in future_to_therapist:
-                                if not f.done():
-                                    f.cancel()
-                            break
-
-                    except Exception as e:
-                        therapist_id = (
-                            match["therapist"].id
-                            if match and "therapist" in match
-                            else "unknown"
-                        )
-                        logger.info(
-                            f"Error processing therapist {therapist_id}: {str(e)}"
-                        )
-                        continue
-
-        return matched
-
-    matched_therapists = process_matches(db, matches, form, limit, last_index)
-    logger.info("next steps")
     matched_therapists = implement_age_factor(
         form.age,
         sorted(
-            matched_therapists,
+            matches,
             key=lambda i: (i.get("score"), len(i["available_slots"])),
             reverse=True,
         ),
@@ -269,3 +155,25 @@ def match_client_with_therapists(
             matched_therapists[last_index : limit + last_index],
         )
     )
+
+
+def _check_slot(slot: datetime, start: datetime, end: datetime) -> bool:
+    start = start.astimezone()
+    slot = slot.astimezone()
+    end = end.astimezone()
+    if start <= slot < end:
+        return True
+    if start <= slot + timedelta(minutes=45) < end:
+        return True
+    return False
+
+
+def provide_therapist_slots(
+    slots: list[datetime], busy_slots: list[dict]
+) -> list[datetime]:
+    filtered = slots
+    for slot in busy_slots:
+        start = parser.parse(slot["start"])
+        end = parser.parse(slot["end"])
+        filtered = [dt for dt in filtered if not _check_slot(dt, start, end)]
+    return filtered

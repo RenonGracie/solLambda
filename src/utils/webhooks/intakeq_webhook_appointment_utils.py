@@ -1,63 +1,10 @@
-from datetime import datetime, UTC
-
-from sqlalchemy import and_
-
 from src.db.database import with_database
 from src.models.db.airtable import AirtableTherapist
 from src.models.db.signup_form import ClientSignup
-from src.models.db.appointments import AppointmentModel
 from src.utils.event_utils import (
     send_ga_event,
     APPOINTMENT_EVENT_TYPE,
 )
-
-
-def _create_appointment(db, therapist: AirtableTherapist, data: dict):
-    appointment = AppointmentModel()
-    appointment.intakeq_id = data["Id"]
-    appointment.start_date = datetime.fromtimestamp(data["StartDate"] / 1e3, UTC)
-    appointment.end_date = datetime.fromtimestamp(data["EndDate"] / 1e3, UTC)
-    appointment.client_email = data["ClientEmail"]
-    appointment.therapist = therapist
-    db.add(appointment)
-
-
-def _update_appointment(
-    db, therapist: AirtableTherapist, data: dict, skip_if_exists=False
-):
-    existing_appointment = (
-        db.query(AppointmentModel).filter_by(intakeq_id=data["Id"]).first()
-    )
-    if existing_appointment and not skip_if_exists:
-        db.delete(existing_appointment)
-        db.flush()
-
-    _create_appointment(db, therapist, data)
-
-
-@with_database
-def update_appointment_with_db(db, therapist: AirtableTherapist, data: dict):
-    return _update_appointment(db, therapist, data)
-
-
-def _delete_appointment(db, data: dict):
-    appointment = db.query(AppointmentModel).filter_by(intakeq_id=data["Id"]).first()
-    if appointment is None:
-        start_date = datetime.fromtimestamp(data["StartDate"] / 1e3, UTC)
-        end_date = datetime.fromtimestamp(data["EndDate"] / 1e3, UTC)
-        appointment = (
-            db.query(AppointmentModel)
-            .filter(
-                and_(
-                    AppointmentModel.start_date == start_date,
-                    AppointmentModel.end_date == end_date,
-                )
-            )
-            .first()
-        )
-
-    if appointment:
-        db.delete(appointment)
 
 
 @with_database
@@ -75,13 +22,6 @@ def process_appointment(db, data: dict):
         return
 
     event = data["EventType"]
-    match event:
-        case "AppointmentCreated":
-            _update_appointment(db, therapist_model, appointment, True)
-        case "AppointmentRescheduled":
-            _update_appointment(db, therapist_model, appointment)
-        case "AppointmentDeleted":
-            _delete_appointment(db, appointment)
 
     if client:
         send_ga_event(
