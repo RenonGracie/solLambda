@@ -30,6 +30,7 @@ def book_appointment(base_url: str, body: CreateAppointment):
         logger.error("Unable to get booking settings")
         return jsonify(Error(error="Unable to get booking settings").dict()), 400
     practitioners = result.json()["Practitioners"]
+    sessions = result.json()["Services"]
     try:
         therapist = next(
             item
@@ -90,15 +91,36 @@ def book_appointment(base_url: str, body: CreateAppointment):
     if error:
         return jsonify(Error(error=error).dict()), 409
 
+    try:
+        match form.discount:
+            case 100:
+                session_id = next(
+                    session
+                    for session in sessions
+                    if str(session["Name"]).__eq__("First Session (Free)")
+                )["Id"]
+            case 50:
+                session_id = next(
+                    session
+                    for session in sessions
+                    if str(session["Name"]).__eq__("First Session (Promo Code)")
+                )["Id"]
+            case _:
+                session_id = next(
+                    session
+                    for session in sessions
+                    if str(session["Name"]).__eq__("First Session")
+                )["Id"]
+    except StopIteration:
+        session_id = "099e964f-c444-4c68-9668-00f734b95afd"
+
     result = create_appointment(
         {
             "PractitionerId": therapist["Id"],
             "ClientId": client_id,
             "LocationId": "1",
             "UtcDateTime": int(slot_time.timestamp() * 1000),
-            "ServiceId": "e818ad3d-5758-4a7d-a1f9-657af8ac4dc8"
-            if form.promo_code and len(form.promo_code) > 1
-            else "099e964f-c444-4c68-9668-00f734b95afd",
+            "ServiceId": session_id,
             "SendClientEmailNotification": body.send_client_email_notification,
             "ReminderType": body.reminder_type if body.reminder_type else "Email",
             "Status": body.status,

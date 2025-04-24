@@ -2,7 +2,7 @@ import json
 from uuid import uuid4
 
 import emoji
-from sqlalchemy import Column, String, Text
+from sqlalchemy import Column, String, Text, Integer
 from sqlalchemy.dialects.postgresql import UUID
 
 from src.utils.typeform.typeform_parser import TypeformData, TypeformIds
@@ -19,6 +19,16 @@ def _calc_points(value: str):
             return 2
         case "Nearly every day":
             return 3
+    return 0
+
+
+def _parse_promocode(value: str) -> int:
+    if value in ["true", "free"]:
+        return 100
+    elif value in ["50off"]:
+        return 50
+    else:
+        return 0
 
 
 class ClientSignup(Base):
@@ -73,6 +83,8 @@ class ClientSignup(Base):
     _utm = Column("utm_params", Text, nullable=True)
 
     therapist_name = Column("therapist_name", Text)
+
+    discount = Column("discount", Integer, default=0)
 
     @property
     def race(self):
@@ -209,8 +221,10 @@ def create_from_typeform_data(response_id: str, data: TypeformData) -> ClientSig
         )
     )
 
-    if data.get_var("promocode").lower() == "true":
+    discount = _parse_promocode(data.get_var("promocode").lower())
+    if discount > 0:
         client.promo_code = data.get_value(TypeformIds.PROMO_CODE)
+    client.discount = discount
     client.referred_by = data.get_value(TypeformIds.REFERRED_BY)
 
     client.how_did_you_hear = data.how_did_you_heard
