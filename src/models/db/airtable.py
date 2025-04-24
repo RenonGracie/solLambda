@@ -264,8 +264,7 @@ class AirtableTherapist(Base):
         therapist.family_household = fields.get(
             "Traditional vs. Non-traditional family household"
         )
-        therapist.welcome_video_link = fields.get("Welcome Video Link")
-        therapist.greetings_video_link = fields.get("Greetings Video Link")
-        therapist.image_link = fields.get("Image Link")
+        therapist.welcome_video_link = fields.get("Welcome Video")
+        therapist.greetings_video_link = fields.get("Greetings Video")
 
         return therapist

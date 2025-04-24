@@ -7,7 +7,6 @@ from sqlalchemy.orm import sessionmaker
 from src.models.db.airtable import AirtableTherapist
 from src.models.db.analytic_event import AnalyticEvent
 from src.models.db.signup_form import ClientSignup
-from src.models.db.therapist_videos import TherapistVideoModel
 from src.models.db.unsubscribed_emails import UnsubscribedEmail
 from src.utils.settings import settings
 from src.utils.singletone import Singleton
@@ -76,7 +75,6 @@ class _Database(Singleton):
         )
 
         ClientSignup.__table__.create(self._engine, checkfirst=True)
-        TherapistVideoModel.__table__.create(self._engine, checkfirst=True)
         AnalyticEvent.__table__.create(self._engine, checkfirst=True)
         AirtableTherapist.__table__.create(self._engine, checkfirst=True)
         UnsubscribedEmail.__table__.create(self._engine, checkfirst=True)

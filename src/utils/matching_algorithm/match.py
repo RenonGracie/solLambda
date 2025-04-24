@@ -9,14 +9,13 @@ from src.db.database import with_database
 from src.models.api.clients import ClientShort
 from src.models.db.airtable import AirtableTherapist
 from src.models.db.signup_form import ClientSignup
-from src.models.db.therapist_videos import TherapistVideoModel
 from src.utils.constants.contants import DEFAULT_ZONE, DATE_FORMAT
 from src.utils.google.google_calendar import get_busy_events_from_gcalendar
 from src.utils.logger import get_logger
 from src.utils.matching_algorithm.algorithm import calculate_match_score
 from src.utils.states_utils import statename_to_abbr
 from src.utils.therapists.therapist_data_utils import (
-    load_therapist_media,
+    provide_therapist_data,
     implement_age_factor,
 )
 
@@ -148,10 +147,9 @@ def match_client_with_therapists(
         ),
     )
 
-    videos = db.query(TherapistVideoModel).all()
     return ClientShort(**form.__dict__).dict(), list(
         map(
-            lambda item: load_therapist_media(videos, item),
+            lambda item: provide_therapist_data(item),
             matched_therapists[last_index : limit + last_index],
         )
     )
