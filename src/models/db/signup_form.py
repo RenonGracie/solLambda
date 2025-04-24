@@ -172,8 +172,8 @@ def create_from_typeform_data(response_id: str, data: TypeformData) -> ClientSig
     client = ClientSignup()
     client.response_id = response_id
 
-    client.first_name = data.get_value(TypeformIds.FIRST_NAME)
-    client.last_name = data.get_value(TypeformIds.LAST_NAME)
+    client.first_name = data.get_value(TypeformIds.FIRST_NAME).strip()
+    client.last_name = data.get_value(TypeformIds.LAST_NAME).strip()
     client.phone = data.get_value(TypeformIds.PHONE)
     client.email = data.get_value(TypeformIds.EMAIL)
     client.gender = data.get_value(TypeformIds.GENDER)
