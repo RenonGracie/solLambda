@@ -2,20 +2,21 @@ from datetime import timedelta
 
 from dateutil import parser
 from flask import jsonify
+from sqlalchemy import or_
 
 from src.db.database import db
 from src.models.api.appointments import CreateAppointment
 from src.models.api.error import Error
+from src.models.db.airtable import AirtableTherapist
 from src.models.db.signup_form import ClientSignup
-from src.utils.constants.contants import DATE_FORMAT
 from src.utils.email_sender import EmailSender
 from src.utils.event_utils import send_ga_event, CALL_SCHEDULED_EVENT, USER_EVENT_TYPE
+from src.utils.google.google_calendar import get_busy_events_from_gcalendar
 from src.utils.intakeq.appointments import check_therapist_availability
 from src.utils.intakeq.clients import search_client, reassign_client
 from src.utils.logger import get_logger
 from src.utils.request_utils import (
     get_booking_settings,
-    search_appointments,
     create_appointment,
 )
 
@@ -73,23 +74,32 @@ def book_appointment(base_url: str, body: CreateAppointment):
 
     therapist_email = therapist.get("Email")
     slot_time = parser.parse(body.datetime)
-    result = search_appointments(
-        {
-            "practitionerEmail": therapist_email,
-            "startDate": (slot_time - timedelta(days=1)).strftime(DATE_FORMAT),
-            "endDate": (slot_time + timedelta(days=1)).strftime(DATE_FORMAT),
-        }
+
+    therapist_model: AirtableTherapist = (
+        db.query(AirtableTherapist)
+        .filter(
+            or_(
+                AirtableTherapist.email == therapist_email,
+                AirtableTherapist.intern_name == body.therapist_name,
+            )
+        )
+        .first()
     )
-    if result.status_code == 200:
-        appointments = result.json()
-    else:
-        appointments = []
-    appointment, error = check_therapist_availability(slot_time, appointments)
+
+    busy = get_busy_events_from_gcalendar(
+        [therapist_model.calendar_email or therapist_model.email],
+        slot_time - timedelta(days=1),
+        slot_time + timedelta(days=1),
+    )
+    slots = busy.get(therapist.calendar_email or therapist.email)
+    busy_slots = slots.get("busy")
+    if busy_slots:
+        error = check_therapist_availability(slot_time, busy_slots)
+        if error:
+            return jsonify(Error(error=error).dict()), 409
 
     utm = form.utm
     email = form.email
-    if error:
-        return jsonify(Error(error=error).dict()), 409
 
     try:
         match form.discount:

@@ -1,8 +1,11 @@
+from datetime import datetime
+
 from googleapiclient.errors import HttpError
 
 
 from googleapiclient.discovery import build
 
+from src.utils.constants.contants import DATE_FORMAT
 from src.utils.google.credentials import get_credentials
 from src.utils.logger import get_logger
 
@@ -82,8 +85,8 @@ def get_events_from_gcalendar(
 
 def get_busy_events_from_gcalendar(
     calendar_ids: list[str],
-    time_min: str | None = None,
-    time_max: str | None = None,
+    time_min: datetime | str | None = None,
+    time_max: datetime | str | None = None,
     raise_error: bool = False,
 ) -> dict | None:
     """
@@ -91,13 +94,19 @@ def get_busy_events_from_gcalendar(
 
     Args:
         calendar_ids: List of calendar IDs to check
-        time_min: Start time in RFC3339 format (e.g., '2024-03-20T00:00:00Z')
-        time_max: End time in RFC3339 format (e.g., '2024-03-21T00:00:00Z')
+        time_min: Start time in format (e.g., '2024-03-20')
+        time_max: End time in format (e.g., '2024-03-21')
         raise_error: Whether to raise exceptions or return None on error
 
     Returns:
         Dictionary containing busy periods for each calendar
     """
+    if isinstance(time_min, datetime):
+        time_min = time_min.strftime(DATE_FORMAT)
+
+    if isinstance(time_max, datetime):
+        time_max = time_max.strftime(DATE_FORMAT)
+
     service = _get_service()
     try:
         # Prepare request body for freebusy query
