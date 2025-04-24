@@ -1,5 +1,4 @@
 from src.models.api.therapist_s3 import S3MediaType
-from src.models.api.therapist_videos import VideoType
 from src.utils import s3
 from src.utils.logger import get_logger
 from src.utils.settings import settings
