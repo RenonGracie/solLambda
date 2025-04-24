@@ -142,6 +142,7 @@ class Therapist(AvailableSlots):
                 family_household=fields.get(
                     "Traditional vs. Non-traditional family household"
                 ),
+                welcome_video_link=fields.get("Welcome Video"),
             )
 
 

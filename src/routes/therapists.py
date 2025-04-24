@@ -59,7 +59,7 @@ def get_therapists():
 )
 def match(query: MatchQuery):
     client, matched = match_client_with_therapists(
-        table, query.response_id, query.limit, query.last_index
+        query.response_id, query.limit, query.last_index
     )
     if client is None:
         return jsonify({"client": None, "therapists": []}), 200

@@ -3,8 +3,6 @@ from datetime import timedelta, datetime
 from dateutil.rrule import rrulestr
 
 from src.models.api.therapist_s3 import S3MediaType
-from src.models.api.therapist_videos import VideoType
-from src.models.db.therapist_videos import TherapistVideoModel
 from src.models.db.appointments import AppointmentModel
 from src.utils import s3
 from src.utils.rrule_utils import get_start_date
@@ -56,7 +54,7 @@ def implement_age_factor(age_str: str, matched: list[dict]) -> list[dict]:
         return matched
 
 
-def load_therapist_media(videos: list[TherapistVideoModel], data: dict) -> dict:
+def provide_therapist_data(data: dict) -> dict:
     therapist_model = data["therapist"]
     email = (
         settings.TEST_THERAPIST_EMAIL
@@ -66,12 +64,6 @@ def load_therapist_media(videos: list[TherapistVideoModel], data: dict) -> dict:
     therapist = therapist_model.to_therapist()
     therapist.available_slots = data["available_slots"]
     data.pop("available_slots")
-    videos = [item for item in videos if item.email == therapist.email]
-    for video in videos:
-        if video.type == VideoType.WELCOME.value:
-            therapist.welcome_video_link = video.video_url
-        if video.type == VideoType.GREETING.value:
-            therapist.greetings_video_link = video.video_url
 
     if not therapist.welcome_video_link and settings.TEST_WELCOME_VIDEO:
         therapist.welcome_video_link = settings.TEST_WELCOME_VIDEO

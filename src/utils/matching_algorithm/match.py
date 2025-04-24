@@ -11,13 +11,12 @@ from src.models.api.clients import ClientShort
 from src.models.db.airtable import AirtableTherapist
 from src.models.db.appointments import AppointmentModel
 from src.models.db.signup_form import ClientSignup
-from src.models.db.therapist_videos import TherapistVideoModel
 from src.utils.constants.contants import DEFAULT_ZONE, DATE_FORMAT
 from src.utils.matching_algorithm.algorithm import calculate_match_score
 from src.utils.states_utils import statename_to_abbr
 from src.utils.therapists.therapist_data_utils import (
     provide_therapist_slots,
-    load_therapist_media,
+    provide_therapist_data,
     implement_age_factor,
 )
 from src.utils.therapists.appointments_utils import get_appointments_for_therapist
@@ -25,7 +24,7 @@ from src.utils.therapists.appointments_utils import get_appointments_for_therapi
 
 @with_database
 def match_client_with_therapists(
-    db, airtable, response_id: str, limit: int, last_index: int
+    db, response_id: str, limit: int, last_index: int
 ) -> (ClientSignup | None, List[dict]):
     form: ClientSignup = (
         db.query(ClientSignup).filter_by(response_id=response_id).first()
@@ -245,10 +244,9 @@ def match_client_with_therapists(
         ),
     )
 
-    videos = db.query(TherapistVideoModel).all()
     return ClientShort(**form.__dict__).dict(), list(
         map(
-            lambda item: load_therapist_media(videos, item),
+            lambda item: provide_therapist_data(item),
             matched_therapists[last_index : limit + last_index],
         )
     )

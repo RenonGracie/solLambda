@@ -9,7 +9,6 @@ from src.routes import (
     appointment_api,
     therapist_api,
     client_signup_api,
-    therapist_video_api,
     intakeq_forms_api,
     events_api,
 )
@@ -38,7 +37,6 @@ app.register_api(client_api)
 app.register_api(client_signup_api)
 app.register_api(appointment_api)
 app.register_api(therapist_api)
-app.register_api(therapist_video_api)
 app.register_api(intakeq_forms_api)
 app.register_api(events_api)
 
