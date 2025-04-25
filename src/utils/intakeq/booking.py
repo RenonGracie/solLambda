@@ -91,7 +91,7 @@ def book_appointment(base_url: str, body: CreateAppointment):
         slot_time - timedelta(days=1),
         slot_time + timedelta(days=1),
     )
-    slots = busy.get(therapist.calendar_email or therapist.email)
+    slots = busy.get(therapist_model.calendar_email or therapist_model.email)
     busy_slots = slots.get("busy")
     if busy_slots:
         error = check_therapist_availability(slot_time, busy_slots)
