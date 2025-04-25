@@ -152,7 +152,7 @@ def book_appointment(base_url: str, body: CreateAppointment):
 
     email_sender.send_email(
         base_url,
-        therapist_name=f"{therapist.get('FirstName')} {therapist.get('LastName')[:1]}",
+        therapist_name=f"{therapist.get('FirstName')} {(therapist.get('LastName') or "")[:1]}",
         therapist_email=therapist_email,
         client_name=f"{client.get('FirstName')[:1]}.{(client.get('LastName') or ' ')[:1]}",
         client_email=client.get("Email"),
