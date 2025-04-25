@@ -34,6 +34,7 @@ def get_media_url(user_id: str, s3_media_type: S3MediaType, expiration=3600):
             Params={"Bucket": S3_BUCKET_NAME, "Key": link},
             ExpiresIn=expiration,
         )
-    except ClientError as e:
-        logger.error("S3 error", extra={"error": str(e)})
+    except Exception as e:
+        if not str(e).__contains__("404"):
+            logger.error("S3 error", extra={"error": str(e)})
         return None
