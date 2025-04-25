@@ -93,7 +93,7 @@ class EmailSender:
             html_body = f"""
             <html>
             <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
-                <h2>Your Therapy Session is Confirmed</h2>
+                <h2>Your Session is Confirmed</h2>
                 <p>Your appointment details have been added to the attached calendar invitation.</p>
                 
                 <h3>Session Details:</h3>
@@ -143,7 +143,7 @@ class EmailSender:
                 start_time=start_time,
                 duration_minutes=duration,
                 location=join_url,
-                description="<b>Join your Therapy session</b>"
+                description="<b>Join your session</b>"
                 f"{
                     '<br><br><b>Use the link below to join your scheduled session:</b>'
                     + f"<br><a href='{join_url}'>Join Session</a>"
