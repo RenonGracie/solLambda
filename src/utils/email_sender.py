@@ -138,29 +138,39 @@ class EmailSender:
             msg.attach(MIMEText(html_body, "html"))
 
             # Create calendar event without unsubscribe link in description
+            calendar_description = "<b>Join your session</b>" \
+                f"{'<br><br><b>Use the link below to join your scheduled session:</b>' + f'<br>🔗<a href=\'{join_url}\'>Join Session</a>' + f'<br><br><b>Invitation code:</b> {invitation_code}' if telehealth_info else ''}" \
+                "<br><br><b>Manage your appointment on contact your Provider</b>" \
+                "<br>Access your Client Portal to manage sessions or send messages" \
+                "<br>🔗<a href='https://solhealth.intakeq.com/portal'>Client Portal</a>" \
+                f"<br>You can also reach your Provider directly <a href='mailto:{therapist_email}'>{therapist_email}</a>" \
+                "<br><br><b>Cancellation Policy</b>" \
+                "<br>Please reschedule or cancel your session at least 24 hours in advance to avoid a no-show fee equal to our session cost." \
+                "<br><br><b>Needs Help?</b>" \
+                "<br>Email us at 📩<a href='mailto:contact@solhealth.co'>contact@solhealth.co</a>"
+
+            # Create ICS calendar event
             ics_content = create_calendar_event(
                 summary=f"Sol Health Appointment: {therapist_name} <> {client_name}",
                 start_time=start_time,
                 duration_minutes=duration,
                 location=join_url,
-                description="<b>Join your session</b>"
-                f"{
-                    '<br><br><b>Use the link below to join your scheduled session:</b>'
-                    + f"<br><a href='{join_url}'>Join Session</a>"
-                    + f'<br><br><b>Invitation code:</b> {invitation_code}'
-                    if telehealth_info
-                    else ''
-                }"
-                "<br><br><b>Manage your appointment on contact your Provider</b>"
-                "<br>Access your <a href='https://solhealth.intakeq.com/portal'>Client Portal</a> to manage sessions or send messages"
-                f"<br>You can also reach your Provider directly <a href='mailto:{therapist_email}'>{therapist_email}</a>"
-                "<br><br><b>Cancellation Policy</b>"
-                "<br>Please reschedule or cancel your session at least 24 hours in advance to avoid a no-show fee equal to our session cost."
-                "<br><br><b>Needs Help?</b>"
-                "<br>Email us at <a href='mailto:contact@solhealth.co'>contact@solhealth.co</a>",
+                description=calendar_description,
                 organizer_email=therapist_email,
                 attendee_email=client_email,
             )
+
+            # Create Google Calendar event
+            # create_gcalendar_event(
+            #     calendar_id=client_email,  # Using client's email as their calendar ID
+            #     summary=f"Sol Health Appointment: {therapist_name} <> {client_name}",
+            #     start_time=start_time,
+            #     duration_minutes=duration,
+            #     location=join_url,
+            #     description=calendar_description,
+            #     organizer_email=therapist_email,
+            #     attendee_email=client_email,
+            # )
 
             # Create calendar attachment
             calendar_part = MIMEBase("text", "calendar")
