@@ -107,24 +107,25 @@ class EmailSender:
                 </ul>
                 
                 {
-                f"<h3>Join Your Session:</h3><p>Click here to <a href='{join_url}'>join your session</a>"
+                f"<h3>Join Your Session:</h3><p>Use the link below to join your scheduled video session: <br>🔗<a href='{join_url}'>join your session</a>"
                 + f"<br>Invitation code: {invitation_code}</p>"
                 if telehealth_info
                 else ""
             }
                 
                 <h3>Important Information:</h3>
-                <p><strong>Manage your appointment or contact your Provider:</strong><br>
-                Access your <a href="https://solhealth.intakeq.com/portal">Client Portal</a> to manage sessions or send messages.<br>
-                You can also reach your Provider directly at <a href="mailto:{
+                <p><strong>Manage Your Appointment or Contact Your Provider</strong><br>
+                Access your Client Portal to manage sessions or send messages<br>
+                🔗<a href="https://solhealth.intakeq.com/portal">Client Portal</a> to manage sessions or send messages.<br>
+                You can also reach your provider directly at <a href="mailto:{
                 therapist_email
             }">{therapist_email}</a></p>
 
                 <p><strong>Cancellation Policy:</strong><br>
-                Please reschedule or cancel your session at least 24 hours in advance to avoid a no-show fee equal to our session cost.</p>
+                Please reschedule or cancel your session at least 24 hours in advance to avoid a no-show fee equal to your session cost.</p>
 
                 <p><strong>Need Help?</strong><br>
-                Email us at <a href="mailto:contact@solhealth.co">contact@solhealth.co</a></p>
+                Email us at 📩<a href="mailto:contact@solhealth.co">contact@solhealth.co</a></p>
 
                 <hr style="margin: 20px 0; border: none; border-top: 1px solid #ddd;">
                 <p style="font-size: 12px; color: #666;">
@@ -139,13 +140,13 @@ class EmailSender:
 
             # Create calendar event without unsubscribe link in description
             calendar_description = "<b>Join your session</b>" \
-                f"{'<br><br><b>Use the link below to join your scheduled session:</b>' + f'<br>🔗<a href=\'{join_url}\'>Join Session</a>' + f'<br><br><b>Invitation code:</b> {invitation_code}' if telehealth_info else ''}" \
-                "<br><br><b>Manage your appointment on contact your Provider</b>" \
+                f"{'<br><br><b>Use the link below to join your scheduled video session:</b>' + f'<br>🔗<a href=\'{join_url}\'>Join Session</a>' + f'<br><br><b>Invitation code:</b> {invitation_code}' if telehealth_info else ''}" \
+                "<br><br><b>Manage Your Appointment or Contact Your Provider</b>" \
                 "<br>Access your Client Portal to manage sessions or send messages" \
                 "<br>🔗<a href='https://solhealth.intakeq.com/portal'>Client Portal</a>" \
-                f"<br>You can also reach your Provider directly <a href='mailto:{therapist_email}'>{therapist_email}</a>" \
+                f"<br>YYou can also reach your provider directly at <a href='mailto:{therapist_email}'>{therapist_email}</a>" \
                 "<br><br><b>Cancellation Policy</b>" \
-                "<br>Please reschedule or cancel your session at least 24 hours in advance to avoid a no-show fee equal to our session cost." \
+                "<br>Please reschedule or cancel your session at least 24 hours in advance to avoid a no-show fee equal to your session cost." \
                 "<br><br><b>Needs Help?</b>" \
                 "<br>Email us at 📩<a href='mailto:contact@solhealth.co'>contact@solhealth.co</a>"
 
