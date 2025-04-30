@@ -39,6 +39,7 @@ def process_typeform_data(db, response_json: dict):
 
     form = create_from_typeform_data(response_id, data)
     if form.state.__eq__("I don't see my state"):
+        db.add(form)
         return
 
     response = save_update_client(create_client_model(data).dict())
