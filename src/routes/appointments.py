@@ -53,7 +53,7 @@ def appointment(path: AppointmentPath):
 
 @appointment_api.post(
     "",
-    responses={200: Appointment, 400: Error, 404: Error, 409: Error},
+    responses={200: Appointment, 400: Error, 404: Error, 409: Error, 410: Error},
     summary="Create a new appointment",
 )
 def new_appointment(body: CreateAppointment):

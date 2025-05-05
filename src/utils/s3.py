@@ -1,5 +1,4 @@
 import boto3
-from botocore.exceptions import ClientError
 
 from src.models.api.therapist_s3 import S3MediaType
 from src.utils.settings import settings

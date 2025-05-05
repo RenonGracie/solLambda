@@ -9,6 +9,7 @@ from src.models.api.appointments import CreateAppointment
 from src.models.api.error import Error
 from src.models.db.airtable import AirtableTherapist
 from src.models.db.signup_form import ClientSignup
+from src.utils.constants.contants import DATE_FORMAT
 from src.utils.email_sender import EmailSender
 from src.utils.event_utils import send_ga_event, CALL_SCHEDULED_EVENT, USER_EVENT_TYPE
 from src.utils.google.google_calendar import get_busy_events_from_gcalendar
@@ -18,6 +19,7 @@ from src.utils.logger import get_logger
 from src.utils.request_utils import (
     get_booking_settings,
     create_appointment,
+    search_appointments,
 )
 
 logger = get_logger()
@@ -44,6 +46,25 @@ def book_appointment(base_url: str, body: CreateAppointment):
     if not therapist:
         logger.error("Therapist not found")
         return jsonify(Error(error="Therapist not found").dict()), 404
+
+    therapist_email = therapist.get("Email")
+    slot_time = parser.parse(body.datetime)
+
+    therapist_model: AirtableTherapist = (
+        db.query(AirtableTherapist)
+        .filter(
+            or_(
+                AirtableTherapist.email == therapist_email,
+                AirtableTherapist.intern_name == body.therapist_name,
+            )
+        )
+        .first()
+    )
+
+    if not therapist_model.accepting_new_clients:
+        return jsonify(
+            Error(error="Therapist is not accepting new clients").dict()
+        ), 410
 
     form = db.query(ClientSignup).filter_by(response_id=body.client_response_id).first()
     if not form:
@@ -72,31 +93,31 @@ def book_appointment(base_url: str, body: CreateAppointment):
         ), 404
     client_id = client.get("ClientId") or client.get("ClientNumber")
 
-    therapist_email = therapist.get("Email")
-    slot_time = parser.parse(body.datetime)
-
-    therapist_model: AirtableTherapist = (
-        db.query(AirtableTherapist)
-        .filter(
-            or_(
-                AirtableTherapist.email == therapist_email,
-                AirtableTherapist.intern_name == body.therapist_name,
-            )
-        )
-        .first()
-    )
-
     busy = get_busy_events_from_gcalendar(
         [therapist_model.calendar_email or therapist_model.email],
         slot_time - timedelta(days=1),
         slot_time + timedelta(days=1),
     )
-    slots = busy.get(therapist_model.calendar_email or therapist_model.email)
-    busy_slots = slots.get("busy")
-    if busy_slots:
-        error = check_therapist_availability(slot_time, busy_slots)
-        if error:
-            return jsonify(Error(error=error).dict()), 409
+
+    result = search_appointments(
+        {
+            "practitionerEmail": therapist_email,
+            "startDate": (slot_time - timedelta(days=1)).strftime(DATE_FORMAT),
+            "endDate": (slot_time + timedelta(days=1)).strftime(DATE_FORMAT),
+        }
+    )
+    error = check_therapist_availability(
+        slot_time, result.json() if result.status_code == 200 else [], True
+    )
+
+    if not error:
+        slots = busy.get(therapist_model.calendar_email or therapist_model.email)
+        busy_slots = slots.get("busy")
+        if busy_slots:
+            error = check_therapist_availability(slot_time, busy_slots)
+
+    if error:
+        return jsonify(Error(error=error).dict()), 409
 
     utm = form.utm
     email = form.email

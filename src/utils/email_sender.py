@@ -139,16 +139,18 @@ class EmailSender:
             msg.attach(MIMEText(html_body, "html"))
 
             # Create calendar event without unsubscribe link in description
-            calendar_description = "<b>Join your session</b>" \
-                f"{'<br><br><b>Use the link below to join your scheduled video session:</b>' + f'<br>🔗<a href=\'{join_url}\'>Join Session</a>' + f'<br><br><b>Invitation code:</b> {invitation_code}' if telehealth_info else ''}" \
-                "<br><br><b>Manage Your Appointment or Contact Your Provider</b>" \
-                "<br>Access your Client Portal to manage sessions or send messages" \
-                "<br>🔗<a href='https://solhealth.intakeq.com/portal'>Client Portal</a>" \
-                f"<br>YYou can also reach your provider directly at <a href='mailto:{therapist_email}'>{therapist_email}</a>" \
-                "<br><br><b>Cancellation Policy</b>" \
-                "<br>Please reschedule or cancel your session at least 24 hours in advance to avoid a no-show fee equal to your session cost." \
-                "<br><br><b>Needs Help?</b>" \
+            calendar_description = (
+                "<b>Join your session</b>"
+                f"{'<br><br><b>Use the link below to join your scheduled video session:</b>' + f"<br>🔗<a href='{join_url}'>Join Session</a>" + f'<br><br><b>Invitation code:</b> {invitation_code}' if telehealth_info else ''}"
+                "<br><br><b>Manage Your Appointment or Contact Your Provider</b>"
+                "<br>Access your Client Portal to manage sessions or send messages"
+                "<br>🔗<a href='https://solhealth.intakeq.com/portal'>Client Portal</a>"
+                f"<br>YYou can also reach your provider directly at <a href='mailto:{therapist_email}'>{therapist_email}</a>"
+                "<br><br><b>Cancellation Policy</b>"
+                "<br>Please reschedule or cancel your session at least 24 hours in advance to avoid a no-show fee equal to your session cost."
+                "<br><br><b>Needs Help?</b>"
                 "<br>Email us at 📩<a href='mailto:contact@solhealth.co'>contact@solhealth.co</a>"
+            )
 
             # Create ICS calendar event
             ics_content = create_calendar_event(
