@@ -9,7 +9,7 @@ from src.db.database import with_database
 from src.models.api.clients import ClientShort
 from src.models.db.airtable import AirtableTherapist
 from src.models.db.signup_form import ClientSignup
-from src.utils.constants.contants import DEFAULT_ZONE, DATE_FORMAT
+from src.utils.constants.contants import DATE_FORMAT
 from src.utils.google.google_calendar import get_busy_events_from_gcalendar
 from src.utils.logger import get_logger
 from src.utils.matching_algorithm.algorithm import calculate_match_score
@@ -18,6 +18,7 @@ from src.utils.therapists.therapist_data_utils import (
     provide_therapist_data,
     implement_age_factor,
 )
+from src.utils.working_hours import current_working_hours
 
 logger = get_logger()
 
@@ -104,16 +105,14 @@ def match_client_with_therapists(
 
     first_week_slots = []
     second_week_slots = []
-    now = datetime.now(tz=DEFAULT_ZONE).replace(
-        hour=7, minute=0, second=0, microsecond=0
-    )
+    day_start, hours_count = current_working_hours()
     for day in range(7):
-        for hour in range(15):
-            first_week_slots.append(now + timedelta(hours=hour, days=day))
-            second_week_slots.append(now + timedelta(hours=hour, days=day + 7))
+        for hour in range(hours_count):
+            first_week_slots.append(day_start + timedelta(hours=hour, days=day))
+            second_week_slots.append(day_start + timedelta(hours=hour, days=day + 7))
 
-    now_2_weeks = now + timedelta(weeks=2)
-    now_str = now.strftime(DATE_FORMAT)
+    now_2_weeks = day_start + timedelta(weeks=2)
+    now_str = day_start.strftime(DATE_FORMAT)
     now_2_weeks_str = now_2_weeks.strftime(DATE_FORMAT)
 
     therapist_emails = [

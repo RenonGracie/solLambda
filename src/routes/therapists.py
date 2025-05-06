@@ -14,7 +14,7 @@ from src.models.api.client_match import MatchedTherapists, MatchQuery
 from src.models.api.error import Error
 from src.models.api.therapist_s3 import MediaQuery, MediaLink
 from src.models.api.therapists import Therapists, Therapist, AvailableSlots
-from src.utils.constants.contants import DEFAULT_ZONE, DATE_FORMAT
+from src.utils.constants.contants import DATE_FORMAT
 from src.utils.google.calendar_event_parser import parse_calendar_events
 from src.utils.google.google_calendar import (
     get_events_from_gcalendar,
@@ -28,6 +28,7 @@ from src.utils.matching_algorithm.match import (
 from src.utils.s3 import get_media_url
 from src.utils.settings import settings
 from src.utils.therapists.airtable import save_therapists
+from src.utils.working_hours import current_working_hours
 
 __tag = Tag(name="Therapists")
 therapist_api = APIBlueprint(
@@ -101,22 +102,18 @@ def get_video_link(query: MediaQuery):
     summary="Get therapist's available slots by calendar email",
 )
 def free_slots(query: Email):
-    now = datetime.now(tz=DEFAULT_ZONE).replace(
-        hour=7, minute=0, second=0, microsecond=0
-    )
-    now_2_weeks = now + timedelta(weeks=2)
-    now_str = now.strftime(DATE_FORMAT)
+    day_start, hours_count = current_working_hours()
+    now_2_weeks = day_start + timedelta(weeks=2)
+    now_str = day_start.strftime(DATE_FORMAT)
     now_2_weeks_str = now_2_weeks.strftime(DATE_FORMAT)
     busy = get_busy_events_from_gcalendar([query.email], now_str, now_2_weeks_str)
     first_week_slots = []
     second_week_slots = []
-    now = datetime.now(tz=DEFAULT_ZONE).replace(
-        hour=7, minute=0, second=0, microsecond=0
-    )
+
     for day in range(7):
-        for hour in range(15):
-            first_week_slots.append(now + timedelta(hours=hour, days=day))
-            second_week_slots.append(now + timedelta(hours=hour, days=day + 7))
+        for hour in range(hours_count):
+            first_week_slots.append(day_start + timedelta(hours=hour, days=day))
+            second_week_slots.append(day_start + timedelta(hours=hour, days=day + 7))
     slots = busy.get(query.email)
     busy_slots = slots.get("busy")
     if busy_slots:

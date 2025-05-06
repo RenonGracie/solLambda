@@ -1,19 +1,18 @@
 import random
-from zoneinfo import ZoneInfo
 
 import pytest
 from datetime import datetime, timedelta
 
 from src.models.api.therapists import Therapist
 from src.utils.matching_algorithm.match import provide_therapist_slots
+from src.utils.working_hours import current_working_hours
 
 
 # Fixture for current time (start of day)
 @pytest.fixture
 def now():
-    return datetime.now(tz=ZoneInfo("US/Eastern")).replace(
-        hour=7, minute=0, second=0, microsecond=0
-    )
+    day_start, hours_count = current_working_hours()
+    return day_start
 
 
 # Fixture for current time (start of day)
