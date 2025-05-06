@@ -100,9 +100,9 @@ def _send_event(
         "user_id": str(user_id),
         "events": [{"name": name, "params": params}],
     }
-    logger.debug("Google Analytics event", extra={"event": event})
+    logger.info("Google Analytics event", extra={"event": event})
     response = sent_analytics_event(event)
-    logger.debug("Google Analytics response", extra={"response": response})
+    logger.info("Google Analytics response", extra={"response": str(response)})
 
 
 def send_ga_event(
