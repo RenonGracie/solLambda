@@ -11,12 +11,12 @@ def process_invoice(db, data: dict):
 
     event = data["EventType"]
 
-    client_id = invoice.get("ClientIdNumber")
+    client_id = client.utm.get("client_id")
     if client:
         send_ga_event(
             database=db,
             client_id=client_id,
-            user_id=client.utm.get("user_id"),
+            user_id=invoice.get("ClientIdNumber"),
             email=client.email,
             session_id=client.utm.get("session_id"),
             name=event,
