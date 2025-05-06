@@ -26,44 +26,8 @@ logger = get_logger()
 def match_client_with_therapists(
     db, response_id: str, limit: int, last_index: int
 ) -> (ClientSignup | None, List[dict]):
-    # form: ClientSignup = (
-    #     db.query(ClientSignup).filter_by(response_id=response_id).first()
-    # )
-    form = ClientSignup(
-        **{
-            "id": "595b440c-1766-49f4-812e-2b8bd4351a93",
-            "response_id": "x7qnltacvsitgdpm0nrx7qn0x306m1qw",
-            "first_name": "Jade",
-            "last_name": "Piatt",
-            "email": "emeraldjade98@gmail.com",
-            "phone": "+19083199638",
-            "gender": "Female",
-            "age": "27",
-            "state": "New York",
-            "therapist_specializes_in": "",
-            "therapist_identifies_as": "",
-            "alcohol": "Several days",
-            "drugs": "Not at all",
-            "pleasure_doing_things": "Nearly every day",
-            "feeling_down": "Nearly every day",
-            "trouble_falling": "More than half the days",
-            "feeling_tired": "Nearly every day",
-            "poor_appetite": "More than half the days",
-            "feeling_bad_about_yourself": "More than half the days",
-            "trouble_concentrating": "Nearly every day",
-            "moving_or_speaking_so_slowly": "More than half the days",
-            "suicidal_thoughts": "Several days",
-            "feeling_nervous": "More than half the days",
-            "not_control_worrying": "Nearly every day",
-            "worrying_too_much": "More than half the days",
-            "trouble_relaxing": "Nearly every day",
-            "being_so_restless": "Several days",
-            "easily_annoyed": "More than half the days",
-            "feeling_afraid": "Several days",
-            "university": "The New School",
-            "referred_by": "",
-            "therapist_name": "April Brown",
-        }
+    form: ClientSignup = (
+        db.query(ClientSignup).filter_by(response_id=response_id).first()
     )
     if not form:
         return None, []
