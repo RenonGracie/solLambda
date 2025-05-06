@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta, UTC
 
 from googleapiclient.errors import HttpError
 
@@ -12,8 +12,10 @@ from src.utils.logger import get_logger
 logger = get_logger()
 
 
-def _get_service():
+def _get_service(subject_email: str | None = None):
     creds = get_credentials()
+    if subject_email:
+        creds = creds.with_subject(subject_email)
     return build("calendar", "v3", credentials=creds)
 
 
@@ -127,6 +129,100 @@ def get_busy_events_from_gcalendar(
         )
         if raise_error:
             raise e
+        return None
+    finally:
+        service.close()
+
+
+def create_gcalendar_event(
+    summary: str,
+    start_time: datetime,
+    attendees: list[dict],
+    duration_minutes: int = 45,
+    description: str | None = None,
+    location: str | None = None,
+    timezone: str = "UTC",
+) -> dict | None:
+    """
+    Create an event directly in attendee's calendar
+
+    Args:
+        summary: Event title
+        start_time: Event start time
+        attendees: List of attendee dictionaries with 'email' and 'name' keys
+        duration_minutes: Event duration in minutes
+        description: Event description (supports HTML)
+        location: Event location (can be physical or virtual meeting link)
+        timezone: Timezone for the event (default: UTC)
+
+    Returns:
+        dict: Created event data or None if failed
+    """
+    service = _get_service("contact@solhealth.co")
+    try:
+        end_time = start_time + timedelta(minutes=duration_minutes)
+
+        # Convert times to ISO format with timezone
+        start_time_iso = start_time.astimezone(UTC).isoformat()
+        end_time_iso = end_time.astimezone(UTC).isoformat()
+
+        event: dict = {
+            "summary": summary,
+            "description": description,
+            "start": {
+                "dateTime": start_time_iso,
+                "timeZone": timezone,
+            },
+            "end": {
+                "dateTime": end_time_iso,
+                "timeZone": timezone,
+            },
+            "organizer": {
+                "email": "serjwoland@gmail.com",
+                "displayName": "SUser Tets",
+                "self": True,
+            },
+            "attendees": [
+                {
+                    "email": attendee["email"],
+                    "displayName": attendee["name"],
+                    "responseStatus": "accepted",
+                }
+                for attendee in attendees
+            ],
+            "reminders": {"useDefault": True},
+        }
+
+        if location:
+            event["location"] = location
+
+        # Create event in calendar
+        created_event = (
+            service.events()
+            .insert(
+                calendarId="primary",
+                body=event,
+                sendUpdates="all",
+                supportsAttachments=True,
+            )
+            .execute()
+        )
+
+        logger.info(
+            "Google Calendar event created successfully",
+            extra={
+                "event_id": created_event.get("id"),
+                "summary": summary,
+                "attendees": attendees,
+            },
+        )
+        return created_event
+
+    except HttpError as e:
+        logger.error(
+            "Failed to create Google Calendar event",
+            extra={"error": str(e), "summary": summary, "attendees": attendees},
+        )
         return None
     finally:
         service.close()
