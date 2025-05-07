@@ -13,16 +13,14 @@ def process_invoice(db, data: dict):
     if not client:
         user_id = invoice.get("ClientIdNumber")
         client = create_empty_client_form(user_id)
+        client.email = invoice.get("ClientEmail")
         db.add(client)
 
     user_id = client.utm.get("user_id")
 
     send_ga_event(
         database=db,
-        client_id=client.utm.get("client_id"),
-        user_id=user_id,
-        email=client.email,
-        session_id=client.utm.get("session_id"),
+        client=client,
         name=event,
         value=invoice.get("TotalAmount"),
         var_1=user_id,

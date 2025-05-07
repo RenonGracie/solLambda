@@ -117,9 +117,6 @@ def book_appointment(base_url: str, body: CreateAppointment):
     if error:
         return jsonify(Error(error=error).dict()), 409
 
-    utm = form.utm
-    email = form.email
-
     try:
         match form.discount:
             case 100:
@@ -159,13 +156,10 @@ def book_appointment(base_url: str, body: CreateAppointment):
 
     if result.status_code == 200:
         send_ga_event(
-            client_id=utm.get("client_id"),
+            client=form,
             name=CALL_SCHEDULED_EVENT,
             value=json.get("Id"),
-            user_id=utm.get("user_id"),
-            session_id=utm.get("session_id"),
             event_type=USER_EVENT_TYPE,
-            email=email,
         )
     reassign_client(client, therapist["Id"])
 

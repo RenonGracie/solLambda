@@ -26,14 +26,12 @@ def process_appointment(db, data: dict):
     if not client:
         user_id = appointment.get("ClientId")
         client = create_empty_client_form(user_id)
+        client.email = appointment.get("ClientEmail")
         db.add(client)
 
     send_ga_event(
         database=db,
-        client_id=client.utm.get("client_id"),
-        user_id=client.utm.get("user_id"),
-        email=client.email,
-        session_id=client.utm.get("session_id"),
+        client=client,
         name=event,
         value=appointment.get("Id"),
         var_2=appointment.get("FullCancellationReason"),

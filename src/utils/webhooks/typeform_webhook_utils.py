@@ -18,6 +18,9 @@ def process_typeform_data(db, response_json: dict):
         return
 
     form_response = response_json["form_response"]
+
+    hidden = form_response.get("hidden", {})
+
     questions_json = form_response["definition"]["fields"]
     questions = dict(map(lambda item: (item["ref"], item), questions_json))
     answers = form_response["answers"]
@@ -43,15 +46,12 @@ def process_typeform_data(db, response_json: dict):
 
     client_json = response.json()
     user_id = client_json.get("Id") or client_json.get("ClientId")
-    client_id, session_id = form.setup_utm(user_id)
+    form.setup_utm(user_id, hidden)
 
     logger.debug("intakeQ response", extra={"response": response.json()})
     send_ga_event(
         database=db,
-        client_id=client_id,
-        user_id=user_id,
-        email=form.email,
-        session_id=session_id,
+        client=form,
         name=REGISTRATION_EVENT,
         event_type=USER_EVENT_TYPE,
     )

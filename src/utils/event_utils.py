@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session
 from src.db.database import with_database
 from src.models.api.events import AnalyticsEvent
 from src.models.db.analytic_event import AnalyticEvent
+from src.models.db.signup_form import ClientSignup
 from src.utils.request_utils import sent_analytics_event
 from src.utils.logger import get_logger
 
@@ -20,32 +21,36 @@ logger = get_logger()
 
 def _send_event(
     db,
-    client_id: str,
-    email: str,
-    user_id: str,
-    session_id: str,
+    client: ClientSignup,
     name: str | None,
     value: str | None,
     event_type: str | None = None,
     var_1: str | None = None,
     var_2: str | None = None,
     params: dict | None = None,
-    utm_source: str | None = None,
-    utm_medium: str | None = None,
-    utm_campaign: str | None = None,
-    utm_adid: str | None = None,
-    utm_adgroup: str | None = None,
-    utm_content: str | None = None,
-    utm_term: str | None = None,
     clid: str | None = None,
 ):
     if params is None:
         params = {}
 
+    utm = client.utm
+    client_id = utm.get("client_id")
+    session_id = utm.get("session_id")
+
+    utm_medium = utm.get("utm_medium")
+    utm_source = utm.get("utm_source")
+    utm_campaign = utm.get("utm_campaign")
+    utm_content = utm.get("utm_content")
+    utm_term = utm.get("utm_term")
+    utm_adid = utm.get("utm_adid")
+    utm_adgroup = utm.get("utm_adgroup")
+
+    user_id = utm.get("user_id")
+
     event = AnalyticEvent()
     event.client_id = client_id
     event.user_id = user_id
-    event.email = email
+    event.email = client.email
     event.session_id = session_id
 
     event.type = event_type
@@ -93,7 +98,7 @@ def _send_event(
     if var_2:
         params["var_2"] = var_2
     if clid:
-        params["clid"] = utm_term
+        params["clid"] = clid
 
     event = {
         "client_id": client_id,
@@ -106,23 +111,13 @@ def _send_event(
 
 
 def send_ga_event(
-    client_id: str,
-    email: str,
-    user_id: str,
-    session_id: str,
+    client: ClientSignup,
     name: str | None,
     value: str | None = None,
     event_type: str | None = None,
     var_1: str | None = None,
     var_2: str | None = None,
     params: dict | None = None,
-    utm_source: str | None = None,
-    utm_medium: str | None = None,
-    utm_campaign: str | None = None,
-    utm_adid: str | None = None,
-    utm_adgroup: str | None = None,
-    utm_content: str | None = None,
-    utm_term: str | None = None,
     clid: str | None = None,
     database: Session | None = None,
 ):
@@ -130,46 +125,26 @@ def send_ga_event(
     def send_event(db):
         _send_event(
             db,
-            client_id,
-            email,
-            user_id,
-            session_id,
+            client,
             name,
             value,
             event_type,
             var_1,
             var_2,
             params,
-            utm_source,
-            utm_medium,
-            utm_campaign,
-            utm_adid,
-            utm_adgroup,
-            utm_content,
-            utm_term,
             clid,
         )
 
     if database:
         _send_event(
             database,
-            client_id,
-            email,
-            user_id,
-            session_id,
+            client,
             name,
             value,
             event_type,
             var_1,
             var_2,
             params,
-            utm_source,
-            utm_medium,
-            utm_campaign,
-            utm_adid,
-            utm_adgroup,
-            utm_content,
-            utm_term,
             clid,
         )
     else:

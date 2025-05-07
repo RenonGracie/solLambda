@@ -1,5 +1,6 @@
 import json
 import random
+from datetime import datetime
 from uuid import uuid4
 
 import emoji
@@ -160,15 +161,36 @@ class ClientSignup(Base):
     def suicidal_thoughts_points(self):
         return _calc_points(self.suicidal_thoughts)
 
-    def setup_utm(self, user_id) -> (str, str):
-        client_id = f"{random.randint(1000, 9999)}.{random.randint(1000, 9999)}"
-        session_id = str(uuid4())
+    def setup_utm(self, user_id, ga_data: dict | None = None):
+        if ga_data is None:
+            ga_data = {}
+
+        client_id = (
+            ga_data.get("client_id")
+            or f"{random.randint(1000000000, 9999999999)}.{random.randint(1000000000, 9999999999)}"
+        )
+        session_id = ga_data.get("session_id") or str(int(datetime.now().timestamp()))
+
+        utm_medium = ga_data.get("utm_medium")
+        utm_source = ga_data.get("utm_source")
+        utm_campaign = ga_data.get("utm_campaign")
+        utm_content = ga_data.get("utm_content")
+        utm_term = ga_data.get("utm_term")
+        utm_adid = ga_data.get("utm_adid")
+        utm_adgroup = ga_data.get("utm_adgroup")
+
         self.utm = {
             "client_id": client_id,
             "user_id": user_id,
             "session_id": session_id,
+            "utm_medium": utm_medium,
+            "utm_source": utm_source,
+            "utm_campaign": utm_campaign,
+            "utm_adid": utm_adid,
+            "utm_adgroup": utm_adgroup,
+            "utm_content": utm_content,
+            "utm_term": utm_term,
         }
-        return client_id, session_id
 
 
 def remove_underscores(text):
