@@ -1,7 +1,6 @@
 from src.models.api.clients import Client
 from src.models.db.signup_form import ClientSignup
 from src.utils.states_utils import statename_to_abbr
-from src.utils.typeform.typeform_parser import TypeformIds, TypeformData
 
 
 def create_new_form(data: ClientSignup) -> dict:
@@ -43,7 +42,7 @@ def create_new_form(data: ClientSignup) -> dict:
     }
 
 
-def create_client_model(data: TypeformData) -> Client:
+def create_client_model(data: ClientSignup) -> Client:
     first_name = data.first_name
     last_name = data.last_name
 
@@ -52,9 +51,9 @@ def create_client_model(data: TypeformData) -> Client:
     client.FirstName = first_name
     client.LastName = last_name
     client.Email = data.email
-    client.Phone = data.get_value(TypeformIds.PHONE)
-    client.Gender = data.get_value(TypeformIds.GENDER)
+    client.Phone = data.phone
+    client.Gender = data.gender
     client.Archived = False
-    client.StateShort = statename_to_abbr.get(data.get_value(TypeformIds.STATE))
+    client.StateShort = statename_to_abbr.get(data.state)
     client.Country = "USA"
     return client
