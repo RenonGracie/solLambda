@@ -39,7 +39,7 @@ def process_typeform_data(db, response_json: dict):
         db.add(form)
         return
 
-    response = save_update_client(create_client_model(data).dict())
+    response = save_update_client(create_client_model(form).dict())
 
     client_json = response.json()
     user_id = client_json.get("Id") or client_json.get("ClientId")
