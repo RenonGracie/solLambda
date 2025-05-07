@@ -1,6 +1,3 @@
-import random
-import uuid
-
 from src.db.database import with_database
 from src.models.db.signup_form import create_from_typeform_data, ClientSignup
 from src.utils.event_utils import send_ga_event, REGISTRATION_EVENT, USER_EVENT_TYPE
@@ -44,15 +41,9 @@ def process_typeform_data(db, response_json: dict):
 
     response = save_update_client(create_client_model(data).dict())
 
-    client_id = f"{random.randint(1000, 9999)}.{random.randint(1000, 9999)}"
     client_json = response.json()
     user_id = client_json.get("Id") or client_json.get("ClientId")
-    session_id = str(uuid.uuid4())
-    form.utm = {
-        "client_id": client_id,
-        "user_id": user_id,
-        "session_id": session_id,
-    }
+    client_id, session_id = form.setup_utm(user_id)
 
     logger.debug("intakeQ response", extra={"response": response.json()})
     send_ga_event(

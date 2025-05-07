@@ -1,4 +1,5 @@
 import json
+import random
 from uuid import uuid4
 
 import emoji
@@ -159,6 +160,16 @@ class ClientSignup(Base):
     def suicidal_thoughts_points(self):
         return _calc_points(self.suicidal_thoughts)
 
+    def setup_utm(self, user_id) -> (str, str):
+        client_id = f"{random.randint(1000, 9999)}.{random.randint(1000, 9999)}"
+        session_id = str(uuid4())
+        self.utm = {
+            "client_id": client_id,
+            "user_id": user_id,
+            "session_id": session_id,
+        }
+        return client_id, session_id
+
 
 def remove_underscores(text):
     if text.startswith("_"):
@@ -230,4 +241,12 @@ def create_from_typeform_data(response_id: str, data: TypeformData) -> ClientSig
     client.how_did_you_hear = data.how_did_you_heard
 
     client.therapist_name = data.get_value(TypeformIds.THERAPIST_YOU_WANT)
+    return client
+
+
+def create_empty_client_form(user_id) -> ClientSignup:
+    client = ClientSignup()
+    client.response_id = str(uuid4())
+
+    client.setup_utm(user_id)
     return client

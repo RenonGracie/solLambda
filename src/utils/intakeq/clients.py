@@ -14,7 +14,7 @@ def search_client(email: str, name: str) -> dict | None:
                     item
                     for item in clients
                     if str(item["Email"]).lower() == email.lower()
-                    and str(item["Name"]).lower() == name.lower()
+                    and str(item["Name"]).strip().lower() == name.lower().strip()
                 )
             except StopIteration:
                 return None

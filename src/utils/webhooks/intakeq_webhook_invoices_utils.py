@@ -1,5 +1,5 @@
 from src.db.database import with_database
-from src.models.db.signup_form import ClientSignup
+from src.models.db.signup_form import ClientSignup, create_empty_client_form
 from src.utils.event_utils import send_ga_event, INVOICE_EVENT_TYPE
 
 
@@ -10,19 +10,23 @@ def process_invoice(db, data: dict):
     client = db.query(ClientSignup).filter_by(email=invoice["ClientEmail"]).first()
 
     event = data["EventType"]
+    if not client:
+        user_id = invoice.get("ClientIdNumber")
+        client = create_empty_client_form(user_id)
+        db.add(client)
 
-    client_id = client.utm.get("client_id")
-    if client:
-        send_ga_event(
-            database=db,
-            client_id=client_id,
-            user_id=invoice.get("ClientIdNumber"),
-            email=client.email,
-            session_id=client.utm.get("session_id"),
-            name=event,
-            value=invoice.get("TotalAmount"),
-            var_1=client_id,
-            var_2=invoice.get("Id"),
-            params={"status": invoice["Status"]},
-            event_type=INVOICE_EVENT_TYPE,
-        )
+    user_id = client.utm.get("user_id")
+
+    send_ga_event(
+        database=db,
+        client_id=client.utm.get("client_id"),
+        user_id=user_id,
+        email=client.email,
+        session_id=client.utm.get("session_id"),
+        name=event,
+        value=invoice.get("TotalAmount"),
+        var_1=user_id,
+        var_2=invoice.get("Id"),
+        params={"status": invoice["Status"]},
+        event_type=INVOICE_EVENT_TYPE,
+    )
