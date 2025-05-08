@@ -1,5 +1,4 @@
 from src.db.database import with_database
-from src.models.db.airtable import AirtableTherapist
 from src.models.db.signup_form import ClientSignup, create_empty_client_form
 from src.utils.event_utils import (
     send_ga_event,
@@ -29,7 +28,7 @@ def process_appointment(db, data: dict):
         var_2=appointment.get("FullCancellationReason"),
         params={
             "ClientId": appointment["ClientId"],
-            "PractitionerId": appointment["PractitionerId"],
+            "PractitionerId": appointment.get("PractitionerId"),
         },
         event_type=APPOINTMENT_EVENT_TYPE,
     )
