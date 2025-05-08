@@ -13,7 +13,7 @@ class ClientMatch(BaseModel):
 
 class MatchedTherapists(BaseModel):
     client: ClientShort | None
-    therapists: list[ClientMatch] | None
+    therapists: list[ClientMatch] = []
 
 
 class MatchQuery(BaseModel):

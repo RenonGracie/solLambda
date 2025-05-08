@@ -52,8 +52,6 @@ class Therapist(AvailableSlots):
 
     accepting_new_clients: bool | None
 
-    available_slots: list[datetime] | None
-
     def __init__(self, json: dict, is_airtable: bool = True):
         if not is_airtable:
             super().__init__(**json)

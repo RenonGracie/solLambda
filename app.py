@@ -2,6 +2,8 @@ from flask import jsonify, request
 from flask_openapi3 import Tag, Info, OpenAPI
 import sentry_sdk
 from sentry_sdk.integrations.flask import FlaskIntegration
+from datetime import datetime
+import json
 
 from src.models.api.base import SuccessResponse
 from src.routes import (
@@ -31,9 +33,24 @@ if settings.ENV != "dev":
 __jwt = {"type": "http", "scheme": "bearer", "bearerFormat": "JWT"}
 __security_schemes = {"jwt": __jwt}
 
+
+class CustomJSONEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, datetime):
+            return obj.isoformat()
+        return super().default(obj)
+
+
 info = Info(title="SolHealth API", version="1.0.0")
 app = OpenAPI(__name__, info=info, security_schemes=__security_schemes)
 app.json.sort_keys = False
+app.json_encoder = CustomJSONEncoder
+
+# Configure Flask to use ISO format for datetime
+app.config["JSON_AS_ASCII"] = False
+app.config["JSONIFY_MIMETYPE"] = "application/json"
+app.config["JSONIFY_PRETTYPRINT_REGULAR"] = False
+app.config["JSONIFY_DATETIME_FORMAT"] = "iso"
 
 # Setup logging
 logger = get_logger()

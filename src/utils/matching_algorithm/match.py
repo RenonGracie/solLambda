@@ -18,7 +18,7 @@ from src.utils.therapists.therapist_data_utils import (
     provide_therapist_data,
     implement_age_factor,
 )
-from src.utils.working_hours import current_working_hours
+from src.utils.working_hours import current_working_hours, week_slots
 
 logger = get_logger()
 
@@ -174,3 +174,25 @@ def provide_therapist_slots(
         end = parser.parse(slot["end"])
         filtered = [dt for dt in filtered if not _check_slot(dt, start, end)]
     return filtered
+
+
+def fetch_therapist_slots(email: str) -> (list | None, str | None):
+    day_start, hours_count = current_working_hours()
+    busy = get_busy_events_from_gcalendar(
+        [email],
+        day_start.strftime(DATE_FORMAT),
+        (day_start + timedelta(weeks=2)).strftime(DATE_FORMAT),
+    )
+
+    slots = busy.get(email)
+    busy_slots = slots.get("busy")
+    errors = slots.get("errors")
+    if errors:
+        return None, slots.get("errors")[0].get("reason")
+
+    if busy_slots:
+        return provide_therapist_slots(
+            week_slots(day_start, hours_count), busy_slots
+        ), None
+    else:
+        return week_slots(day_start, hours_count), None

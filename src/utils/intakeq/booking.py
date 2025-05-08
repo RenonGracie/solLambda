@@ -10,7 +10,6 @@ from src.models.api.error import Error
 from src.models.db.airtable import AirtableTherapist
 from src.models.db.signup_form import ClientSignup
 from src.utils.constants.contants import DATE_FORMAT
-from src.utils.email_sender import send_invite
 from src.utils.event_utils import send_ga_event, CALL_SCHEDULED_EVENT, USER_EVENT_TYPE
 from src.utils.google.google_calendar import get_busy_events_from_gcalendar
 from src.utils.intakeq.appointments import check_therapist_availability
@@ -162,14 +161,5 @@ def book_appointment(base_url: str, body: CreateAppointment):
             event_type=USER_EVENT_TYPE,
         )
     reassign_client(client, therapist["Id"])
-
-    send_invite(
-        therapist_name=f"{therapist.get('FirstName')} {(therapist.get('LastName') or '')[:1]}",
-        therapist_email=therapist_email,
-        client_name=f"{client.get('FirstName')[:1]}.{(client.get('LastName') or ' ')[:1]}",
-        client_email=client.get("Email"),
-        start_time=slot_time,
-        telehealth_info=json.get("TelehealthInfo"),
-    )
 
     return jsonify(json), result.status_code
