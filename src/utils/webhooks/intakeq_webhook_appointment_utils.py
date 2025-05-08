@@ -10,16 +10,8 @@ from src.utils.event_utils import (
 @with_database
 def process_appointment(db, data: dict):
     appointment = data["Appointment"]
-    therapist_model = (
-        db.query(AirtableTherapist)
-        .filter_by(email=appointment["PractitionerEmail"])
-        .first()
-    )
 
     client = db.query(ClientSignup).filter_by(email=appointment["ClientEmail"]).first()
-
-    if therapist_model is None:
-        return
 
     event = data["EventType"]
 
