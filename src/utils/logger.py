@@ -35,7 +35,7 @@ class ConsoleFormatter(logging.Formatter):
             for k, v in record.__dict__.items()
             if v is not None and k not in keys_to_remove
         }
-        message += f"\n  Extra: {json.dumps(filtered_dict, indent=2)}"
+        message += f"\n  Extra: {json.dumps(filtered_dict)}"
 
         return message
 

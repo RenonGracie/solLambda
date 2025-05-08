@@ -81,10 +81,6 @@ def typeform_webhook():
 )
 def intakeq_hook():
     data = request.get_json()
-    logger.info(
-        "Received IntakeQ appointment webhook",
-        extra={"type": "intakeq_appointment_hook", "data": data},
-    )
     process_appointment(data)
     return "", 200
 
@@ -96,10 +92,6 @@ def intakeq_hook():
 )
 def intakeq_invoice_hook():
     data = request.get_json()
-    logger.info(
-        "Received IntakeQ invoice webhook",
-        extra={"type": "intakeq_invoice_hook", "data": data},
-    )
     process_invoice(data)
     return "", 200
 
