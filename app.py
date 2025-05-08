@@ -80,8 +80,8 @@ def typeform_webhook():
     summary="Webhook for IntakeQ Appointments",
 )
 def intakeq_hook():
-    logger.info("Appointment webhook triggered")
     data = request.get_json()
+    logger.info("Appointment webhook triggered", extra={"data": data})
     process_appointment(data)
     return "", 200
 
