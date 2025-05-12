@@ -122,7 +122,7 @@ def match_client_with_therapists(
             slots = busy.get(therapist.calendar_email or therapist.email)
             busy_slots = slots.get("busy")
             if busy_slots:
-                available_slots = provide_therapist_slots(slots)
+                available_slots = provide_therapist_slots(slots, busy_slots)
                 if len(available_slots) >= 0 or form.therapist_name:
                     matches[index]["available_slots"] = available_slots
                 else:
