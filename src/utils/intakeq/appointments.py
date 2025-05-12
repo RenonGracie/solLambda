@@ -2,6 +2,7 @@ from datetime import datetime, timedelta, UTC
 
 from src.utils.constants.contants import DEFAULT_ZONE
 from src.utils.matching_algorithm.match import provide_therapist_slots
+from src.utils.working_hours import current_working_hours
 
 
 def check_therapist_availability(
@@ -24,7 +25,9 @@ def check_therapist_availability(
     if slot < next_day:
         return "You cannot book an appointment less than 24 hours in advance."
 
-    if 7 <= slot.hour < 22:
+    day_start, hours_count = current_working_hours()
+
+    if day_start.hour <= slot.hour < (day_start + timedelta(hours=hours_count)).hour:
         if is_appointments:
             for data in slots:
                 start_date = datetime.fromtimestamp(

@@ -38,8 +38,12 @@ def send_invite(
     telehealth_info: dict | None,
     duration: int = 45,
 ):
-    invitation_code = extract_invitation_code(telehealth_info["Invitation"])
-    join_url = telehealth_info["JoinUrl"]
+    if telehealth_info:
+        invitation_code = extract_invitation_code(telehealth_info["Invitation"])
+        join_url = telehealth_info["JoinUrl"]
+    else:
+        invitation_code = None
+        join_url = None
 
     # Create calendar event without unsubscribe link in description
     calendar_description = (

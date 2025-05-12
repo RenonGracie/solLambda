@@ -119,7 +119,9 @@ def match_client_with_therapists(
     for index in reversed(range(len(matches))):
         therapist = matches[index]["therapist"]
         if therapist:
-            busy_slots = busy.get(therapist.calendar_email or therapist.email).get("busy")
+            busy_slots = busy.get(therapist.calendar_email or therapist.email).get(
+                "busy"
+            )
             if busy_slots:
                 available_slots = provide_therapist_slots(slots, busy_slots)
                 if len(available_slots) >= 0 or form.therapist_name:
