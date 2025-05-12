@@ -103,13 +103,8 @@ def match_client_with_therapists(
         ),
     )
 
-    first_week_slots = []
-    second_week_slots = []
     day_start, hours_count = current_working_hours()
-    for day in range(7):
-        for hour in range(hours_count):
-            first_week_slots.append(day_start + timedelta(hours=hour, days=day))
-            second_week_slots.append(day_start + timedelta(hours=hour, days=day + 7))
+    slots = week_slots(day_start, hours_count)
 
     now_2_weeks = day_start + timedelta(weeks=2)
     now_str = day_start.strftime(DATE_FORMAT)
@@ -127,15 +122,13 @@ def match_client_with_therapists(
             slots = busy.get(therapist.calendar_email or therapist.email)
             busy_slots = slots.get("busy")
             if busy_slots:
-                available_slots = provide_therapist_slots(
-                    first_week_slots + second_week_slots, busy_slots
-                )
+                available_slots = provide_therapist_slots(slots)
                 if len(available_slots) >= 0 or form.therapist_name:
                     matches[index]["available_slots"] = available_slots
                 else:
                     del matches[index]
             else:
-                matches[index]["available_slots"] = first_week_slots + second_week_slots
+                matches[index]["available_slots"] = slots
 
     matched_therapists = implement_age_factor(
         form.age,
