@@ -177,11 +177,6 @@ def create_gcalendar_event(
                 "dateTime": end_time_iso,
                 "timeZone": timezone,
             },
-            "organizer": {
-                "email": "serjwoland@gmail.com",
-                "displayName": "SUser Tets",
-                "self": True,
-            },
             "attendees": [
                 {
                     "email": attendee["email"],
