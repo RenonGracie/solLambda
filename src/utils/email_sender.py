@@ -67,6 +67,6 @@ def send_invite(
             {"email": client_email, "name": client_name},
         ],
         description=calendar_description,
-        location=join_url,
+        join_url=join_url,
         duration_minutes=duration,
     )

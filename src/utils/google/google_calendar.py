@@ -140,8 +140,8 @@ def create_gcalendar_event(
     attendees: list[dict],
     duration_minutes: int = 45,
     description: str | None = None,
-    location: str | None = None,
-    timezone: str = "UTC",
+    join_url: str | None = None,
+    timezone: str = "UTC"
 ) -> dict | None:
     """
     Create an event directly in attendee's calendar
@@ -152,7 +152,7 @@ def create_gcalendar_event(
         attendees: List of attendee dictionaries with 'email' and 'name' keys
         duration_minutes: Event duration in minutes
         description: Event description (supports HTML)
-        location: Event location (can be physical or virtual meeting link)
+        join_url: Event call url (can be physical or virtual meeting link)
         timezone: Timezone for the event (default: UTC)
 
     Returns:
@@ -188,8 +188,20 @@ def create_gcalendar_event(
             "reminders": {"useDefault": True},
         }
 
-        if location:
-            event["location"] = location
+        if join_url:
+            event["conferenceData"] = {
+                "entryPoints": [{
+                    "entryPointType": "video",
+                    "uri": join_url,
+                    "label": "meet.google.com" if join_url.__contains__("meet.google.com") else "SolHealth Video Call"
+                }],
+                "conferenceSolution": {
+                    "key": {
+                        "type": "hangoutsMeet" if join_url.__contains__("meet.google.com") else "addOn"
+                    },
+                    "name": "Google Meet" if join_url.__contains__("meet.google.com") else "SolHealth Video Call"
+                }
+            }
 
         # Create event in calendar
         created_event = (
@@ -199,6 +211,7 @@ def create_gcalendar_event(
                 body=event,
                 sendUpdates="all",
                 supportsAttachments=True,
+                conferenceDataVersion=1 if join_url else 0,
             )
             .execute()
         )
