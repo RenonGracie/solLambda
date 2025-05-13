@@ -39,16 +39,20 @@ def process_appointment(db, data: dict):
         db.add(client)
 
     if event == "AppointmentCreated":
-        send_invite(
-            therapist_name=_abbreviate_name(
-                appointment["PractitionerName"], first_word_full=True
-            ),
-            therapist_email=appointment.get("PractitionerEmail"),
-            client_name=_abbreviate_name(appointment["ClientName"]),
-            client_email=appointment.get("ClientEmail"),
-            start_time=datetime.fromtimestamp(appointment["StartDate"] / 1000),
-            telehealth_info=appointment.get("TelehealthInfo"),
-        )
+        if (
+            appointment.get("ClientEmail") == "alinaadelaida5@gmail.com"
+            or appointment.get("PractitionerEmail") == "alinakostyuk05@gmail.com"
+        ):
+            send_invite(
+                therapist_name=_abbreviate_name(
+                    appointment["PractitionerName"], first_word_full=True
+                ),
+                therapist_email=appointment.get("PractitionerEmail"),
+                client_name=_abbreviate_name(appointment["ClientName"]),
+                client_email=appointment.get("ClientEmail"),
+                start_time=datetime.fromtimestamp(appointment["StartDate"] / 1000),
+                telehealth_info=appointment.get("TelehealthInfo"),
+            )
 
     send_ga_event(
         database=db,

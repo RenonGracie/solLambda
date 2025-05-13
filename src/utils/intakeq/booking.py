@@ -24,7 +24,7 @@ from src.utils.request_utils import (
 logger = get_logger()
 
 
-def book_appointment(base_url: str, body: CreateAppointment):
+def book_appointment(body: CreateAppointment):
     result = get_booking_settings()
     if not result:
         logger.error("Unable to get booking settings")

@@ -40,15 +40,20 @@ def send_invite(
 ):
     if telehealth_info:
         invitation_code = extract_invitation_code(telehealth_info["Invitation"])
-        join_url = telehealth_info["JoinUrl"]
+        join_url = telehealth_info.get("JoinUrl")
     else:
         invitation_code = None
         join_url = None
 
+    if join_url and not join_url.__contains__("meet.google.com"):
+        session_link = f"<br>🔗<a href='{join_url}'>Join Session</a><br><br><b>Invitation code:</b> {invitation_code}"
+    else:
+        session_link = f"<br>🔗<a href='{join_url}'>Join Session</a>"
+
     # Create calendar event without unsubscribe link in description
     calendar_description = (
         "<b>Join your session</b>"
-        f"{'<br><br><b>Use the link below to join your scheduled video session:</b>' + f"<br>🔗<a href='{join_url}'>Join Session</a>" + f'<br><br><b>Invitation code:</b> {invitation_code}' if telehealth_info else ''}"
+        f"{'<br><br><b>Use the link below to join your scheduled video session:</b>' + session_link if telehealth_info else ''}"
         "<br><br><b>Manage Your Appointment or Contact Your Provider</b>"
         "<br>Access your Client Portal to manage sessions or send messages"
         "<br>🔗<a href='https://solhealth.intakeq.com/portal'>Client Portal</a>"

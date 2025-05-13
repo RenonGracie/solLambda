@@ -14,6 +14,7 @@ from src.models.api.calendar import (
 from src.models.api.client_match import MatchedTherapists, MatchQuery
 from src.models.api.error import Error
 from src.models.api.therapists import Therapists, Therapist, AvailableSlots
+from src.utils.google.calendar_event_parser import parse_calendar_events
 from src.utils.google.google_calendar import (
     get_events_from_gcalendar,
 )
@@ -85,15 +86,16 @@ def matching(query: MatchQuery):
 def get_events(query: EventQuery):
     now = datetime.now()
     try:
-        data = CalendarEvents()
-        data.events = get_events_from_gcalendar(
+        events = get_events_from_gcalendar(
             calendar_id=query.calendar_id,
             time_min=f"{query.date_min or now.strftime('%Y-%m-%d')}T00:00:00+0000",
             time_max=f"{query.date_max or (now + timedelta(days=14)).strftime('%Y-%m-%d')}T00:00:00+0000",
             max_results=query.max_results,
             raise_error=True,
         )
-        return json.loads(data.json()), 200
+        return json.loads(
+            CalendarEvents(data=parse_calendar_events(events)).json()
+        ), 200
     except HttpError as e:
         details = []
         if isinstance(e.error_details, list):

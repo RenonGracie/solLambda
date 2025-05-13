@@ -52,7 +52,7 @@ def test_check_therapist_availability_outside_working_hours():
     early_slot = tomorrow.replace(hour=6, minute=0, second=0, microsecond=0)
 
     # Create a slot for tomorrow at 10 PM (outside working hours)
-    late_slot = tomorrow.replace(hour=22, minute=0, second=0, microsecond=0)
+    late_slot = tomorrow.replace(hour=23, minute=0, second=0, microsecond=0)
 
     # Mock current time to be more than 24 hours before the slots
     mock_now = early_slot - timedelta(days=2)
@@ -65,7 +65,7 @@ def test_check_therapist_availability_outside_working_hours():
         result = check_therapist_availability(early_slot, [])
         assert result == "You can't book an appointment outside of working hours."
 
-        # Test late slot (10 PM)
+        # Test late slot (11 PM)
         result = check_therapist_availability(late_slot, [])
         assert result == "You can't book an appointment outside of working hours."
 

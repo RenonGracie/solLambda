@@ -35,7 +35,6 @@ def _send_event(
 
     utm = client.utm
     client_id = utm.get("client_id")
-    session_id = utm.get("session_id")
 
     utm_medium = utm.get("utm_medium")
     utm_source = utm.get("utm_source")
@@ -51,7 +50,6 @@ def _send_event(
     event.client_id = client_id
     event.user_id = user_id
     event.email = client.email
-    event.session_id = session_id
 
     event.type = event_type
 
@@ -77,8 +75,6 @@ def _send_event(
         params["type"] = event_type
     if value:
         params["value"] = value
-    if session_id:
-        params["session_id"] = session_id
     if utm_source:
         params["utm_source"] = utm_source
     if utm_medium:
