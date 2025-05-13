@@ -11,7 +11,7 @@ class ClientMatch(BaseModel):
 
 
 class MatchedTherapists(BaseModel):
-    client: ClientShort | None
+    client: ClientShort | None = None
     therapists: list[ClientMatch] = []
 
 
