@@ -7,10 +7,10 @@ from src.utils.states_utils import statename_to_abbr
 
 def calculate_match_score(
     data: ClientSignup, therapist: AirtableTherapist
-) -> (int, list, list):
+) -> (int, list):
     # Hard factor #0
     if therapist.accepting_new_clients is not True:
-        return -1, [], []
+        return -1, []
 
     # Hard factor #1
     state = statename_to_abbr.get(data.state)
@@ -19,7 +19,7 @@ def calculate_match_score(
         or not state
         or state.lower() not in [state.lower() for state in therapist.states]
     ):
-        return -1, [], []
+        return -1, []
 
     # Hard factor #2
     if therapist.gender and (
@@ -35,42 +35,36 @@ def calculate_match_score(
     ):
         pass
     else:
-        return -1, [], []
+        return -1, []
 
     # Hard factor #3
     ph9 = data.ph9_sum
     yes_count = str(therapist.experience_with_risk_clients).lower().count("yes")
     if ph9 > 20 and yes_count < 2:
-        return -1, [], []
+        return -1, []
     elif ph9 > 14 and yes_count < 1:
-        return -1, [], []
+        return -1, []
 
     gad7 = data.gad7_sum
     if gad7 >= 15 and yes_count < 1:
-        return -1, [], []
+        return -1, []
 
     last_ph9 = data.suicidal_thoughts_points
     if last_ph9 >= 2 > yes_count:
-        return -1, [], []
+        return -1, []
     elif last_ph9 >= 1 > yes_count:
-        return -1, [], []
+        return -1, []
 
     score = 0
-    matched_diagnoses = set()
-    matched_specialities = set()
+    matched_diagnoses_specialities = set()
 
     # Soft factor #1
     for preference in data.therapist_specializes_in:
-        if therapist.diagnoses:
-            for diagnose in therapist.diagnoses:
+        if therapist.diagnoses_specialities:
+            for diagnose in therapist.diagnoses_specialities:
                 if fuzz.token_set_ratio(preference, diagnose) > 80:
                     score += 3
-                    matched_diagnoses.add(diagnose)
-        if therapist.specialities:
-            for speciality in therapist.specialities:
-                if fuzz.token_set_ratio(preference, speciality) > 80:
-                    score += 3
-                    matched_specialities.add(speciality)
+                    matched_diagnoses_specialities.add(diagnose)
         if therapist.therapeutic_orientation:
             for therapeutic_orientation in therapist.therapeutic_orientation:
                 if fuzz.token_set_ratio(preference, therapeutic_orientation) > 80:
@@ -124,4 +118,4 @@ def calculate_match_score(
         ):
             score += 2
 
-    return score, list(matched_diagnoses), list(matched_specialities)
+    return score, list(matched_diagnoses_specialities)

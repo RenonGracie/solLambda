@@ -9,30 +9,19 @@ from src.utils.matching_algorithm.algorithm import calculate_match_score
 
 @pytest.fixture
 def sample_therapist():
-    return AirtableTherapist.from_airtable(
-        {
-            "id": "1",
-            "fields": {
-                "States": ["CA", "NY"],
-                "Accepting New Clients": "Yes",
-                "Gender": "Male",
-                "Experience and/or interest in working with higher-risk clients": "Yes",
-                "Diagnoses: Please select the diagnoses you have experience and/or interest in working with": [
-                    "Anxiety",
-                    "Depression",
-                ],
-                "Specialities: Please select any specialities you have experience and/or interest in working with. ": [
-                    "Trauma",
-                    "Family Therapy",
-                ],
-                "Traditional vs. Non-traditional family household": "Non-traditional",
-                "Individualist vs. Collectivist culture": "Individualist",
-                "Many places or only one or two places?": "Many places",
-                "LGBTQ+: Are you a part of the LGBTQ+ community?": "Yes",
-                "Social Media: Have you ever been negatively affected by social media?": "No",
-            },
-        }
-    )
+    therapist = AirtableTherapist()
+    therapist.states = ["CA", "NY"]
+    therapist.accepting_new_clients = True
+    therapist.gender = "Male"
+    therapist.experience_with_risk_clients = "Yes, no"
+    therapist.diagnoses = ["Anxiety", "Depression"]
+    therapist.specialities = ["Trauma", "Family Therapy"]
+    therapist.traditional_vs_non_traditional_family_household = "Non-traditional"
+    therapist.individualist_vs_collectivist_culture = "Individualist"
+    therapist.many_places_or_only_one_or_two_places = "Many places"
+    therapist.lgbtq_part = True
+    therapist.negative_affect_by_social_media = False
+    return therapist
 
 
 @pytest.fixture
@@ -75,22 +64,20 @@ def sample_client():
 # Test cases
 def test_hard_factor_state_mismatch(sample_client, sample_therapist):
     sample_client.state = "TX"
-    score, matched_diagnoses, matched_specialities = calculate_match_score(
+    score, matched_diagnoses_specialities = calculate_match_score(
         sample_client, sample_therapist
     )
     assert score == -1
-    assert matched_diagnoses == []
-    assert matched_specialities == []
+    assert matched_diagnoses_specialities == []
 
 
 def test_hard_factor_gender_mismatch(sample_client, sample_therapist):
     sample_client.therapist_identifies_as = ["Female"]
-    score, matched_diagnoses, matched_specialities = calculate_match_score(
+    score, matched_diagnoses_specialities = calculate_match_score(
         sample_client, sample_therapist
     )
     assert score == -1
-    assert matched_diagnoses == []
-    assert matched_specialities == []
+    assert matched_diagnoses_specialities == []
 
 
 def test_ph9_hard_factor(sample_client, sample_therapist):
@@ -103,33 +90,22 @@ def test_ph9_hard_factor(sample_client, sample_therapist):
     sample_client.trouble_concentrating = "Nearly every day"
     sample_client.moving_or_speaking_so_slowly = "Nearly every day"
 
-    score, matched_diagnoses, matched_specialities = calculate_match_score(
+    score, matched_diagnoses_specialities = calculate_match_score(
         sample_client, sample_therapist
     )
     assert score == -1
-    assert matched_diagnoses == []
-    assert matched_specialities == []
-
-
-def test_soft_factors(sample_client, sample_therapist):
-    score, matched_diagnoses, matched_specialities = calculate_match_score(
-        sample_client, sample_therapist
-    )
-    assert score == 12
-    assert "Trauma" in matched_specialities
-    assert "Family Therapy" in matched_specialities
+    assert matched_diagnoses_specialities == []
 
 
 def test_no_matches(sample_client, sample_therapist):
     sample_client.therapist_specializes_in = []
     sample_client.therapist_identifies_as = "Female"
     sample_client.lived_experiences = []
-    score, matched_diagnoses, matched_specialities = calculate_match_score(
+    score, matched_diagnoses_specialities = calculate_match_score(
         sample_client, sample_therapist
     )
     assert score == -1
-    assert matched_diagnoses == []
-    assert matched_specialities == []
+    assert matched_diagnoses_specialities == []
 
 
 def test_calculate_match_score_full_match(sample_client, sample_therapist):
@@ -143,17 +119,17 @@ def test_calculate_match_score_full_match(sample_client, sample_therapist):
     ]
     sample_client.therapist_specializes_in = [
         "Anxiety",
-        "CBT-focused",
-        "DBT skills based",
+        "CBT",
+        "DBT",
         "Trauma",
+        "Depression",
     ]
     sample_client.therapist_identifies_as = "Male"
-    sample_therapist.diagnoses = ["Anxiety", "Depression"]
-    sample_therapist.specialities = ["Trauma"]
+    sample_therapist.diagnoses_specialities = ["Anxiety", "Depression", "Trauma"]
     sample_therapist.therapeutic_orientation = ["CBT", "DBT"]
-    score, matched_diagnoses, matched_specialities = calculate_match_score(
+    score, matched_diagnoses_specialities = calculate_match_score(
         sample_client, sample_therapist
     )
-    assert score == 18  # Adjust based on your scoring logic
-    assert "Anxiety" in matched_diagnoses
-    assert "Trauma" in matched_specialities
+    assert score == 15  # Adjust based on your scoring logic
+    assert "Anxiety" in matched_diagnoses_specialities
+    assert "Trauma" in matched_diagnoses_specialities

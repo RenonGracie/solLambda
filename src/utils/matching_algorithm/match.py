@@ -76,7 +76,7 @@ def match_client_with_therapists(
                 )
                 break
         else:
-            score, matched_diagnoses, matched_specialities = calculate_match_score(
+            score, matched_diagnoses_specialities = calculate_match_score(
                 form, therapist
             )
             if score >= 0:
@@ -88,8 +88,7 @@ def match_client_with_therapists(
                             {
                                 "therapist": therapist,
                                 "score": score,
-                                "matched_specialities": matched_specialities,
-                                "matched_diagnoses": matched_diagnoses,
+                                "matched_diagnoses_specialities": matched_diagnoses_specialities,
                                 "max_caseload": max_caseload,
                             }
                         )

@@ -23,7 +23,11 @@ class AirtableTherapist(Base):
     caseload_tracker = Column("caseload_tracker", Text)
     has_children = Column("has_children", Boolean)
     cohort = Column("cohort", String(100))
-    _diagnoses = Column("diagnoses", Text)
+
+    _diagnoses_specialities = Column("diagnoses_specialities", Text)
+    _specialities = Column("diagnoses", Text)
+    _diagnoses = Column("specialities", Text)
+
     _ethnicity = Column("ethnicity", Text)
     gender = Column("gender", String(100))
     identities_as = Column("identities_as", String(100))
@@ -41,7 +45,6 @@ class AirtableTherapist(Base):
     experience_with_risk_clients = Column("experience_with_risk_clients", Text)
     working_with_lgbtq_clients = Column("working_with_lgbtq_clients", Text)
     negative_affect_by_social_media = Column("negative_affect_by_social_media", Boolean)
-    _specialities = Column("specialities", Text)
     _states = Column("states", Text)
     _therapeutic_orientation = Column("therapeutic_orientation", Text)
     family_household = Column("family_household", String(100))
@@ -61,14 +64,6 @@ class AirtableTherapist(Base):
         self._availability = json.dumps(data)
 
     @property
-    def diagnoses(self):
-        return json.loads(self._diagnoses or "[]")
-
-    @diagnoses.setter
-    def diagnoses(self, data):
-        self._diagnoses = json.dumps(data)
-
-    @property
     def ethnicity(self):
         return json.loads(self._ethnicity or "[]")
 
@@ -85,12 +80,17 @@ class AirtableTherapist(Base):
         self._religion = json.dumps(data)
 
     @property
-    def specialities(self):
-        return json.loads(self._specialities or "[]")
+    def diagnoses_specialities(self):
+        if self._diagnoses_specialities:
+            return json.loads(self._diagnoses_specialities or "[]")
+        else:
+            return json.loads(self._diagnoses or "[]") + json.loads(
+                self._specialities or "[]"
+            )
 
-    @specialities.setter
-    def specialities(self, data):
-        self._specialities = json.dumps(data)
+    @diagnoses_specialities.setter
+    def diagnoses_specialities(self, data):
+        self._diagnoses_specialities = json.dumps(data)
 
     @property
     def states(self):
@@ -137,7 +137,7 @@ class AirtableTherapist(Base):
             "caseload_tracker": self.caseload_tracker,
             "has_children": self.has_children,
             "cohort": self.cohort,
-            "diagnoses": self.diagnoses,
+            "diagnoses_specialities": self.diagnoses_specialities,
             "ethnicity": self.ethnicity,
             "gender": self.gender,
             "identities_as": self.identities_as,
@@ -155,7 +155,6 @@ class AirtableTherapist(Base):
             "experience_with_risk_clients": self.experience_with_risk_clients,
             "working_with_lgbtq_clients": self.working_with_lgbtq_clients,
             "negative_affect_by_social_media": self.negative_affect_by_social_media,
-            "specialities": self.specialities,
             "states": self.states,
             "therapeutic_orientation": self.therapeutic_orientation,
             "family_household": self.family_household,
@@ -183,6 +182,25 @@ class AirtableTherapist(Base):
             else:
                 return None
 
+        diagnoses_specialities = fields.get("Diagnoses + Specialties") or []
+        if diagnoses_specialities:
+            diagnoses_specialities += (
+                json.dumps(
+                    fields.get(
+                        "Diagnoses: Please select the diagnoses you have experience and/or interest in working with"
+                    )
+                )
+                or []
+            )
+            diagnoses_specialities += (
+                json.dumps(
+                    fields.get(
+                        "Specialities: Please select any specialities you have experience and/or interest in working with. "
+                    )
+                )
+                or []
+            )
+
         therapist.id = airtable_data["id"]
         therapist.intern_name = fields.get("Intern Name") or fields.get("Name")
         therapist.age = fields.get("Age")
@@ -204,11 +222,6 @@ class AirtableTherapist(Base):
             fields.get("Children: Do you have children?")
         )
         therapist.cohort = fields.get("Cohort")
-        therapist._diagnoses = json.dumps(
-            fields.get(
-                "Diagnoses: Please select the diagnoses you have experience and/or interest in working with"
-            )
-        )
         therapist._ethnicity = json.dumps(fields.get("Ethnicity"))
         therapist.gender = fields.get("Gender")
         therapist.identities_as = fields.get("Identities as (Gender)")
@@ -250,11 +263,7 @@ class AirtableTherapist(Base):
                 "Social Media: Have you ever been negatively affected by social media?"
             )
         )
-        therapist._specialities = json.dumps(
-            fields.get(
-                "Specialities: Please select any specialities you have experience and/or interest in working with. "
-            )
-        )
+        therapist._diagnoses_specialities = diagnoses_specialities
         therapist._states = json.dumps(fields.get("States"))
         therapist._therapeutic_orientation = json.dumps(
             fields.get(
