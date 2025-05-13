@@ -23,7 +23,7 @@ class Therapist(AvailableSlots):
     caseload_tracker: str | None
     has_children: bool | None
     cohort: str | None
-    diagnoses: list[str] | None
+    diagnoses_specialities: list[str] | None
     ethnicity: list[str] | None
     gender: str | None
     identities_as: str | None
@@ -41,7 +41,6 @@ class Therapist(AvailableSlots):
     experience_with_risk_clients: str | None
     working_with_lgbtq_clients: str | None
     negative_affect_by_social_media: bool | None
-    specialities: list[str] | None
     states: list[str] | None
     therapeutic_orientation: list[str] | None
     family_household: str | None
@@ -68,6 +67,21 @@ class Therapist(AvailableSlots):
                 else:
                     return None
 
+            diagnoses_specialities = fields.get("Diagnoses + Specialties") or []
+            if not diagnoses_specialities:
+                diagnoses_specialities += (
+                    fields.get(
+                        "Diagnoses: Please select the diagnoses you have experience and/or interest in working with"
+                    )
+                    or []
+                )
+                diagnoses_specialities += (
+                    fields.get(
+                        "Specialities: Please select any specialities you have experience and/or interest in working with. "
+                    )
+                    or []
+                )
+
             super().__init__(
                 id=json["id"],
                 intern_name=fields.get("Intern Name") or fields.get("Name"),
@@ -88,9 +102,7 @@ class Therapist(AvailableSlots):
                 caseload_tracker=fields.get("Caseload Tracker"),
                 has_children=parce_bool(fields.get("Children: Do you have children?")),
                 cohort=fields.get("Cohort"),
-                diagnoses=fields.get(
-                    "Diagnoses: Please select the diagnoses you have experience and/or interest in working with"
-                ),
+                diagnoses_specialities=diagnoses_specialities,
                 ethnicity=fields.get("Ethnicity"),
                 gender=fields.get("Gender"),
                 identities_as=fields.get("Identities as (Gender)"),
@@ -129,9 +141,6 @@ class Therapist(AvailableSlots):
                     fields.get(
                         "Social Media: Have you ever been negatively affected by social media?"
                     )
-                ),
-                specialities=fields.get(
-                    "Specialities: Please select any specialities you have experience and/or interest in working with. "
                 ),
                 states=fields.get("States"),
                 therapeutic_orientation=fields.get(

@@ -8,6 +8,7 @@ from googleapiclient.discovery import build
 from src.utils.constants.contants import DATE_FORMAT
 from src.utils.google.credentials import get_credentials
 from src.utils.logger import get_logger
+from src.utils.settings import settings
 
 logger = get_logger()
 
@@ -158,7 +159,7 @@ def create_gcalendar_event(
     Returns:
         dict: Created event data or None if failed
     """
-    service = _get_service("contact@solhealth.co")
+    service = _get_service(settings.CONTACT_EMAIL)
     try:
         end_time = start_time + timedelta(minutes=duration_minutes)
 
@@ -240,5 +241,106 @@ def create_gcalendar_event(
             extra={"error": str(e), "summary": summary, "attendees": attendees},
         )
         return None
+    finally:
+        service.close()
+
+
+def update_gcalendar_event(
+    event_id: str,
+    start_time: datetime | None = None,
+    duration_minutes: int = 45,
+    timezone: str = "UTC",
+) -> dict | None:
+    """
+    Update an existing Google Calendar event
+
+    Args:
+        event_id: ID of the event to update
+        start_time: New event start time (optional)
+        duration_minutes: Event duration in minutes
+        timezone: Timezone for the event (default: UTC)
+
+    Returns:
+        dict: Updated event data or None if failed
+    """
+    service = _get_service(settings.CONTACT_EMAIL)
+    try:
+        # First get the existing event
+        event = service.events().get(calendarId="primary", eventId=event_id).execute()
+
+        # Update fields if provided
+        if start_time:
+            event["start"] = {
+                "dateTime": start_time.astimezone(UTC).isoformat(),
+                "timeZone": timezone,
+            }
+            event["end"] = {
+                "dateTime": (start_time + timedelta(minutes=duration_minutes))
+                .astimezone(UTC)
+                .isoformat(),
+                "timeZone": timezone,
+            }
+
+        # Update the event
+        updated_event = (
+            service.events()
+            .update(
+                calendarId="primary",
+                eventId=event_id,
+                body=event,
+                sendUpdates="all",
+                supportsAttachments=True,
+                conferenceDataVersion=1 if event.get("conferenceData") else 0,
+            )
+            .execute()
+        )
+
+        return updated_event
+
+    except HttpError as e:
+        logger.error(
+            "Update calendar event error",
+            extra={"event_id": event_id, "error": str(e)},
+        )
+        return None
+    finally:
+        service.close()
+
+
+def delete_gcalendar_event(
+    event_id: str,
+    send_updates: str = "all",
+):
+    """
+    Delete an event from Google Calendar
+
+    Args:
+        event_id: ID of the event to delete
+        send_updates: Whether to send notifications about the deletion
+            - "all": Send notifications to all attendees
+            - "externalOnly": Send notifications only to non-Google Calendar users
+            - "none": Don't send any notifications
+
+    Returns:
+        bool: True if deletion was successful, False otherwise
+    """
+    service = _get_service(settings.CONTACT_EMAIL)
+    try:
+        service.events().delete(
+            calendarId="primary",
+            eventId=event_id,
+            sendUpdates=send_updates,
+        ).execute()
+
+        logger.info(
+            "Google Calendar event deleted successfully",
+            extra={"event_id": event_id},
+        )
+
+    except HttpError as e:
+        logger.error(
+            "Failed to delete Google Calendar event",
+            extra={"event_id": event_id, "error": str(e)},
+        )
     finally:
         service.close()

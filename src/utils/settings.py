@@ -10,6 +10,8 @@ class Settings(Singleton):
         load_dotenv()
         self.ENV = os.getenv("ENV")
 
+        self.CONTACT_EMAIL = os.getenv("CONTACT_EMAIL", "contact@solhealth.co")
+
         self.INTAKEQ_AUTH_KEY = os.getenv("INTAKEQ_AUTH_KEY")
         self.INTAKEQ_BASE_URL = "https://intakeq.com/api/v1"
         self.INTAKEQ_SIGNUP_FORM = os.getenv("INTAKEQ_SIGNUP_FORM")

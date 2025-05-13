@@ -6,6 +6,7 @@ from sqlalchemy.orm import sessionmaker
 
 from src.models.db.airtable import AirtableTherapist
 from src.models.db.analytic_event import AnalyticEvent
+from src.models.db.calendar_events import CalendarEvent
 from src.models.db.signup_form import ClientSignup
 from src.models.db.unsubscribed_emails import UnsubscribedEmail
 from src.utils.settings import settings
@@ -78,6 +79,7 @@ class _Database(Singleton):
         AnalyticEvent.__table__.create(self._engine, checkfirst=True)
         AirtableTherapist.__table__.create(self._engine, checkfirst=True)
         UnsubscribedEmail.__table__.create(self._engine, checkfirst=True)
+        CalendarEvent.__table__.create(self._engine, checkfirst=True)
 
         session_maker = sessionmaker(bind=self._engine)
         self.session = session_maker()
