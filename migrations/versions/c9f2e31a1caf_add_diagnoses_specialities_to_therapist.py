@@ -5,6 +5,7 @@ Revises: 8c222d8a6a10
 Create Date: 2025-05-13 11:59:18.502908
 
 """
+
 from typing import Sequence, Union
 
 from alembic import op
@@ -14,8 +15,8 @@ from sqlalchemy import text
 from src.models.db.airtable import AirtableTherapist
 
 # revision identifiers, used by Alembic.
-revision: str = 'c9f2e31a1caf'
-down_revision: Union[str, None] = '8c222d8a6a10'
+revision: str = "c9f2e31a1caf"
+down_revision: Union[str, None] = "8c222d8a6a10"
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 

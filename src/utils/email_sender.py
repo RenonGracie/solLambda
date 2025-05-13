@@ -64,7 +64,7 @@ def send_invite(
         "<br>Email us at 📩<a href='mailto:contact@solhealth.co'>contact@solhealth.co</a>"
     )
 
-    create_gcalendar_event(
+    return create_gcalendar_event(
         summary=f"Sol Health Appointment: {therapist_name} <> {client_name}",
         start_time=start_time,
         attendees=[
