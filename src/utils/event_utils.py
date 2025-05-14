@@ -37,19 +37,19 @@ def send_ga_event(
     if event_type:
         params["type"] = event_type
     if utm_source:
-        params["utm_source"] = utm_source
+        params["source"] = utm_source
     if utm_medium:
-        params["utm_medium"] = utm_medium
+        params["medium"] = utm_medium
     if utm_campaign:
-        params["utm_campaign"] = utm_campaign
+        params["campaign"] = utm_campaign
     if utm_adid:
-        params["utm_adid"] = utm_adid
+        params["adid"] = utm_adid
     if utm_adgroup:
-        params["utm_adgroup"] = utm_adgroup
+        params["adgroup"] = utm_adgroup
     if utm_content:
-        params["utm_content"] = utm_content
+        params["content"] = utm_content
     if utm_term:
-        params["utm_term"] = utm_term
+        params["term"] = utm_term
 
     event = {
         "client_id": client_id,
