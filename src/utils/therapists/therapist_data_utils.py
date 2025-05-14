@@ -11,25 +11,23 @@ def _rearrange_elements(elements, indices):
     remaining_elements = [
         elem for idx, elem in enumerate(elements) if idx not in indices
     ]
-    rearranged_elements = selected_elements + remaining_elements
-    return rearranged_elements
+    return selected_elements + remaining_elements
 
 
 def _find_client_age_group(client_age):
     if 20 <= client_age <= 26:
         return "Early/Mid 20s"
-    elif 27 <= client_age <= 29:
+    if 27 <= client_age <= 29:
         return "Late 20s"
-    elif 30 <= client_age <= 39:
+    if 30 <= client_age <= 39:
         return "30s"
-    elif 40 <= client_age <= 49:
+    if 40 <= client_age <= 49:
         return "40s"
-    elif 50 <= client_age <= 59:
+    if 50 <= client_age <= 59:
         return "50s"
-    elif client_age >= 60:
+    if client_age >= 60:
         return "60+"
-    else:
-        return "Age out of range"
+    return "Age out of range"
 
 
 def implement_age_factor(age_str: str, matched: list[dict]) -> list[dict]:

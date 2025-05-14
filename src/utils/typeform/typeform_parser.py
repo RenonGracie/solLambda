@@ -5,10 +5,8 @@ def _value_to_list(value):
     if isinstance(value, str):
         if value:
             return [value]
-        else:
-            return []
-    else:
-        return value
+        return []
+    return value
 
 
 class TypeformData:
@@ -64,8 +62,7 @@ class TypeformData:
             case "multiple_choice":
                 if data["answer"].get("labels"):
                     return data["answer"].get("labels")
-                else:
-                    return data["answer"].get("label")
+                return data["answer"].get("label")
             case "dropdown":
                 return data["answer"].get("label")
             case "choice":

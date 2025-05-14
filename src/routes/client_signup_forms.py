@@ -1,9 +1,10 @@
 from flask import jsonify
-from flask_openapi3 import Tag, APIBlueprint
+from flask_openapi3 import APIBlueprint, Tag
 
 from src.db.database import db
 from src.models.api.base import Email
-from src.models.api.client_signup import ClientSignup as SignupForm, ClientSignupQuery
+from src.models.api.client_signup import ClientSignup as SignupForm
+from src.models.api.client_signup import ClientSignupQuery
 from src.models.api.error import Error
 from src.models.db.signup_form import ClientSignup
 

@@ -1,5 +1,5 @@
-from src.utils.request_utils import search_clients, save_update_client
 from src.utils.logger import get_logger
+from src.utils.request_utils import save_update_client, search_clients
 
 logger = get_logger()
 
@@ -56,8 +56,7 @@ def reassign_client(client: dict, therapist_id: str):
     try:
         if client.get("PractitionerId") == therapist_id:
             return
-        else:
-            client["PractitionerId"] = therapist_id
-            save_update_client(client)
+        client["PractitionerId"] = therapist_id
+        save_update_client(client)
     except Exception as e:
         logger.error("Client search error", extra={"error": str(e)})

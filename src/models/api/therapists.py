@@ -62,10 +62,9 @@ class Therapist(AvailableSlots):
                     return None
                 if field.lower().__eq__("yes"):
                     return True
-                elif field.lower().__eq__("no"):
+                if field.lower().__eq__("no"):
                     return False
-                else:
-                    return None
+                return None
 
             diagnoses_specialities = fields.get("Diagnoses + Specialties") or []
             if not diagnoses_specialities:

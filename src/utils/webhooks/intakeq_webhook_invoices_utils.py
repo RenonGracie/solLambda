@@ -1,6 +1,6 @@
 from src.db.database import with_database
 from src.models.db.signup_form import ClientSignup, create_empty_client_form
-from src.utils.event_utils import send_ga_event, INVOICE_EVENT_TYPE
+from src.utils.event_utils import INVOICE_EVENT_TYPE, send_ga_event
 
 
 @with_database
@@ -16,15 +16,14 @@ def process_invoice(db, data: dict):
         client.email = invoice.get("ClientEmail")
         db.add(client)
 
-    user_id = client.utm.get("user_id")
-
     send_ga_event(
         database=db,
         client=client,
         name=event,
-        value=invoice.get("TotalAmount"),
-        var_1=user_id,
-        var_2=invoice.get("Id"),
-        params={"status": invoice["Status"]},
+        params={
+            "status": invoice["Status"],
+            "total_amount": invoice.get("TotalAmount"),
+            "invoice_id": invoice.get("Id"),
+        },
         event_type=INVOICE_EVENT_TYPE,
     )

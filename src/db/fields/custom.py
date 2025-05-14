@@ -1,7 +1,7 @@
 from datetime import datetime
 
-from sqlalchemy import TypeDecorator, String
 from dateutil.parser import parse
+from sqlalchemy import String, TypeDecorator
 
 
 class DateTimeAsString(TypeDecorator):
@@ -19,7 +19,7 @@ class DateTimeAsString(TypeDecorator):
         if isinstance(value, str):
             parse(value)
             return value
-        raise ValueError("Expected datetime or string, got {}".format(type(value)))
+        raise ValueError(f"Expected datetime or string, got {type(value)}")
 
     def process_result_value(self, value, dialect):
         if value is None:

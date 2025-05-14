@@ -1,25 +1,25 @@
-from flask import jsonify, request
-from flask_openapi3 import Tag, Info, OpenAPI
-import sentry_sdk
-from sentry_sdk.integrations.flask import FlaskIntegration
-from datetime import datetime
 import json
+from datetime import datetime
+
+import sentry_sdk
+from flask import jsonify, request
+from flask_openapi3 import Info, OpenAPI, Tag
+from sentry_sdk.integrations.flask import FlaskIntegration
 
 from src.models.api.base import SuccessResponse
 from src.routes import (
-    client_api,
     appointment_api,
-    therapist_api,
+    client_api,
     client_signup_api,
-    intakeq_forms_api,
-    events_api,
     emails_api,
+    intakeq_forms_api,
+    therapist_api,
 )
+from src.utils.logger import add_request_id, get_logger
 from src.utils.settings import settings
 from src.utils.webhooks.intakeq_webhook_appointment_utils import process_appointment
 from src.utils.webhooks.intakeq_webhook_invoices_utils import process_invoice
 from src.utils.webhooks.typeform_webhook_utils import process_typeform_data
-from src.utils.logger import add_request_id, get_logger
 
 # Initialize Sentry
 if settings.ENV != "dev":
@@ -67,7 +67,6 @@ app.register_api(client_signup_api)
 app.register_api(appointment_api)
 app.register_api(therapist_api)
 app.register_api(intakeq_forms_api)
-app.register_api(events_api)
 app.register_blueprint(emails_api)
 
 

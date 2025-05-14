@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta, UTC
+from datetime import UTC, datetime, timedelta
 
 from src.utils.constants.contants import DEFAULT_ZONE
 from src.utils.matching_algorithm.match import provide_therapist_slots
@@ -43,5 +43,4 @@ def check_therapist_availability(
             if len(slots) == 0:
                 return "This time slot is already taken."
         return None
-    else:
-        return "You can't book an appointment outside of working hours."
+    return "You can't book an appointment outside of working hours."
