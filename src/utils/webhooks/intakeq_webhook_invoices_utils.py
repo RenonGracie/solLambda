@@ -17,7 +17,6 @@ def process_invoice(db, data: dict):
         db.add(client)
 
     send_ga_event(
-        database=db,
         client=client,
         name=event,
         params={

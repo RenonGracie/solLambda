@@ -84,7 +84,6 @@ def process_appointment(db, data: dict):
                 delete_gcalendar_event(event_db.google_calendar_id)
 
     send_ga_event(
-        database=db,
         client=client,
         name=event,
         params={
