@@ -157,9 +157,7 @@ def book_appointment(body: CreateAppointment):
         send_ga_event(
             client=form,
             name=CALL_SCHEDULED_EVENT,
-            params={
-                "appointment_id": json.get("Id")
-            },
+            params={"appointment_id": json.get("Id")},
             event_type=USER_EVENT_TYPE,
         )
     reassign_client(client, therapist["Id"])
