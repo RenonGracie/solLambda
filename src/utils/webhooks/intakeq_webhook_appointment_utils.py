@@ -74,7 +74,7 @@ def process_appointment(db, data: dict):
                     event_db.google_calendar_id,
                     start_time=datetime.fromtimestamp(appointment["StartDate"] / 1000),
                 )
-        elif event == "AppointmentCancelled" or event == "AppointmentDeleted":
+        elif event == "AppointmentCanceled" or event == "AppointmentDeleted":
             event_db = (
                 db.query(CalendarEvent)
                 .filter_by(intakeQ_id=appointment.get("Id"))
