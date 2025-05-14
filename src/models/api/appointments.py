@@ -1,5 +1,3 @@
-from typing import List
-
 from pydantic import BaseModel
 
 from src.models.api.base import CustomField
@@ -36,8 +34,8 @@ class Appointment(BaseModel):
     ClientEmail: str | None
     EndDate: int | None
     BookedByClient: bool | None
-    AdditionalClients: List[AdditionalClient] | None
-    CustomFields: List[CustomField] | None
+    AdditionalClients: list[AdditionalClient] | None
+    CustomFields: list[CustomField] | None
     Price: int | None
     AttendanceConfirmationResponse: str | None
     Id: str | None
@@ -46,7 +44,7 @@ class Appointment(BaseModel):
 
 
 class Appointments(BaseModel):
-    appointments: List[Appointment] | None
+    appointments: list[Appointment] | None
 
 
 class AppointmentQuery(BaseModel):

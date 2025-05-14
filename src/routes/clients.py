@@ -1,21 +1,23 @@
 from flask import jsonify
-from flask_openapi3 import Tag, APIBlueprint
+from flask_openapi3 import APIBlueprint, Tag
 
 from src.models.api.clients import (
     Client,
-    Clients,
-    ClientQueryModel,
-    ClientTag,
-    ClientTagQuery,
     ClientDiagnoses,
     ClientPath,
+    ClientQueryModel,
+    Clients,
+    ClientTag,
+    ClientTagQuery,
 )
 from src.utils.request_utils import (
-    save_update_client,
-    search_clients as search,
     add_client_tag,
-    delete_client_tag,
     client_diagnoses,
+    delete_client_tag,
+    save_update_client,
+)
+from src.utils.request_utils import (
+    search_clients as search,
 )
 
 __tag = Tag(name="Clients")

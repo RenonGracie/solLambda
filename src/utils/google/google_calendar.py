@@ -1,9 +1,7 @@
-from datetime import datetime, timedelta, UTC
-
-from googleapiclient.errors import HttpError
-
+from datetime import UTC, datetime, timedelta
 
 from googleapiclient.discovery import build
+from googleapiclient.errors import HttpError
 
 from src.utils.constants.contants import DATE_FORMAT
 from src.utils.google.credentials import get_credentials

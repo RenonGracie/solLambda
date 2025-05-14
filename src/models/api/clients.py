@@ -1,8 +1,7 @@
+from typing import Any
 from uuid import UUID
 
 from pydantic import BaseModel, Field
-from typing import List, Any
-
 
 from src.models.api.base import CustomField
 
@@ -30,14 +29,14 @@ class Client(BaseModel):
     Country: str | None = Field(default="US")
 
     AdditionalInformation: str | None = Field(default=None)
-    CustomFields: List[CustomField] | None = Field(default=None)
+    CustomFields: list[CustomField] | None = Field(default=None)
 
     Guid: str | None = Field(default=None)
     MobilePhone: int | None = Field(default=None)
     Archived: bool | None = Field(default=None)
-    Tags: List[str] | None = Field(default=None)
+    Tags: list[str] | None = Field(default=None)
     PractitionerId: str | None = Field(default=None)
-    LinkedClients: List[str] | None = Field(default=None)
+    LinkedClients: list[str] | None = Field(default=None)
     DateCreated: int | None = Field(default=None)
     BillingType: int | None = Field(default=None)
     LastActivityName: str | None = Field(default=None)
@@ -64,7 +63,7 @@ class ClientQueryModel(BaseModel):
 
 
 class Clients(BaseModel):
-    clients: List[Client] | None = None
+    clients: list[Client] | None = None
 
 
 class ClientTag(BaseModel):
@@ -90,4 +89,4 @@ class ClientDiagnose(BaseModel):
 
 
 class ClientDiagnoses(BaseModel):
-    diagnoses: List[ClientDiagnose] | None = None
+    diagnoses: list[ClientDiagnose] | None = None

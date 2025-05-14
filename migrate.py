@@ -1,5 +1,5 @@
-from alembic.config import Config
 from alembic import command
+from alembic.config import Config
 
 from src.db.database import get_db_url
 

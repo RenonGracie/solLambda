@@ -1,5 +1,5 @@
 from flask import jsonify
-from flask_openapi3 import Tag, APIBlueprint
+from flask_openapi3 import APIBlueprint, Tag
 
 from src.models.api.base import Url
 from src.models.api.intakeq_forms import IntakeQMandatoryFormQuery

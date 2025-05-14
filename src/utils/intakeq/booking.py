@@ -10,14 +10,14 @@ from src.models.api.error import Error
 from src.models.db.airtable import AirtableTherapist
 from src.models.db.signup_form import ClientSignup
 from src.utils.constants.contants import DATE_FORMAT
-from src.utils.event_utils import send_ga_event, CALL_SCHEDULED_EVENT, USER_EVENT_TYPE
+from src.utils.event_utils import CALL_SCHEDULED_EVENT, USER_EVENT_TYPE, send_ga_event
 from src.utils.google.google_calendar import get_busy_events_from_gcalendar
 from src.utils.intakeq.appointments import check_therapist_availability
-from src.utils.intakeq.clients import search_client, reassign_client
+from src.utils.intakeq.clients import reassign_client, search_client
 from src.utils.logger import get_logger
 from src.utils.request_utils import (
-    get_booking_settings,
     create_appointment,
+    get_booking_settings,
     search_appointments,
 )
 

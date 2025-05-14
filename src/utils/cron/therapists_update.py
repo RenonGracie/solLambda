@@ -1,9 +1,9 @@
 from pyairtable import Api
 
-from src.utils.settings import settings
-from src.utils.therapists.airtable import save_therapists
 from src.models.api.therapists import Therapist
 from src.utils.logger import get_logger
+from src.utils.settings import settings
+from src.utils.therapists.airtable import save_therapists
 
 logger = get_logger()
 
@@ -36,5 +36,5 @@ def update_therapists_table():
             "message": f"Updated {len(therapists)} therapist records",
         }
     except Exception as e:
-        logger.error(f"Error updating therapists table: {str(e)}")
+        logger.error(f"Error updating therapists table: {e!s}")
         return {"success": False, "error": str(e)}

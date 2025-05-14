@@ -2,7 +2,7 @@ import json
 from datetime import datetime, timedelta
 
 from flask import jsonify
-from flask_openapi3 import Tag, APIBlueprint
+from flask_openapi3 import APIBlueprint, Tag
 from googleapiclient.errors import HttpError
 from pyairtable import Api
 
@@ -13,15 +13,15 @@ from src.models.api.calendar import (
 )
 from src.models.api.client_match import MatchedTherapists, MatchQuery
 from src.models.api.error import Error
-from src.models.api.therapists import Therapists, Therapist, AvailableSlots
+from src.models.api.therapists import AvailableSlots, Therapist, Therapists
 from src.utils.google.calendar_event_parser import parse_calendar_events
 from src.utils.google.google_calendar import (
     get_events_from_gcalendar,
 )
 from src.utils.logger import get_logger
 from src.utils.matching_algorithm.match import (
-    match_client_with_therapists,
     fetch_therapist_slots,
+    match_client_with_therapists,
 )
 from src.utils.settings import settings
 from src.utils.therapists.airtable import save_therapists

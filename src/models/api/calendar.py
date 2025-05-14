@@ -1,5 +1,3 @@
-from typing import List
-
 from pydantic import BaseModel
 
 
@@ -14,11 +12,11 @@ class CalendarEvent(BaseModel):
 
 class CalendarEventsDateGroup(BaseModel):
     date: str
-    events: List[CalendarEvent]
+    events: list[CalendarEvent]
 
 
 class CalendarEvents(BaseModel):
-    data: List[CalendarEventsDateGroup] | None
+    data: list[CalendarEventsDateGroup] | None
 
 
 class EventQuery(BaseModel):

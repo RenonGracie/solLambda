@@ -1,6 +1,5 @@
 import re
 from datetime import datetime, timedelta
-from typing import List
 
 from dateutil import parser
 from sqlalchemy import Column, Text
@@ -15,8 +14,8 @@ from src.utils.logger import get_logger
 from src.utils.matching_algorithm.algorithm import calculate_match_score
 from src.utils.states_utils import statename_to_abbr
 from src.utils.therapists.therapist_data_utils import (
-    provide_therapist_data,
     implement_age_factor,
+    provide_therapist_data,
 )
 from src.utils.working_hours import current_working_hours, week_slots
 
@@ -26,7 +25,7 @@ logger = get_logger()
 @with_database
 def match_client_with_therapists(
     db, response_id: str, limit: int, last_index: int
-) -> (ClientSignup | None, List[dict]):
+) -> (ClientSignup | None, list[dict]):
     form: ClientSignup = (
         db.query(ClientSignup).filter_by(response_id=response_id).first()
     )
@@ -187,5 +186,4 @@ def fetch_therapist_slots(email: str) -> (list | None, str | None):
         return provide_therapist_slots(
             week_slots(day_start, hours_count), busy_slots
         ), None
-    else:
-        return week_slots(day_start, hours_count), None
+    return week_slots(day_start, hours_count), None

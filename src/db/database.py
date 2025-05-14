@@ -1,20 +1,17 @@
 from functools import wraps
 
-from sqlalchemy import create_engine, URL
+import boto3
+from sqlalchemy import URL, create_engine
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import sessionmaker
 
 from src.models.db.airtable import AirtableTherapist
-from src.models.db.analytic_event import AnalyticEvent
 from src.models.db.calendar_events import CalendarEvent
 from src.models.db.signup_form import ClientSignup
 from src.models.db.unsubscribed_emails import UnsubscribedEmail
+from src.utils.logger import get_logger
 from src.utils.settings import settings
 from src.utils.singletone import Singleton
-from src.utils.logger import get_logger
-
-import boto3
-
 
 logger = get_logger()
 
@@ -76,7 +73,6 @@ class _Database(Singleton):
         )
 
         ClientSignup.__table__.create(self._engine, checkfirst=True)
-        AnalyticEvent.__table__.create(self._engine, checkfirst=True)
         AirtableTherapist.__table__.create(self._engine, checkfirst=True)
         UnsubscribedEmail.__table__.create(self._engine, checkfirst=True)
         CalendarEvent.__table__.create(self._engine, checkfirst=True)

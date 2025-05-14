@@ -1,8 +1,8 @@
 import boto3
 
 from src.models.api.therapist_s3 import S3MediaType
-from src.utils.settings import settings
 from src.utils.logger import get_logger
+from src.utils.settings import settings
 
 _s3_client = boto3.client("s3")
 

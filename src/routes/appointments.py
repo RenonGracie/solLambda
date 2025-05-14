@@ -1,11 +1,11 @@
 from flask import jsonify
-from flask_openapi3 import Tag, APIBlueprint
+from flask_openapi3 import APIBlueprint, Tag
 
 from src.models.api.appointments import (
-    Appointments,
     Appointment,
-    AppointmentQuery,
     AppointmentPath,
+    AppointmentQuery,
+    Appointments,
     AppointmentsShort,
     CancelAppointment,
     CreateAppointment,
@@ -15,10 +15,10 @@ from src.utils.intakeq.booking import (
     book_appointment,
 )
 from src.utils.request_utils import (
-    search_appointments,
-    get_appointment,
-    update_appointment,
     appointment_cancellation,
+    get_appointment,
+    search_appointments,
+    update_appointment,
 )
 
 __tag = Tag(name="Appointments")

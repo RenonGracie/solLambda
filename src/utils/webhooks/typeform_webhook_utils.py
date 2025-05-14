@@ -1,11 +1,11 @@
 from src.db.database import with_database
-from src.models.db.signup_form import create_from_typeform_data, ClientSignup
-from src.utils.event_utils import send_ga_event, REGISTRATION_EVENT, USER_EVENT_TYPE
-from src.utils.intakeq.bot.bot import create_new_form, create_client_model
+from src.models.db.signup_form import ClientSignup, create_from_typeform_data
+from src.utils.event_utils import REGISTRATION_EVENT, USER_EVENT_TYPE, send_ga_event
+from src.utils.intakeq.bot.bot import create_client_model, create_new_form
+from src.utils.logger import get_logger
 from src.utils.request_utils import intakeq, save_update_client
 from src.utils.settings import settings
 from src.utils.typeform.typeform_parser import TypeformData
-from src.utils.logger import get_logger
 
 logger = get_logger()
 

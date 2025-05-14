@@ -1,19 +1,18 @@
 from datetime import datetime, timedelta
-from typing import Optional
+from uuid import uuid4
 
 from dateutil import parser
 from icalendar import Calendar, Event
-from uuid import uuid4
 
 
 def create_calendar_event(
     summary: str,
     start_time: str | datetime,
     duration_minutes: int = 60,
-    description: Optional[str] = None,
-    location: Optional[str] = None,
-    organizer_email: Optional[str] = None,
-    attendee_email: Optional[str] = None,
+    description: str | None = None,
+    location: str | None = None,
+    organizer_email: str | None = None,
+    attendee_email: str | None = None,
 ) -> bytes:
     """
     Create an ICS calendar event

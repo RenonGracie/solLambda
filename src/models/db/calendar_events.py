@@ -1,6 +1,6 @@
 from uuid import uuid4
 
-from sqlalchemy import Column, UUID, String
+from sqlalchemy import UUID, Column, String
 
 from src.models.db.base import Base
 

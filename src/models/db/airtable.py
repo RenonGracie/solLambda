@@ -1,8 +1,8 @@
 import json
 
-from sqlalchemy import Column, String, Text, Boolean
-from src.models.api.therapists import Therapist
+from sqlalchemy import Boolean, Column, String, Text
 
+from src.models.api.therapists import Therapist
 from src.models.db.base import Base
 
 
@@ -83,10 +83,9 @@ class AirtableTherapist(Base):
     def diagnoses_specialities(self):
         if self._diagnoses_specialities:
             return json.loads(self._diagnoses_specialities or "[]")
-        else:
-            return json.loads(self._diagnoses or "[]") + json.loads(
-                self._specialities or "[]"
-            )
+        return json.loads(self._diagnoses or "[]") + json.loads(
+            self._specialities or "[]"
+        )
 
     @diagnoses_specialities.setter
     def diagnoses_specialities(self, data):
@@ -177,10 +176,9 @@ class AirtableTherapist(Base):
                 return None
             if field.lower() == "yes":
                 return True
-            elif field.lower() == "no":
+            if field.lower() == "no":
                 return False
-            else:
-                return None
+            return None
 
         diagnoses_specialities = fields.get("Diagnoses + Specialties") or []
         if diagnoses_specialities:

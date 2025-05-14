@@ -1,7 +1,7 @@
 import random
+from datetime import datetime, timedelta
 
 import pytest
-from datetime import datetime, timedelta
 
 from src.models.api.therapists import Therapist
 from src.utils.matching_algorithm.match import provide_therapist_slots

@@ -5,8 +5,12 @@ from src.models.db.calendar_events import CalendarEvent
 from src.models.db.signup_form import ClientSignup, create_empty_client_form
 from src.utils.email_sender import send_invite
 from src.utils.event_utils import (
-    send_ga_event,
     APPOINTMENT_EVENT_TYPE,
+    send_ga_event,
+)
+from src.utils.google.google_calendar import (
+    delete_gcalendar_event,
+    update_gcalendar_event,
 )
 from src.utils.google.google_calendar import (
     update_gcalendar_event,
@@ -24,9 +28,8 @@ def _abbreviate_name(full_name, first_word_full=False):
         first_word = words[0]
         other_letters = [word[0].upper() for word in words[1:]]
         return f"{first_word} {' '.join(other_letters)}"
-    else:
-        abbreviated = [f"{word[0].upper()}." for word in words]
-        return " ".join(abbreviated)
+    abbreviated = [f"{word[0].upper()}." for word in words]
+    return " ".join(abbreviated)
 
 
 @with_database
@@ -88,11 +91,12 @@ def process_appointment(db, data: dict):
         database=db,
         client=client,
         name=event,
-        value=appointment.get("Id"),
-        var_2=appointment.get("FullCancellationReason"),
         params={
-            "ClientId": appointment["ClientId"],
-            "PractitionerId": appointment.get("PractitionerId"),
+            "client_id": appointment["ClientId"],
+            "practitioner_id": appointment.get("PractitionerId"),
+            "start_date": appointment.get("StartDateIso"),
+            "appointment_id": appointment.get("Id"),
+            "cancellation_reason": appointment.get("FullCancellationReason"),
         },
         event_type=APPOINTMENT_EVENT_TYPE,
     )

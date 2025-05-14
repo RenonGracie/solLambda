@@ -1,14 +1,13 @@
 import json
 import random
-from datetime import datetime
 from uuid import uuid4
 
 import emoji
-from sqlalchemy import Column, String, Text, Integer
+from sqlalchemy import Column, Integer, String, Text
 from sqlalchemy.dialects.postgresql import UUID
 
-from src.utils.typeform.typeform_parser import TypeformData, TypeformIds
 from src.models.db.base import Base
+from src.utils.typeform.typeform_parser import TypeformData, TypeformIds
 
 
 def _calc_points(value: str):
@@ -27,10 +26,9 @@ def _calc_points(value: str):
 def _parse_promocode(value: str) -> int:
     if value in ["true", "free"]:
         return 100
-    elif value in ["50off"]:
+    if value in ["50off"]:
         return 50
-    else:
-        return 0
+    return 0
 
 
 class ClientSignup(Base):
@@ -169,7 +167,7 @@ class ClientSignup(Base):
             ga_data.get("client_id")
             or f"{random.randint(1000000000, 9999999999)}.{random.randint(1000000000, 9999999999)}"
         )
-        session_id = ga_data.get("session_id") or str(int(datetime.now().timestamp()))
+        session_id = ga_data.get("session_id")
 
         utm_medium = ga_data.get("utm_medium")
         utm_source = ga_data.get("utm_source")
