@@ -12,10 +12,6 @@ from src.utils.google.google_calendar import (
     delete_gcalendar_event,
     update_gcalendar_event,
 )
-from src.utils.google.google_calendar import (
-    update_gcalendar_event,
-    delete_gcalendar_event,
-)
 
 
 def _abbreviate_name(full_name, first_word_full=False):
@@ -88,7 +84,6 @@ def process_appointment(db, data: dict):
                 delete_gcalendar_event(event_db.google_calendar_id)
 
     send_ga_event(
-        database=db,
         client=client,
         name=event,
         params={

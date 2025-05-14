@@ -81,21 +81,6 @@ class Therapist(AvailableSlots):
                     or []
                 )
 
-            diagnoses_specialities = fields.get("Diagnoses + Specialties") or []
-            if not diagnoses_specialities:
-                diagnoses_specialities += (
-                    fields.get(
-                        "Diagnoses: Please select the diagnoses you have experience and/or interest in working with"
-                    )
-                    or []
-                )
-                diagnoses_specialities += (
-                    fields.get(
-                        "Specialities: Please select any specialities you have experience and/or interest in working with. "
-                    )
-                    or []
-                )
-
             super().__init__(
                 id=json["id"],
                 intern_name=fields.get("Intern Name") or fields.get("Name"),

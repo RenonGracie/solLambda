@@ -50,7 +50,6 @@ def process_typeform_data(db, response_json: dict):
 
     logger.debug("intakeQ response", extra={"response": response.json()})
     send_ga_event(
-        database=db,
         client=form,
         name=REGISTRATION_EVENT,
         event_type=USER_EVENT_TYPE,
