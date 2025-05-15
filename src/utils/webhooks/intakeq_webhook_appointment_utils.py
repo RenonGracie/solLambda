@@ -79,7 +79,6 @@ def process_appointment(db, data: dict):
         client=client,
         name=event,
         params={
-            "client_id": appointment["ClientId"],
             "practitioner_id": appointment.get("PractitionerId"),
             "start_date": appointment.get("StartDateIso"),
             "appointment_id": appointment.get("Id"),
