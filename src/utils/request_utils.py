@@ -48,18 +48,6 @@ def search_clients(args: dict):
     return _intakeq_get("/clients", params=args)
 
 
-def add_client_tag(data: dict):
-    return _intakeq_post("/clientTags", data=data)
-
-
-def delete_client_tag(args: dict):
-    return _intakeq_delete("/clientTags", params=args)
-
-
-def client_diagnoses(client_id: str):
-    return _intakeq_get(f"/client/{client_id}/diagnoses")
-
-
 def get_booking_settings():
     return _intakeq_get("/appointments/settings")
 

@@ -9,7 +9,6 @@ from sentry_sdk.integrations.flask import FlaskIntegration
 from src.models.api.base import SuccessResponse
 from src.routes import (
     appointment_api,
-    client_api,
     client_signup_api,
     emails_api,
     intakeq_forms_api,
@@ -62,7 +61,6 @@ def before_request():
     add_request_id()
 
 
-app.register_api(client_api)
 app.register_api(client_signup_api)
 app.register_api(appointment_api)
 app.register_api(therapist_api)
@@ -99,7 +97,7 @@ def intakeq_hook():
     data = request.get_json()
     logger.info("Appointment webhook triggered", extra={"data": data})
     process_appointment(data)
-    return "", 200
+    return "", 204
 
 
 @app.post(
@@ -110,7 +108,7 @@ def intakeq_hook():
 def intakeq_invoice_hook():
     data = request.get_json()
     process_invoice(data)
-    return "", 200
+    return "", 204
 
 
 if __name__ == "__main__":

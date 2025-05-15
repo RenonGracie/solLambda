@@ -50,6 +50,8 @@ def send_ga_event(
         params["content"] = utm_content
     if utm_term:
         params["term"] = utm_term
+    if user_id:
+        params["custom_user_id"] = user_id
 
     event = {
         "client_id": client_id,
