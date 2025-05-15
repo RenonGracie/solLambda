@@ -3,7 +3,7 @@ from datetime import datetime
 from src.db.database import with_database
 from src.models.db.calendar_events import CalendarEvent
 from src.models.db.signup_form import ClientSignup, create_empty_client_form
-from src.utils.email_sender import send_invite
+from src.utils.invite_sender import send_invite
 from src.utils.event_utils import (
     APPOINTMENT_EVENT_TYPE,
     send_ga_event,
