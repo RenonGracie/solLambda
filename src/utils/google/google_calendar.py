@@ -51,9 +51,13 @@ def get_events_from_gcalendar(
     max_results: int = 1000,
     raise_error: bool = False,
 ) -> list[dict] | None:
-    service = _get_service()
+    service = _get_service(
+        settings.CONTACT_EMAIL if calendar_id.endswith("@solhealth.co") else None
+    )
     try:
-        insert_email_to_gcalendar(calendar_id)
+        if not calendar_id.endswith("@solhealth.co"):
+            insert_email_to_gcalendar(calendar_id)
+
         page_token = None
         data = []
         while True:
@@ -342,3 +346,15 @@ def delete_gcalendar_event(
         )
     finally:
         service.close()
+
+
+def get_event_from_gcalendar(
+    summary: str, calendar_id: str, date_start: str, date_end: str
+) -> dict | None:
+    events = get_events_from_gcalendar(
+        calendar_id=calendar_id, time_min=date_start, time_max=date_end
+    )
+    for event in events:
+        if event["summary"] == summary:
+            return event
+    return None

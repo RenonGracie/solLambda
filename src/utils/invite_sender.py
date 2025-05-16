@@ -1,5 +1,7 @@
 import re
 from datetime import datetime
+from jinja2 import Environment, FileSystemLoader
+import os
 
 from src.utils.google.google_calendar import create_gcalendar_event
 from src.utils.logger import get_logger
@@ -35,33 +37,27 @@ def send_invite(
     client_name: str,
     client_email: str,
     start_time: datetime,
-    telehealth_info: dict | None,
     duration: int = 45,
+    join_url: str | None = None,
+    invitation: str | None = None,
 ):
-    if telehealth_info:
-        invitation_code = extract_invitation_code(telehealth_info["Invitation"])
-        join_url = telehealth_info.get("JoinUrl")
+    if invitation:
+        invitation_code = extract_invitation_code(invitation)
     else:
         invitation_code = None
-        join_url = None
 
-    if join_url and not join_url.__contains__("meet.google.com"):
-        session_link = f"<br>🔗<a href='{join_url}'>Join Session</a><br><br><b>Invitation code:</b> {invitation_code}"
-    else:
-        session_link = f"<br>🔗<a href='{join_url}'>Join Session</a>"
+    # Setup Jinja2 environment
+    template_dir = os.path.join(os.path.dirname(__file__), "..", "..", "templates")
+    env = Environment(loader=FileSystemLoader(template_dir), autoescape=True)
+    template = env.get_template("calendar_description.html")
 
-    # Create calendar event without unsubscribe link in description
-    calendar_description = (
-        "<b>Join your session</b>"
-        f"{'<br><br><b>Use the link below to join your scheduled video session:</b>' + session_link if telehealth_info else ''}"
-        "<br><br><b>Manage Your Appointment or Contact Your Provider</b>"
-        "<br>Access your Client Portal to manage sessions or send messages"
-        "<br>🔗<a href='https://solhealth.intakeq.com/portal'>Client Portal</a>"
-        f"<br>You can also reach your provider directly at <a href='mailto:{therapist_email}'>{therapist_email}</a>"
-        "<br><br><b>Cancellation Policy</b>"
-        "<br>Please reschedule or cancel your session at least 24 hours in advance to avoid a no-show fee equal to your session cost."
-        "<br><br><b>Needs Help?</b>"
-        "<br>Email us at 📩<a href='mailto:contact@solhealth.co'>contact@solhealth.co</a>"
+    # Render the template
+    calendar_description = template.render(
+        {
+            "join_url": join_url,
+            "invitation_code": invitation_code,
+            "therapist_email": therapist_email,
+        }
     )
 
     return create_gcalendar_event(

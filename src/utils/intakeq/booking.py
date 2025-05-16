@@ -31,11 +31,13 @@ def book_appointment(body: CreateAppointment):
         return jsonify(Error(error="Unable to get booking settings").dict()), 400
     practitioners = result.json()["Practitioners"]
     sessions = result.json()["Services"]
+
+    therapist_email = body.therapist_email.lower()
     try:
         therapist = next(
             item
             for item in practitioners
-            if str(item["Email"]).lower() == body.therapist_email.lower()
+            if str(item["Email"]).lower() == body.therapist_email
             or (item["CompleteName"]).lower() == body.therapist_name.lower()
         )
     except StopIteration:
@@ -44,7 +46,6 @@ def book_appointment(body: CreateAppointment):
         logger.error("Therapist not found")
         return jsonify(Error(error="Therapist not found").dict()), 404
 
-    therapist_email = therapist.get("Email")
     slot_time = parser.parse(body.datetime)
 
     therapist_model: AirtableTherapist = (
@@ -122,19 +123,31 @@ def book_appointment(body: CreateAppointment):
                 session_id = next(
                     session
                     for session in sessions
-                    if str(session["Name"]).__eq__("First Session (Free)")
+                    if str(session["Name"]).__eq__(
+                        "First Session (Free) (Google Meets)"
+                        if therapist_email.endswith("@solhealth.co")
+                        else "First Session (Free)"
+                    )
                 )["Id"]
             case 50:
                 session_id = next(
                     session
                     for session in sessions
-                    if str(session["Name"]).__eq__("First Session (Promo Code)")
+                    if str(session["Name"]).__eq__(
+                        "First Session (Promo Code) (Google Meets)"
+                        if therapist_email.endswith("@solhealth.co")
+                        else "First Session (Promo Code)"
+                    )
                 )["Id"]
             case _:
                 session_id = next(
                     session
                     for session in sessions
-                    if str(session["Name"]).__eq__("First Session")
+                    if str(session["Name"]).__eq__(
+                        "First Session (Google Meets)"
+                        if therapist_email.endswith("@solhealth.co")
+                        else "First Session"
+                    )
                 )["Id"]
     except StopIteration:
         session_id = "099e964f-c444-4c68-9668-00f734b95afd"

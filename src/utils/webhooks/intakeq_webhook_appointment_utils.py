@@ -1,6 +1,7 @@
 from datetime import datetime
 
 from src.db.database import with_database
+from src.models.db.airtable import AirtableTherapist
 from src.models.db.calendar_events import CalendarEvent
 from src.models.db.signup_form import ClientSignup, create_empty_client_form
 from src.utils.invite_sender import send_invite
@@ -11,6 +12,7 @@ from src.utils.event_utils import (
 from src.utils.google.google_calendar import (
     delete_gcalendar_event,
     update_gcalendar_event,
+    get_event_from_gcalendar,
 )
 
 
@@ -28,6 +30,33 @@ def _abbreviate_name(full_name, first_word_full=False):
     return " ".join(abbreviated)
 
 
+def _join_url(db, appointment: dict) -> (str | None, str | None):
+    info = appointment.get("TelehealthInfo")
+    if info:
+        return info.get("JoinUrl"), info.get("Invitation")
+
+    if appointment.get("ServiceName").__contains__("Google Meets"):
+        therapist = (
+            db.query(AirtableTherapist)
+            .filter_by(email=appointment.get("PractitionerEmail"))
+            .first()
+        )
+        if therapist:
+            event = get_event_from_gcalendar(
+                summary=appointment.get("ClientName"),
+                calendar_id=therapist.calendar_email or therapist.email,
+                date_start=appointment.get("StartDateIso"),
+                date_end=appointment.get("EndDateIso"),
+            )
+            if event.get("conferenceData") and event.get("conferenceData").get(
+                "entryPoints"
+            ):
+                return event.get("conferenceData").get("entryPoints")[0].get(
+                    "uri"
+                ), None
+    return None, None
+
+
 @with_database
 def process_appointment(db, data: dict):
     appointment = data["Appointment"]
@@ -43,6 +72,7 @@ def process_appointment(db, data: dict):
         db.add(client)
 
     if event == "AppointmentCreated":
+        join_url, invitation = _join_url(db, appointment)
         google_event = send_invite(
             therapist_name=_abbreviate_name(
                 appointment["PractitionerName"], first_word_full=True
@@ -51,7 +81,8 @@ def process_appointment(db, data: dict):
             client_name=_abbreviate_name(appointment["ClientName"]),
             client_email=appointment.get("ClientEmail"),
             start_time=datetime.fromtimestamp(appointment["StartDate"] / 1000),
-            telehealth_info=appointment.get("TelehealthInfo"),
+            join_url=join_url,
+            invitation=invitation,
         )
         db.add(
             CalendarEvent(
