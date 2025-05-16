@@ -27,6 +27,7 @@ def search_clients(query: ClientSignupQuery):
         data = SignupForm(**form.__dict__)
         data.therapist_specializes_in = form.therapist_specializes_in
         data.lived_experiences = form.lived_experiences
+        data.utm = form.utm
         return jsonify(data.dict()), 200
     return jsonify(Error(error="Form not found").dict()), 404
 

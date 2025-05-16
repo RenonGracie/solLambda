@@ -52,6 +52,8 @@ class ClientSignup(BaseModel):
 
     therapist_name: str | None
 
+    utm: dict | None
+
 
 class ClientSignupForms(BaseModel):
     forms: list[ClientSignup]

@@ -1,0 +1,16 @@
+<b>Join your session</b>
+{% if join_url %}
+<br><b>Use the link below to join your scheduled video session:</b>
+🔗<a href='{{ join_url }}'>Join Session</a>
+{% if invitation_code %}
+Invitation Code: {{ invitation_code }}
+{% endif %}
+{% endif %}
+<b>Manage Your Appointment or Contact Your Provider</b>
+Access your Client Portal to manage sessions or send messages
+🔗<a href='https://solhealth.intakeq.com/portal'>Client Portal</a>
+You can also reach your provider directly at <a href='mailto:{{ therapist_email }}'>{{ therapist_email }}</a>
+<br><b>Cancellation Policy</b>
+Please reschedule or cancel your session at least 24 hours in advance to avoid a no-show fee equal to your session cost.
+<br><b>Needs Help?</b>
+Email us at 📩<a href='mailto:contact@solhealth.co'>contact@solhealth.co</a>
