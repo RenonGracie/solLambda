@@ -71,6 +71,7 @@ def match_client_with_therapists(
                 matches.append(
                     {
                         "therapist": therapist,
+                        "matched_diagnoses_specialities": []
                     }
                 )
                 break
