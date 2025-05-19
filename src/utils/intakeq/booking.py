@@ -150,7 +150,7 @@ def book_appointment(body: CreateAppointment):
                     )
                 )["Id"]
     except StopIteration:
-        session_id = "099e964f-c444-4c68-9668-00f734b95afd"
+        session_id = "eeb06bd5-c63b-4615-bc98-e2e80268ec6f"
 
     result = create_appointment(
         {
