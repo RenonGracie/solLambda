@@ -35,7 +35,8 @@ def _join_url(db, appointment: dict) -> (str | None, str | None):
     if info:
         return info.get("JoinUrl"), info.get("Invitation")
 
-    if appointment.get("ServiceName").__contains__("Google Meets"):
+    service_name = appointment.get("ServiceName")
+    if service_name and service_name.__contains__("Google Meets"):
         therapist = (
             db.query(AirtableTherapist)
             .filter_by(email=appointment.get("PractitionerEmail"))
@@ -60,6 +61,8 @@ def _join_url(db, appointment: dict) -> (str | None, str | None):
 @with_database
 def process_appointment(db, data: dict):
     appointment = data["Appointment"]
+    if not appointment:
+        return 
 
     client = db.query(ClientSignup).filter_by(email=appointment["ClientEmail"]).first()
 
