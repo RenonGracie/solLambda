@@ -69,10 +69,7 @@ def match_client_with_therapists(
         if form.therapist_name:
             if therapist.intern_name == form.therapist_name:
                 matches.append(
-                    {
-                        "therapist": therapist,
-                        "matched_diagnoses_specialities": []
-                    }
+                    {"therapist": therapist, "matched_diagnoses_specialities": []}
                 )
                 break
         else:

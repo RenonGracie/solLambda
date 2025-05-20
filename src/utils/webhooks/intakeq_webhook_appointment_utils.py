@@ -1,5 +1,7 @@
 from datetime import datetime
 
+from sqlalchemy import or_
+
 from src.db.database import with_database
 from src.models.db.airtable import AirtableTherapist
 from src.models.db.calendar_events import CalendarEvent
@@ -30,16 +32,26 @@ def _abbreviate_name(full_name, first_word_full=False):
     return " ".join(abbreviated)
 
 
-def _join_url(db, appointment: dict) -> (str | None, str | None):
+def _join_url(db, appointment: dict) -> (str | None, str | None, str | None):
     info = appointment.get("TelehealthInfo")
     if info:
-        return info.get("JoinUrl"), info.get("Invitation")
+        return (
+            info.get("JoinUrl"),
+            info.get("Invitation"),
+            appointment.get("PractitionerEmail"),
+        )
 
     service_name = appointment.get("ServiceName")
     if service_name and service_name.__contains__("Google Meets"):
         therapist = (
             db.query(AirtableTherapist)
-            .filter_by(email=appointment.get("PractitionerEmail"))
+            .filter(
+                or_(
+                    AirtableTherapist.email == appointment.get("PractitionerEmail"),
+                    AirtableTherapist.intern_name
+                    == appointment.get("PractitionerName"),
+                )
+            )
             .first()
         )
         if therapist:
@@ -52,17 +64,19 @@ def _join_url(db, appointment: dict) -> (str | None, str | None):
             if event.get("conferenceData") and event.get("conferenceData").get(
                 "entryPoints"
             ):
-                return event.get("conferenceData").get("entryPoints")[0].get(
-                    "uri"
-                ), None
-    return None, None
+                return (
+                    event.get("conferenceData").get("entryPoints")[0].get("uri"),
+                    None,
+                    therapist.calendar_email or therapist.email,
+                )
+    return None, None, None
 
 
 @with_database
 def process_appointment(db, data: dict):
     appointment = data["Appointment"]
     if not appointment:
-        return 
+        return
 
     client = db.query(ClientSignup).filter_by(email=appointment["ClientEmail"]).first()
 
@@ -75,12 +89,12 @@ def process_appointment(db, data: dict):
         db.add(client)
 
     if event == "AppointmentCreated":
-        join_url, invitation = _join_url(db, appointment)
+        join_url, invitation, therapist_email = _join_url(db, appointment)
         google_event = send_invite(
             therapist_name=_abbreviate_name(
                 appointment["PractitionerName"], first_word_full=True
             ),
-            therapist_email=appointment.get("PractitionerEmail"),
+            therapist_email=therapist_email or appointment.get("PractitionerEmail"),
             client_name=_abbreviate_name(appointment["ClientName"]),
             client_email=appointment.get("ClientEmail"),
             start_time=datetime.fromtimestamp(appointment["StartDate"] / 1000),
