@@ -183,18 +183,14 @@ class AirtableTherapist(Base):
         diagnoses_specialities = fields.get("Diagnoses + Specialties") or []
         if diagnoses_specialities:
             diagnoses_specialities += (
-                json.dumps(
-                    fields.get(
-                        "Diagnoses: Please select the diagnoses you have experience and/or interest in working with"
-                    )
+                fields.get(
+                    "Diagnoses: Please select the diagnoses you have experience and/or interest in working with"
                 )
                 or []
             )
             diagnoses_specialities += (
-                json.dumps(
-                    fields.get(
-                        "Specialities: Please select any specialities you have experience and/or interest in working with. "
-                    )
+                fields.get(
+                    "Specialities: Please select any specialities you have experience and/or interest in working with. "
                 )
                 or []
             )
