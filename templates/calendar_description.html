@@ -1,10 +1,5 @@
-{% if join_url %}
-<br><b>Use the link below to join your scheduled video session:</b>
-🔗<a href='{{ join_url }}'>Join Session</a>
-{% if invitation_code %}
-Invitation Code: {{ invitation_code }}
-{% endif %}
-{% endif %}
+{% if join_url %}<b>Use the link below to join your scheduled video session:</b>
+🔗<a href='{{ join_url }}'>Join Session</a>{% if invitation_code %}<br>Invitation Code: {{ invitation_code }}{% endif %}<br>{% endif %}
 📧 <b>Contact Your Provider</b>
 For <b>scheduling, cancellations, or questions</b>, email your provider directly: <a href='mailto:{{ therapist_email }}'>{{ therapist_email }}</a>
 You can also log into your <b>Client Portal</b> to view upcoming appointments or send messages: <a href='https://solhealth.intakeq.com/portal'>Client Portal</a>
