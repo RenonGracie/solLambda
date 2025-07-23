@@ -25,7 +25,10 @@ logger = get_logger()
 
 
 def book_appointment(body: CreateAppointment):
-    result = get_booking_settings()
+    # Select appropriate IntakeQ credentials based on the client's payment type
+    payment_type = None  # default until we fetch the form
+
+    result = get_booking_settings(payment_type=payment_type)
     if not result:
         logger.error("Unable to get booking settings")
         return jsonify(Error(error="Unable to get booking settings").dict()), 400
@@ -65,6 +68,17 @@ def book_appointment(body: CreateAppointment):
         ), 410
 
     form = db.query(ClientSignup).filter_by(response_id=body.client_response_id).first()
+    if form:
+        payment_type = form.payment_type
+
+        # If insurance client, we need practitioner/services list from the insurance IntakeQ account
+        if payment_type == "insurance":
+            result = get_booking_settings(payment_type=payment_type)
+            if not result:
+                logger.error("Unable to get booking settings (insurance account)")
+                return jsonify(Error(error="Unable to get booking settings").dict()), 400
+            practitioners = result.json()["Practitioners"]
+            sessions = result.json()["Services"]
     if not form:
         logger.error(
             "Signup form not found",
@@ -76,9 +90,21 @@ def book_appointment(body: CreateAppointment):
             ).dict()
         ), 404
 
+    # Validate payment type against therapist's program
+    if therapist_model.program == "Limited Permit":
+        if form.payment_type != "insurance":
+            return jsonify(
+                Error(error="This therapist only accepts insurance clients").dict()
+            ), 400
+    else:
+        if form.payment_type == "insurance":
+            return jsonify(
+                Error(error="This therapist only accepts out-of-pocket clients").dict()
+            ), 400
+
     name = f"{form.first_name} {form.last_name}"
 
-    client = search_client(form.email, name)
+    client = search_client(form.email, name, payment_type=payment_type)
 
     if not client:
         logger.error(
@@ -102,7 +128,8 @@ def book_appointment(body: CreateAppointment):
             "practitionerEmail": therapist_email,
             "startDate": (slot_time - timedelta(days=1)).strftime(DATE_FORMAT),
             "endDate": (slot_time + timedelta(days=1)).strftime(DATE_FORMAT),
-        }
+        },
+        payment_type=payment_type,
     )
     error = check_therapist_availability(
         slot_time, result.json() if result.status_code == 200 else [], True
@@ -152,27 +179,29 @@ def book_appointment(body: CreateAppointment):
     except StopIteration:
         session_id = "eeb06bd5-c63b-4615-bc98-e2e80268ec6f"
 
-    result = create_appointment(
+    create_response = create_appointment(
         {
-            "PractitionerId": therapist["Id"],
             "ClientId": client_id,
+            "Date": slot_time.strftime(DATE_FORMAT),
+            "ServiceId": session_id,
+            "PractitionerId": therapist["Id"],
             "LocationId": "1",
             "UtcDateTime": int(slot_time.timestamp() * 1000),
-            "ServiceId": session_id,
             "SendClientEmailNotification": body.send_client_email_notification,
             "ReminderType": body.reminder_type if body.reminder_type else "Email",
             "Status": body.status,
-        }
+        },
+        payment_type=payment_type,
     )
-    json = result.json()
+    json = create_response.json()
 
-    if result.status_code == 200:
+    if create_response.status_code == 200:
         send_ga_event(
             client=form,
             name=CALL_SCHEDULED_EVENT,
             params={"appointment_id": json.get("Id")},
             event_type=USER_EVENT_TYPE,
         )
-    reassign_client(client, therapist["Id"])
+    reassign_client(client, therapist["Id"], payment_type=payment_type)
 
-    return jsonify(json), result.status_code
+    return jsonify(json), create_response.status_code

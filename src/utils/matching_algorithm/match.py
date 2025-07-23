@@ -35,23 +35,51 @@ def match_client_with_therapists(
     state = statename_to_abbr.get(form.state)
 
     if not form.therapist_name:
-        therapists: list[AirtableTherapist] = (
+        # Build base query common for all clients
+        base_query = (
             db.query(AirtableTherapist)
             .filter(
-                AirtableTherapist.accepting_new_clients,
+                AirtableTherapist.accepting_new_clients == True,
                 Column("states", Text).like(f'%"{state}"%') if state else True,
-                AirtableTherapist.gender.in_(
-                    ["Male"]
-                    if "Male" in form.therapist_identifies_as
-                    else ["Female"]
-                    if "Female" in form.therapist_identifies_as
-                    else ["Male", "Female"]
-                    if "No preference" in form.therapist_identifies_as
-                    else []
-                ),
             )
-            .all()
         )
+
+        # Apply gender preference filters
+        gender_filter = AirtableTherapist.gender.in_(
+            ["Male"]
+            if "Male" in form.therapist_identifies_as
+            else ["Female"]
+            if "Female" in form.therapist_identifies_as
+            else ["Male", "Female"]
+            if "No preference" in form.therapist_identifies_as
+            else []
+        )
+        base_query = base_query.filter(gender_filter)
+
+        # Apply payment type based filtering
+        if form.payment_type == "insurance":
+            # Insurance clients should only see Limited Permit therapists
+            base_query = base_query.filter(AirtableTherapist.program == "Limited Permit")
+        else:
+            # Out-of-pocket clients should not see Limited Permit therapists
+            base_query = base_query.filter(
+                AirtableTherapist.program != "Limited Permit",
+                AirtableTherapist.program.isnot(None),
+            )
+
+        therapists: list[AirtableTherapist] = base_query.all()
+
+        # Logging therapist count after filtering
+        if form.payment_type == "insurance":
+            logger.info(
+                f"Matching insurance client {response_id} with Limited Permit therapists",
+                extra={"therapist_count": len(therapists)},
+            )
+        else:
+            logger.info(
+                f"Matching out-of-pocket client {response_id} with non-Limited Permit therapists",
+                extra={"therapist_count": len(therapists)},
+            )
     else:
         therapist: AirtableTherapist | None = (
             db.query(AirtableTherapist)
@@ -98,6 +126,11 @@ def match_client_with_therapists(
             reverse=True,
         ),
     )
+    logger.info(
+    f"Filtered therapists for client {form.response_id} based on payment_type={form.payment_type}",
+    extra={"therapist_count": len(therapists)}
+)
+
 
     day_start, hours_count = current_working_hours()
     slots = week_slots(day_start, hours_count)

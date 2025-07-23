@@ -85,6 +85,7 @@ class ClientSignup(Base):
     therapist_name = Column("therapist_name", Text)
 
     discount = Column("discount", Integer, default=0)
+    payment_type = Column("payment_type", String(50), default="out_of_pocket")
 
     @property
     def race(self):
