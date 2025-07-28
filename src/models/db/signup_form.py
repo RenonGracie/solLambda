@@ -252,10 +252,13 @@ def create_from_typeform_data(response_id: str, data: TypeformData) -> ClientSig
             data.lived_experiences,
         )
     )
+    print("Available Typeform variables:", data.variables)
+    print("Available Typeform values:", data.values)
 
-    discount = _parse_promocode(data.get_var("promocode").lower())
+    promocode = data.get_var("promocode")
+    discount = _parse_promocode(promocode.lower()) if promocode else None
     if discount > 0:
-        client.promo_code = data.get_value(TypeformIds.PROMO_CODE)
+        client.promo_code = promocode
     client.discount = discount
     client.referred_by = data.get_value(TypeformIds.REFERRED_BY)
 
