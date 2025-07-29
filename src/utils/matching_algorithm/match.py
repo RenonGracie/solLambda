@@ -1,3 +1,4 @@
+# src/utils/matching_algorithm/match.py
 import re
 from datetime import datetime, timedelta
 
@@ -26,6 +27,10 @@ logger = get_logger()
 def match_client_with_therapists(
     db, response_id: str, limit: int, last_index: int
 ) -> (ClientSignup | None, list[dict]):
+    """
+    Matches a client with a list of suitable therapists based on their
+    preferences, payment type, and therapist availability.
+    """
     form: ClientSignup = (
         db.query(ClientSignup).filter_by(response_id=response_id).first()
     )
@@ -35,22 +40,57 @@ def match_client_with_therapists(
     state = statename_to_abbr.get(form.state)
 
     if not form.therapist_name:
-        therapists: list[AirtableTherapist] = (
+        # Build base query common for all clients
+        base_query = (
             db.query(AirtableTherapist)
             .filter(
-                AirtableTherapist.accepting_new_clients,
+                AirtableTherapist.accepting_new_clients == True,
                 Column("states", Text).like(f'%"{state}"%') if state else True,
-                AirtableTherapist.gender.in_(
-                    ["Male"]
-                    if "Male" in form.therapist_identifies_as
-                    else ["Female"]
-                    if "Female" in form.therapist_identifies_as
-                    else ["Male", "Female"]
-                    if "No preference" in form.therapist_identifies_as
-                    else []
-                ),
             )
-            .all()
+        )
+
+        # Apply gender preference filters
+        gender_filter = AirtableTherapist.gender.in_(
+            ["Male"]
+            if "Male" in form.therapist_identifies_as
+            else ["Female"]
+            if "Female" in form.therapist_identifies_as
+            else ["Male", "Female"]
+            if "No preference" in form.therapist_identifies_as
+            else []
+        )
+        base_query = base_query.filter(gender_filter)
+
+        # Apply payment type based filtering - with fallback for staging environments
+        try:
+            # Check if payment_type column exists and has a value
+            payment_type = getattr(form, 'payment_type', 'out_of_pocket')
+            if payment_type == "insurance":
+                base_query = base_query.filter(AirtableTherapist.program == "Limited Permit")
+            else:
+                base_query = base_query.filter(
+                    AirtableTherapist.program != "Limited Permit",
+                    AirtableTherapist.program.isnot(None),
+                )
+            logger.info(
+                f"Applied payment type filter for client {form.response_id}",
+                extra={"payment_type": payment_type}
+            )
+        except AttributeError:
+            # Fallback for environments where payment_type doesn't exist yet
+            logger.warning(
+                f"Payment type not available for client {form.response_id}, using default filtering"
+            )
+            base_query = base_query.filter(
+                AirtableTherapist.program != "Limited Permit",
+                AirtableTherapist.program.isnot(None),
+            )
+
+        therapists: list[AirtableTherapist] = base_query.all()
+
+        logger.info(
+            f"Filtered therapists for client {form.response_id}",
+            extra={"therapist_count": len(therapists)}
         )
     else:
         therapist: AirtableTherapist | None = (
@@ -58,10 +98,7 @@ def match_client_with_therapists(
             .filter(AirtableTherapist.intern_name == form.therapist_name)
             .first()
         )
-        if therapist:
-            therapists = [therapist]
-        else:
-            therapists = []
+        therapists = [therapist] if therapist else []
 
     matches = []
 
@@ -77,7 +114,7 @@ def match_client_with_therapists(
                 form, therapist
             )
             if score >= 0:
-                caseload = re.findall(r"\d+", therapist.max_caseload)
+                caseload = re.findall(r"\d+", therapist.max_caseload or "0")
                 if len(caseload) > 0:
                     max_caseload = int(caseload[-1])
                     if max_caseload > 0:
@@ -94,7 +131,7 @@ def match_client_with_therapists(
         form.age,
         sorted(
             matches,
-            key=lambda i: i.get("score"),
+            key=lambda i: i.get("score", 0),
             reverse=True,
         ),
     )
@@ -115,23 +152,27 @@ def match_client_with_therapists(
     for index in reversed(range(len(matches))):
         therapist = matches[index]["therapist"]
         if therapist:
-            busy_slots = busy.get(therapist.calendar_email or therapist.email).get(
-                "busy"
-            )
-            if busy_slots:
-                available_slots = provide_therapist_slots(slots, busy_slots)
-                if len(available_slots) >= 0 or form.therapist_name:
-                    matches[index]["available_slots"] = available_slots
+            therapist_email = therapist.calendar_email or therapist.email
+            busy_data = busy.get(therapist_email)
+            if busy_data:
+                busy_slots = busy_data.get("busy")
+                if busy_slots:
+                    available_slots = provide_therapist_slots(slots, busy_slots)
+                    if len(available_slots) > 0 or form.therapist_name:
+                        matches[index]["available_slots"] = available_slots
+                    else:
+                        del matches[index]
                 else:
-                    del matches[index]
+                     matches[index]["available_slots"] = slots # Assumes therapist is fully available
             else:
                 matches[index]["available_slots"] = slots
+
 
     matched_therapists = implement_age_factor(
         form.age,
         sorted(
             matches,
-            key=lambda i: (i.get("score"), len(i["available_slots"])),
+            key=lambda i: (i.get("score", 0), len(i.get("available_slots", []))),
             reverse=True,
         ),
     )
@@ -158,10 +199,10 @@ def _check_slot(slot: datetime, start: datetime, end: datetime) -> bool:
 def provide_therapist_slots(
     slots: list[datetime], busy_slots: list[dict]
 ) -> list[datetime]:
-    filtered = slots
-    for slot in busy_slots:
-        start = parser.parse(slot["start"])
-        end = parser.parse(slot["end"])
+    filtered = slots[:]
+    for busy_event in busy_slots:
+        start = parser.parse(busy_event["start"])
+        end = parser.parse(busy_event["end"])
         filtered = [dt for dt in filtered if not _check_slot(dt, start, end)]
     return filtered
 
@@ -175,6 +216,9 @@ def fetch_therapist_slots(email: str) -> (list | None, str | None):
     )
 
     slots = busy.get(email)
+    if not slots:
+        return week_slots(day_start, hours_count), "Could not retrieve calendar data."
+
     busy_slots = slots.get("busy")
     errors = slots.get("errors")
     if errors:

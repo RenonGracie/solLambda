@@ -1,3 +1,4 @@
+# src/routes/client_signup_forms.py
 from flask import jsonify
 from flask_openapi3 import APIBlueprint, Tag
 
@@ -28,6 +29,14 @@ def search_clients(query: ClientSignupQuery):
         data.therapist_specializes_in = form.therapist_specializes_in
         data.lived_experiences = form.lived_experiences
         data.utm = form.utm
+        
+        # Handle payment_type with fallback for staging environments
+        try:
+            data.payment_type = getattr(form, 'payment_type', 'out_of_pocket')
+        except AttributeError:
+            # Fallback for environments where payment_type doesn't exist yet
+            data.payment_type = 'out_of_pocket'
+            
         return jsonify(data.dict()), 200
     return jsonify(Error(error="Form not found").dict()), 404
 
@@ -42,5 +51,13 @@ def all_clients(query: Email):
         data = SignupForm(**form.__dict__)
         data.therapist_specializes_in = form.therapist_specializes_in
         data.lived_experiences = form.lived_experiences
+        
+        # Handle payment_type with fallback for staging environments
+        try:
+            data.payment_type = getattr(form, 'payment_type', 'out_of_pocket')
+        except AttributeError:
+            # Fallback for environments where payment_type doesn't exist yet
+            data.payment_type = 'out_of_pocket'
+            
         items.append(data.dict())
     return jsonify({"forms": items}), 200
