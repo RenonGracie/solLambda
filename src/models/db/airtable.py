@@ -2,8 +2,6 @@ import json
 
 from sqlalchemy import Boolean, Column, String, Text
 
-from sqlalchemy import Boolean, Column, String, Text
-
 from src.models.api.therapists import Therapist
 from src.models.db.base import Base
 
@@ -25,16 +23,9 @@ class AirtableTherapist(Base):
     caseload_tracker = Column("caseload_tracker", Text)
     has_children = Column("has_children", Boolean)
     cohort = Column("cohort", String(100))
-
     _diagnoses_specialities = Column("diagnoses_specialities", Text)
     _specialities = Column("diagnoses", Text)
     _diagnoses = Column("specialities", Text)
-
-
-    _diagnoses_specialities = Column("diagnoses_specialities", Text)
-    _specialities = Column("diagnoses", Text)
-    _diagnoses = Column("specialities", Text)
-
     _ethnicity = Column("ethnicity", Text)
     gender = Column("gender", String(100))
     identities_as = Column("identities_as", String(100))
@@ -93,16 +84,7 @@ class AirtableTherapist(Base):
         return json.loads(self._diagnoses or "[]") + json.loads(
             self._specialities or "[]"
         )
-    def diagnoses_specialities(self):
-        if self._diagnoses_specialities:
-            return json.loads(self._diagnoses_specialities or "[]")
-        return json.loads(self._diagnoses or "[]") + json.loads(
-            self._specialities or "[]"
-        )
 
-    @diagnoses_specialities.setter
-    def diagnoses_specialities(self, data):
-        self._diagnoses_specialities = json.dumps(data)
     @diagnoses_specialities.setter
     def diagnoses_specialities(self, data):
         self._diagnoses_specialities = json.dumps(data)
@@ -153,7 +135,6 @@ class AirtableTherapist(Base):
             "has_children": self.has_children,
             "cohort": self.cohort,
             "diagnoses_specialities": self.diagnoses_specialities,
-            "diagnoses_specialities": self.diagnoses_specialities,
             "ethnicity": self.ethnicity,
             "gender": self.gender,
             "identities_as": self.identities_as,
@@ -194,26 +175,22 @@ class AirtableTherapist(Base):
             if field.lower() == "yes":
                 return True
             if field.lower() == "no":
-            if field.lower() == "no":
                 return False
             return None
-            return None
 
+        # Prefer the combined 'Diagnoses + Specialties' field. If it's empty,
+        # combine the two separate diagnoses and specialities fields.
         diagnoses_specialities = fields.get("Diagnoses + Specialties") or []
-        if diagnoses_specialities:
+        if not diagnoses_specialities:
             diagnoses_specialities += (
-                json.dumps(
-                    fields.get(
-                        "Diagnoses: Please select the diagnoses you have experience and/or interest in working with"
-                    )
+                fields.get(
+                    "Diagnoses: Please select the diagnoses you have experience and/or interest in working with"
                 )
                 or []
             )
             diagnoses_specialities += (
-                json.dumps(
-                    fields.get(
-                        "Specialities: Please select any specialities you have experience and/or interest in working with. "
-                    )
+                fields.get(
+                    "Specialities: Please select any specialities you have experience and/or interest in working with. "
                 )
                 or []
             )
@@ -239,6 +216,7 @@ class AirtableTherapist(Base):
             fields.get("Children: Do you have children?")
         )
         therapist.cohort = fields.get("Cohort")
+        therapist._diagnoses_specialities = json.dumps(diagnoses_specialities)
         therapist._ethnicity = json.dumps(fields.get("Ethnicity"))
         therapist.gender = fields.get("Gender")
         therapist.identities_as = fields.get("Identities as (Gender)")
@@ -280,8 +258,6 @@ class AirtableTherapist(Base):
                 "Social Media: Have you ever been negatively affected by social media?"
             )
         )
-        therapist._diagnoses_specialities = diagnoses_specialities
-        therapist._diagnoses_specialities = diagnoses_specialities
         therapist._states = json.dumps(fields.get("States"))
         therapist._therapeutic_orientation = json.dumps(
             fields.get(
