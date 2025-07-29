@@ -1,10 +1,11 @@
 from src.utils.logger import get_logger
 from src.utils.request_utils import save_update_client, search_clients
 
+
 logger = get_logger()
 
 
-def search_client(email: str, name: str) -> dict | None:
+def search_client(email: str, name: str, *, payment_type: str | None = None) -> dict | None:
     client = None
 
     def find_client(clients) -> dict | None:
@@ -22,7 +23,8 @@ def search_client(email: str, name: str) -> dict | None:
             return None
 
     logger.debug("Searching clients", extra={"email": email})
-    result = search_clients({"search": email, "includeProfile": True})
+    kwargs = {"payment_type": payment_type} if payment_type else {}
+    result = search_clients({"search": email, "includeProfile": True}, **kwargs)
     if result.status_code == 200:
         client = find_client(result.json())
     else:
@@ -34,7 +36,8 @@ def search_client(email: str, name: str) -> dict | None:
     logger.debug("Client search result", extra={"found": client is not None})
     if not client:
         logger.debug("Searching clients", extra={"name": name})
-        result = search_clients({"search": name, "includeProfile": True})
+        kwargs = {"payment_type": payment_type} if payment_type else {}
+        result = search_clients({"search": name, "includeProfile": True}, **kwargs)
         if result.status_code != 200:
             logger.debug(
                 "Search result",
@@ -47,7 +50,7 @@ def search_client(email: str, name: str) -> dict | None:
     return client
 
 
-def reassign_client(client: dict, therapist_id: str):
+def reassign_client(client: dict, therapist_id: str, *, payment_type: str | None = None):
     """
     Transfer client to another therapist.
     If client already has a therapist, use transfer_client_data API.
@@ -57,6 +60,7 @@ def reassign_client(client: dict, therapist_id: str):
         if client.get("PractitionerId") == therapist_id:
             return
         client["PractitionerId"] = therapist_id
-        save_update_client(client)
+        kwargs = {"payment_type": payment_type} if payment_type else {}
+        save_update_client(client, **kwargs)
     except Exception as e:
         logger.error("Client search error", extra={"error": str(e)})

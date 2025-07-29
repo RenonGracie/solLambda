@@ -26,3 +26,4 @@ node_modules/
 events.json
 src/utils/typeform/typeform_ids.py
 src/utils/google/google_credentials.json
+/venv

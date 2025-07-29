@@ -112,29 +112,54 @@ def get_busy_events_from_gcalendar(
     if isinstance(time_max, datetime):
         time_max = time_max.strftime(DATE_FORMAT)
 
-    service = _get_service()
+    def _fetch_busy_events(ids: list[str], use_solhealth: bool = False) -> dict | None:
+        service = _get_service(settings.CONTACT_EMAIL if use_solhealth else None)
+        try:
+            # Prepare request body for freebusy query
+            body = {
+                "timeMin": f"{time_min}T00:00:00+0000",
+                "timeMax": f"{time_max}T23:59:59+0000",
+                "items": [{"id": calendar_id} for calendar_id in ids],
+            }
+            # Execute freebusy query
+            result = service.freebusy().query(body=body).execute()
+            return result.get("calendars", {})
+        except HttpError as e:
+            logger.error(
+                "Freebusy query error",
+                extra={"calendar_ids": calendar_ids, "error": str(e)},
+            )
+            if raise_error:
+                raise e
+            return None
+        finally:
+            service.close()
+
+    solhealth_ids = [
+        calendar_id
+        for calendar_id in calendar_ids
+        if calendar_id.endswith("@solhealth.co")
+    ]
+    others = [
+        calendar_id
+        for calendar_id in calendar_ids
+        if not calendar_id.endswith("@solhealth.co")
+    ]
+    data = {}
     try:
-        # Prepare request body for freebusy query
-        body = {
-            "timeMin": f"{time_min}T00:00:00+0000",
-            "timeMax": f"{time_max}T23:59:59+0000",
-            "items": [{"id": calendar_id} for calendar_id in calendar_ids],
-        }
-
-        # Execute freebusy query
-        result = service.freebusy().query(body=body).execute()
-        return result.get("calendars", {})
-
-    except HttpError as e:
+        if solhealth_ids:
+            data.update(_fetch_busy_events(solhealth_ids, use_solhealth=True))
+        if others:
+            data.update(_fetch_busy_events(others))
+        return data
+    except HttpError as error:
         logger.error(
             "Freebusy query error",
-            extra={"calendar_ids": calendar_ids, "error": str(e)},
+            extra={"calendar_ids": calendar_ids, "error": str(error)},
         )
         if raise_error:
-            raise e
+            raise error
         return None
-    finally:
-        service.close()
 
 
 def create_gcalendar_event(

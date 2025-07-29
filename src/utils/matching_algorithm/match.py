@@ -61,26 +61,12 @@ def match_client_with_therapists(
         )
         base_query = base_query.filter(gender_filter)
 
-        # Apply payment type based filtering - with fallback for staging environments
-        try:
-            # Check if payment_type column exists and has a value
-            payment_type = getattr(form, 'payment_type', 'out_of_pocket')
-            if payment_type == "insurance":
-                base_query = base_query.filter(AirtableTherapist.program == "Limited Permit")
-            else:
-                base_query = base_query.filter(
-                    AirtableTherapist.program != "Limited Permit",
-                    AirtableTherapist.program.isnot(None),
-                )
-            logger.info(
-                f"Applied payment type filter for client {form.response_id}",
-                extra={"payment_type": payment_type}
-            )
-        except AttributeError:
-            # Fallback for environments where payment_type doesn't exist yet
-            logger.warning(
-                f"Payment type not available for client {form.response_id}, using default filtering"
-            )
+        # Apply payment type based filtering
+        if hasattr(form, 'payment_type') and form.payment_type == "insurance":
+            # Insurance clients can only see Limited Permit therapists
+            base_query = base_query.filter(AirtableTherapist.program == "Limited Permit")
+        else:
+            # Out-of-pocket clients cannot see Limited Permit therapists
             base_query = base_query.filter(
                 AirtableTherapist.program != "Limited Permit",
                 AirtableTherapist.program.isnot(None),
@@ -90,7 +76,10 @@ def match_client_with_therapists(
 
         logger.info(
             f"Filtered therapists for client {form.response_id}",
-            extra={"therapist_count": len(therapists)}
+            extra={
+                "therapist_count": len(therapists),
+                "payment_type": getattr(form, 'payment_type', 'out_of_pocket')
+            }
         )
     else:
         therapist: AirtableTherapist | None = (
@@ -163,10 +152,9 @@ def match_client_with_therapists(
                     else:
                         del matches[index]
                 else:
-                     matches[index]["available_slots"] = slots # Assumes therapist is fully available
+                    matches[index]["available_slots"] = slots
             else:
                 matches[index]["available_slots"] = slots
-
 
     matched_therapists = implement_age_factor(
         form.age,

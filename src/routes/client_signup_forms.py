@@ -1,9 +1,12 @@
 # src/routes/client_signup_forms.py
 from flask import jsonify
 from flask_openapi3 import APIBlueprint, Tag
+from flask_openapi3 import APIBlueprint, Tag
 
 from src.db.database import db
 from src.models.api.base import Email
+from src.models.api.client_signup import ClientSignup as SignupForm
+from src.models.api.client_signup import ClientSignupQuery
 from src.models.api.client_signup import ClientSignup as SignupForm
 from src.models.api.client_signup import ClientSignupQuery
 from src.models.api.error import Error
@@ -22,6 +25,7 @@ client_signup_api = APIBlueprint(
 @client_signup_api.get(
     "", responses={200: SignupForm, 404: Error}, summary="Search clients"
 )
+
 def search_clients(query: ClientSignupQuery):
     form = db.query(ClientSignup).filter_by(response_id=query.response_id).first()
     if form:

@@ -40,8 +40,12 @@ def get_db_url() -> (URL, dict):
     rds_username = settings.RDS_USER
     database = settings.RDS_DATABASE
 
+    # Fallback to an in-memory SQLite database when RDS settings are not provided (e.g., during unit tests)
     if not rds_host:
-        raise ValueError("RDS_HOST environment variable is not set")
+        logger.warning(
+            "RDS_HOST is not set – falling back to an in-memory SQLite database."
+        )
+        return URL.create("sqlite+pysqlite", database=":memory:"), {}
 
     if settings.IS_AWS is True:
         region = "us-east-2"

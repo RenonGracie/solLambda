@@ -13,6 +13,8 @@ class Settings(Singleton):
         self.CONTACT_EMAIL = os.getenv("CONTACT_EMAIL", "contact@solhealth.co")
 
         self.INTAKEQ_AUTH_KEY = os.getenv("INTAKEQ_AUTH_KEY")
+        # Secondary key for the separate IntakeQ account (used for insurance clients)
+        self.INTAKEQ_AUTH_KEY_INSURANCE = os.getenv("INTAKEQ_AUTH_KEY_INSURANCE")
         self.INTAKEQ_BASE_URL = "https://intakeq.com/api/v1"
         self.INTAKEQ_SIGNUP_FORM = os.getenv("INTAKEQ_SIGNUP_FORM")
 
