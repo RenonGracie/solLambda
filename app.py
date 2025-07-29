@@ -87,7 +87,15 @@ def typeform_webhook():
     process_typeform_data(request.get_json())
     return jsonify({"success": True}), 200
 
-
+@app.get("/run-migration-temp", summary="Temporary migration endpoint")
+def run_migration_temp():
+    from migrate import run_migration
+    try:
+        run_migration()
+        return jsonify({"success": True, "message": "Migration completed"}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    
 @app.post(
     "/intakeq_hook",
     tags=[Tag(name="Webhook")],
