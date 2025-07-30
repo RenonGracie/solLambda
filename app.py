@@ -19,7 +19,7 @@ from src.utils.settings import settings
 from src.utils.webhooks.intakeq_webhook_appointment_utils import process_appointment
 from src.utils.webhooks.intakeq_webhook_invoices_utils import process_invoice
 from src.utils.webhooks.typeform_webhook_utils import process_typeform_data
-from src.utils.db import db  # Make sure this import exists
+from src.db.database import db 
 
 
 # Initialize Sentry
