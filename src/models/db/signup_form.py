@@ -85,8 +85,6 @@ class ClientSignup(Base):
     therapist_name = Column("therapist_name", Text)
 
     discount = Column("discount", Integer, default=0)
-    payment_type = Column("payment_type", String(50), default="out_of_pocket")
-
     payment_type = Column("payment_type", String(50), default="out_of_pocket", nullable=False)
 
     @property
@@ -255,7 +253,7 @@ def create_from_typeform_data(response_id: str, data: TypeformData) -> ClientSig
         )
     )
     print("Available Typeform variables:", data.variables)
-    print("Available Typeform values:", data.values)
+    print("Available Typeform values:", data._data)
 
     promocode = data.get_var("promocode")
     discount = _parse_promocode(promocode.lower()) if promocode else None
