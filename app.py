@@ -77,10 +77,41 @@ def is_origin_allowed(origin):
     return False
 
 
-# Add request ID middleware
+# ---------------------------------------------------------------------------
+# CORS pre-flight handler – must come before other before_request middleware
+# ---------------------------------------------------------------------------
+
+
 @app.before_request
-def before_request():
-    # Only add request ID if this isn't a preflight request
+def handle_cors_preflight():
+    if request.method == "OPTIONS":
+        origin = request.headers.get("Origin")
+
+        allowed_origins = {
+            "https://stg.solhealth.co",
+            "https://solhealth.co",
+            "https://www.solhealth.co",
+            "https://api.stg.solhealth.co",
+            "https://solpaymentflow-production.up.railway.app",
+        }
+
+        if origin and (origin in allowed_origins or origin.endswith("solhealth.co")):
+            response = jsonify({"status": "OK"})
+            response.headers["Access-Control-Allow-Origin"] = origin
+            response.headers["Access-Control-Allow-Methods"] = "GET,POST,PUT,DELETE,OPTIONS"
+            response.headers["Access-Control-Allow-Headers"] = "Content-Type,Authorization,X-Requested-With"
+            response.headers["Access-Control-Allow-Credentials"] = "true"
+            response.headers["Access-Control-Max-Age"] = "86400"
+            return response
+
+# ---------------------------------------------------------------------------
+# Add request ID middleware (renamed)
+# ---------------------------------------------------------------------------
+
+
+@app.before_request
+def add_request_id_middleware():
+    # Skip adding request ID for OPTIONS requests
     if request.method != "OPTIONS":
         add_request_id()
 
@@ -93,37 +124,40 @@ app.register_blueprint(emails_api)
 
 
 # ---------------------------------------------------------------------------
-# Updated CORS middleware
+# After-request CORS headers
 # ---------------------------------------------------------------------------
 
 
-# Handle simple CORS responses
 @app.after_request
 def set_cors_headers(response):
     origin = request.headers.get("Origin")
 
-    if is_origin_allowed(origin):
-        response.headers["Access-Control-Allow-Headers"] = "Content-Type,Authorization"
+    allowed_origins = {
+        "https://stg.solhealth.co",
+        "https://solhealth.co",
+        "https://www.solhealth.co",
+        "https://api.stg.solhealth.co",
+        "https://solpaymentflow-production.up.railway.app",
+    }
+
+    # Allow if origin is explicitly allowed or ends with solhealth.co
+    if origin and (origin in allowed_origins or origin.endswith("solhealth.co")):
+        response.headers["Access-Control-Allow-Headers"] = "Content-Type,Authorization,X-Requested-With"
         response.headers["Access-Control-Allow-Origin"] = origin
         response.headers["Access-Control-Allow-Methods"] = "GET,POST,PUT,DELETE,OPTIONS"
         response.headers["Access-Control-Allow-Credentials"] = "true"
+        response.headers["Access-Control-Max-Age"] = "86400"
 
     return response
 
+# ---------------------------------------------------------------------------
+# Deprecated: old pre-flight handler (kept to avoid reference errors, no-op)
+# ---------------------------------------------------------------------------
 
-# Pre-flight OPTIONS handler
-@app.before_request
-def handle_preflight():
-    if request.method == "OPTIONS":
-        origin = request.headers.get("Origin")
 
-        if is_origin_allowed(origin):
-            response = make_response()
-            response.headers["Access-Control-Allow-Origin"] = origin
-            response.headers["Access-Control-Allow-Methods"] = "GET,POST,PUT,DELETE,OPTIONS"
-            response.headers["Access-Control-Allow-Headers"] = "Content-Type,Authorization"
-            response.headers["Access-Control-Allow-Credentials"] = "true"
-            return response
+def _deprecated_handle_preflight():
+    """This function has been superseded by handle_cors_preflight."""
+    pass
 
 
 @app.post(
