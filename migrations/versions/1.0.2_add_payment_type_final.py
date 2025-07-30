@@ -33,24 +33,64 @@ def upgrade() -> None:
     ).fetchall()
     
     if result:
-        # Column exists, just ensure all NULL values are set to default
-        op.execute(
-            text("UPDATE signup SET payment_type = 'out_of_pocket' WHERE payment_type IS NULL")
-        )
-    else:
-        # Column doesn't exist, add it
-        op.add_column(
-            'signup', 
-            sa.Column('payment_type', sa.String(50), nullable=True, server_default='out_of_pocket')
+        # Column exists, update any 'out_of_pocket' values to 'cash_pay'
+        conn.execute(
+            text("UPDATE signup SET payment_type = 'cash_pay' WHERE payment_type = 'out_of_pocket'")
         )
         
-        # Update any NULL values to 'out_of_pocket'
-        op.execute(
-            text("UPDATE signup SET payment_type = 'out_of_pocket' WHERE payment_type IS NULL")
+        # Update any NULL values to 'cash_pay'
+        conn.execute(
+            text("UPDATE signup SET payment_type = 'cash_pay' WHERE payment_type IS NULL")
+        )
+        
+        # Update payment_type based on discount values
+        conn.execute(
+            text("""
+                UPDATE signup 
+                SET payment_type = CASE
+                    WHEN discount = 100 THEN 'free'
+                    WHEN discount = 50 THEN 'promo_code'
+                    WHEN payment_type IN ('insurance', 'cash_pay', 'free', 'promo_code') THEN payment_type
+                    ELSE 'cash_pay'
+                END
+            """)
+        )
+    else:
+        # Column doesn't exist, add it with proper default
+        op.add_column(
+            'signup', 
+            sa.Column('payment_type', sa.String(50), nullable=True, server_default='cash_pay')
+        )
+        
+        # Set payment_type based on discount values for existing records
+        conn.execute(
+            text("""
+                UPDATE signup 
+                SET payment_type = CASE
+                    WHEN discount = 100 THEN 'free'
+                    WHEN discount = 50 THEN 'promo_code'
+                    ELSE 'cash_pay'
+                END
+                WHERE payment_type IS NULL
+            """)
         )
 
 
 def downgrade() -> None:
-    # Don't drop the column on downgrade since 1.0.1 already handles the column
-    # Just revert any data changes if needed
-    pass
+    conn = op.get_bind()
+    
+    # Check if column exists
+    result = conn.execute(
+        text("""
+            SELECT column_name 
+            FROM information_schema.columns 
+            WHERE table_name = 'signup' 
+            AND column_name = 'payment_type'
+        """)
+    ).fetchall()
+    
+    if result:
+        # Revert 'cash_pay' back to 'out_of_pocket' for compatibility
+        conn.execute(
+            text("UPDATE signup SET payment_type = 'out_of_pocket' WHERE payment_type = 'cash_pay'")
+        )

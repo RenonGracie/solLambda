@@ -85,7 +85,9 @@ class ClientSignup(Base):
     therapist_name = Column("therapist_name", Text)
 
     discount = Column("discount", Integer, default=0)
-    payment_type = Column("payment_type", String(50), default="out_of_pocket", nullable=False)
+    
+    # Add payment_type field
+    payment_type = Column("payment_type", String(50), default="cash_pay")
 
     @property
     def race(self):
@@ -252,19 +254,32 @@ def create_from_typeform_data(response_id: str, data: TypeformData) -> ClientSig
             data.lived_experiences,
         )
     )
-    print("Available Typeform variables:", data.variables)
-    print("Available Typeform values:", data._data)
 
-    promocode = data.get_var("promocode")
-    discount = _parse_promocode(promocode.lower()) if promocode else None
+    discount = _parse_promocode(data.get_var("promocode").lower())
     if discount > 0:
-        client.promo_code = promocode
+        client.promo_code = data.get_value(TypeformIds.PROMO_CODE)
     client.discount = discount
     client.referred_by = data.get_value(TypeformIds.REFERRED_BY)
 
     client.how_did_you_hear = data.how_did_you_heard
 
     client.therapist_name = data.get_value(TypeformIds.THERAPIST_YOU_WANT)
+    
+    # Get client_type which represents the payment type
+    client_type = data.get_value(TypeformIds.CLIENT_TYPE)
+    
+    if client_type:
+        # Use the client_type as payment_type (insurance or cash_pay)
+        client.payment_type = client_type
+    else:
+        # Fallback: determine payment_type based on discount
+        if discount == 100:
+            client.payment_type = "free"
+        elif discount == 50:
+            client.payment_type = "promo_code"
+        else:
+            client.payment_type = "cash_pay"
+    
     return client
 
 

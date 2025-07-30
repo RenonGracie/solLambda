@@ -28,8 +28,8 @@ def process_typeform_data(db, response_json: dict):
     form_response = response_json["form_response"]
     hidden = form_response.get("hidden", {})
 
-    # Extract payment type from Typeform hidden fields, defaulting to out_of_pocket
-    payment_type = hidden.get("paymentType", "out_of_pocket")
+    # Extract payment_type from hidden field (if present)
+    payment_type = hidden.get("paymentType")  # May be None, 'insurance', 'cash_pay', or legacy 'out_of_pocket'
 
     # Extract client ID for insurance clients (created during eligibility check)
     existing_client_id = hidden.get("clientId", None)
@@ -52,12 +52,41 @@ def process_typeform_data(db, response_json: dict):
 
     form = create_from_typeform_data(response_id, data)
     
+    # Determine final payment_type gracefully handling legacy fields and discounts
+    client_type = hidden.get("client_type") or data.get_var("client_type")
+    if client_type:
+        payment_type = client_type
+        logger.info(
+            f"Overriding payment_type with client_type: {client_type} for client {response_id}"
+        )
+
+    # Normalize legacy value 'out_of_pocket' to the new 'cash_pay'
+    if payment_type == "out_of_pocket":
+        logger.info(
+            f"Normalizing legacy payment_type 'out_of_pocket' to 'cash_pay' for client {response_id}"
+        )
+        payment_type = "cash_pay"
+
+    # Fallback logic if payment_type is still undefined
+    if not payment_type:
+        if form.discount == 100:
+            payment_type = "free"
+        elif form.discount == 50:
+            payment_type = "promo_code"
+        else:
+            payment_type = "cash_pay"
+        logger.info(
+            f"Fallback payment_type resolved to: {payment_type} for client {response_id}"
+        )
+
     # Save payment type on the form - with fallback for staging environments
     try:
         form.payment_type = payment_type
         logger.info(f"Set payment type: {payment_type} for client {response_id}")
     except AttributeError:
-        logger.warning(f"payment_type attribute not available in this environment for client {response_id}")
+        logger.warning(
+            f"payment_type attribute not available in this environment for client {response_id}"
+        )
     
     if form.state.__eq__("I don't see my state"):
         db.add(form)
@@ -80,7 +109,12 @@ def process_typeform_data(db, response_json: dict):
     # Store UTM params against the user/client
     form.setup_utm(user_id, hidden)
 
-    logger.debug("intakeQ response", extra={"response": client_json if payment_type == "out_of_pocket" else {"existing_client": existing_client_id}})
+    logger.debug(
+        "intakeQ response",
+        extra={
+            "response": client_json if payment_type != "insurance" else {"existing_client": existing_client_id}
+        },
+    )
 
     # Send data to IntakeQ bot for BOTH payment types
     user_data = create_new_form(form)

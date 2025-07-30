@@ -46,6 +46,8 @@ def get_db_url_for_alembic():
         # It relies on the environment having AWS CLI configured or `boto3` for token generation.
         # For simplicity with Alembic, we'll try to connect directly if credentials are known,
         # or assume local tunneling is in place if connecting to a remote RDS from local machine.
+        # If you're running Alembic locally against a remote RDS, you likely need an SSH tunnel.
+        # If running on Lambda, the IAM role grants access.
         db_host = os.getenv("RDS_HOST")
         db_port = os.getenv("RDS_PORT", "5432")
         db_database = os.getenv("RDS_DATABASE")
@@ -99,8 +101,8 @@ def run_migrations_offline() -> None:
         dialect_opts={"paramstyle": "named"},
     )
 
-    with context.begin_transaction() as connection:
-        context.execute(connection)
+    with context.begin_transaction():
+        context.run_migrations()
 
 
 def run_migrations_online() -> None:
@@ -120,7 +122,7 @@ def run_migrations_online() -> None:
             connection=connection, target_metadata=target_metadata
         )
 
-        with context.begin_of_resource():
+        with context.begin_transaction():  # Fixed: was begin_of_resource()
             context.run_migrations()
 
 if context.is_offline_mode():
