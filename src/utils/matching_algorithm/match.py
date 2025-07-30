@@ -1,4 +1,3 @@
-# src/utils/matching_algorithm/match.py
 import re
 from datetime import datetime, timedelta
 
@@ -26,7 +25,7 @@ logger = get_logger()
 @with_database
 def match_client_with_therapists(
     db, response_id: str, limit: int, last_index: int
-) -> (ClientSignup | None, list[dict]):
+) -> tuple[ClientShort | None, list[dict]]:
     """
     Matches a client with a list of suitable therapists based on their
     preferences, payment type, and therapist availability.
@@ -62,11 +61,9 @@ def match_client_with_therapists(
         base_query = base_query.filter(gender_filter)
 
         # Apply payment type based filtering
-        if hasattr(form, 'payment_type') and form.payment_type == "insurance":
-            # Insurance clients can only see Limited Permit therapists
+        if form.payment_type == "insurance":
             base_query = base_query.filter(AirtableTherapist.program == "Limited Permit")
         else:
-            # Out-of-pocket clients cannot see Limited Permit therapists
             base_query = base_query.filter(
                 AirtableTherapist.program != "Limited Permit",
                 AirtableTherapist.program.isnot(None),
@@ -75,11 +72,8 @@ def match_client_with_therapists(
         therapists: list[AirtableTherapist] = base_query.all()
 
         logger.info(
-            f"Filtered therapists for client {form.response_id}",
-            extra={
-                "therapist_count": len(therapists),
-                "payment_type": getattr(form, 'payment_type', 'out_of_pocket')
-            }
+            f"Filtered therapists for client {form.response_id} based on payment_type={form.payment_type}",
+            extra={"therapist_count": len(therapists)}
         )
     else:
         therapist: AirtableTherapist | None = (
@@ -142,7 +136,7 @@ def match_client_with_therapists(
         therapist = matches[index]["therapist"]
         if therapist:
             therapist_email = therapist.calendar_email or therapist.email
-            busy_data = busy.get(therapist_email)
+            busy_data = busy.get(therapist_email) if busy else None
             if busy_data:
                 busy_slots = busy_data.get("busy")
                 if busy_slots:
@@ -152,9 +146,10 @@ def match_client_with_therapists(
                     else:
                         del matches[index]
                 else:
-                    matches[index]["available_slots"] = slots
+                     matches[index]["available_slots"] = slots # Assumes therapist is fully available
             else:
                 matches[index]["available_slots"] = slots
+
 
     matched_therapists = implement_age_factor(
         form.age,
@@ -165,7 +160,15 @@ def match_client_with_therapists(
         ),
     )
 
-    return ClientShort(**form.__dict__).dict(), list(
+    client_short = ClientShort(**{
+        'id': form.id,
+        'first_name': form.first_name,
+        'last_name': form.last_name,
+        'email': form.email,
+        'response_id': form.response_id
+    })
+
+    return client_short, list(
         map(
             lambda item: provide_therapist_data(item),
             matched_therapists[last_index : limit + last_index],
@@ -195,7 +198,7 @@ def provide_therapist_slots(
     return filtered
 
 
-def fetch_therapist_slots(email: str) -> (list | None, str | None):
+def fetch_therapist_slots(email: str) -> tuple[list | None, str | None]:
     day_start, hours_count = current_working_hours()
     busy = get_busy_events_from_gcalendar(
         [email],
@@ -203,7 +206,7 @@ def fetch_therapist_slots(email: str) -> (list | None, str | None):
         (day_start + timedelta(weeks=2)).strftime(DATE_FORMAT),
     )
 
-    slots = busy.get(email)
+    slots = busy.get(email) if busy else None
     if not slots:
         return week_slots(day_start, hours_count), "Could not retrieve calendar data."
 

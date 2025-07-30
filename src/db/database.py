@@ -103,24 +103,7 @@ class _Database(Singleton):
 
         session_maker = sessionmaker(bind=self._engine)
         self.session = session_maker()
-    
-    def execute(self, query, params=None):
-        """Execute raw SQL queries"""
-        return self.session.execute(text(query), params or {})
-    
-    def commit(self):
-        """Commit the current transaction"""
-        self.session.commit()
-    
-    def rollback(self):
-        """Rollback the current transaction"""
-        self.session.rollback()
 
 
 _database = _Database()
 db = _database.session
-
-# Add convenience methods to the session
-db.execute = _database.execute
-db.commit = _database.commit
-db.rollback = _database.rollback
