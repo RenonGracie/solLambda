@@ -2,7 +2,7 @@ import json
 from datetime import datetime
 
 import sentry_sdk
-from flask import jsonify, request
+from flask import jsonify, request, make_response
 from flask_openapi3 import Info, OpenAPI, Tag
 from sentry_sdk.integrations.flask import FlaskIntegration
 
@@ -55,10 +55,34 @@ app.config["JSONIFY_DATETIME_FORMAT"] = "iso"
 logger = get_logger()
 
 
+# -------------------------------------------------
+# CORS helpers
+# -------------------------------------------------
+# NOTE: Placed close to the top so it can be reused in any route definitions below.
+
+
+def is_origin_allowed(origin):
+    """Check if the origin is allowed based on configuration."""
+    if not origin:
+        return False
+
+    # Explicitly allowed origins from the environment
+    if origin in settings.ALLOWED_CORS_ORIGINS:
+        return True
+
+    # Fallback: allow any sub-domain of solhealth.co
+    if origin.endswith("solhealth.co"):
+        return True
+
+    return False
+
+
 # Add request ID middleware
 @app.before_request
 def before_request():
-    add_request_id()
+    # Only add request ID if this isn't a preflight request
+    if request.method != "OPTIONS":
+        add_request_id()
 
 
 app.register_api(client_signup_api)
@@ -68,13 +92,38 @@ app.register_api(intakeq_forms_api)
 app.register_blueprint(emails_api)
 
 
+# ---------------------------------------------------------------------------
+# Updated CORS middleware
+# ---------------------------------------------------------------------------
+
+
+# Handle simple CORS responses
 @app.after_request
 def set_cors_headers(response):
     origin = request.headers.get("Origin")
-    if origin and origin.endswith("solhealth.co"):
+
+    if is_origin_allowed(origin):
         response.headers["Access-Control-Allow-Headers"] = "Content-Type,Authorization"
         response.headers["Access-Control-Allow-Origin"] = origin
+        response.headers["Access-Control-Allow-Methods"] = "GET,POST,PUT,DELETE,OPTIONS"
+        response.headers["Access-Control-Allow-Credentials"] = "true"
+
     return response
+
+
+# Pre-flight OPTIONS handler
+@app.before_request
+def handle_preflight():
+    if request.method == "OPTIONS":
+        origin = request.headers.get("Origin")
+
+        if is_origin_allowed(origin):
+            response = make_response()
+            response.headers["Access-Control-Allow-Origin"] = origin
+            response.headers["Access-Control-Allow-Methods"] = "GET,POST,PUT,DELETE,OPTIONS"
+            response.headers["Access-Control-Allow-Headers"] = "Content-Type,Authorization"
+            response.headers["Access-Control-Allow-Credentials"] = "true"
+            return response
 
 
 @app.post(
