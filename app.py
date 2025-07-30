@@ -19,6 +19,8 @@ from src.utils.settings import settings
 from src.utils.webhooks.intakeq_webhook_appointment_utils import process_appointment
 from src.utils.webhooks.intakeq_webhook_invoices_utils import process_invoice
 from src.utils.webhooks.typeform_webhook_utils import process_typeform_data
+from src.utils.db import db  # Make sure this import exists
+
 
 # Initialize Sentry
 if settings.ENV != "dev":
@@ -190,6 +192,45 @@ def intakeq_hook():
     process_appointment(data)
     return "", 204
 
+@app.post(
+    "/admin/add-payment-type",
+    tags=[Tag(name="Admin")],
+    responses={200: SuccessResponse},
+    summary="Add payment_type column - TEMPORARY",
+    doc_ui=False  # Hide from API documentation UI
+)
+def add_payment_type_column():
+    """Temporarily add payment_type column through API"""
+    # Check admin password
+    admin_header = request.headers.get("X-Admin-Password")
+    if admin_header != settings.ADMIN_PASSWORD:
+        logger.warning("Unauthorized attempt to add payment_type column")
+        return jsonify({"error": "Unauthorized"}), 401
+    
+    try:
+        # Check if column already exists
+        result = db.execute("""
+            SELECT column_name 
+            FROM information_schema.columns 
+            WHERE table_name = 'signup' 
+            AND column_name = 'payment_type'
+        """).fetchall()
+        
+        if result:
+            logger.info("payment_type column already exists")
+            return jsonify({"message": "Column already exists"}), 200
+        
+        # Add the column
+        db.execute("ALTER TABLE signup ADD COLUMN payment_type VARCHAR(50) DEFAULT 'cash_pay'")
+        db.commit()
+        
+        logger.info("Successfully added payment_type column to signup table")
+        return jsonify({"success": True, "message": "payment_type column added"}), 200
+        
+    except Exception as e:
+        db.rollback()
+        logger.error(f"Error adding payment_type column: {str(e)}")
+        return jsonify({"error": str(e)}), 500
 
 @app.post(
     "/intakeq_invoice_hook",
