@@ -35,60 +35,52 @@ target_metadata = Base.metadata # Ensure this points to the Base from which all 
 def get_db_url_and_args_for_alembic():
     """
     Constructs the database URL and connection args for Alembic.
-    Handles IAM authentication for AWS environments.
+    Handles IAM authentication for AWS environments and local development against AWS.
     """
-    is_aws = os.getenv("IS_AWS", "false").lower() == "true"
+    # Load environment variables if not already loaded
+    from dotenv import load_dotenv
+    load_dotenv()
+    
     env_name = os.getenv("ENV", "local")
-
     db_host = os.getenv("RDS_HOST")
     db_port = os.getenv("RDS_PORT", "5432")
     db_database = os.getenv("RDS_DATABASE")
     db_user = os.getenv("RDS_USER")
 
-    if is_aws or env_name != "local":
-        # For AWS environments, use IAM authentication
-        if db_host and db_database and db_user:
-            try:
-                import boto3
-                
-                # Generate IAM auth token
-                region = "us-east-2"
-                client = boto3.client("dsql", region_name=region)
-                password = client.generate_db_connect_admin_auth_token(
-                    Hostname=db_host,
-                    Region=region,
-                )
-                
-                url = f"postgresql://{db_user}:{password}@{db_host}:{db_port}/{db_database}"
-                args = {"sslmode": "require"}
-                
-                print(f"INFO: Using IAM authentication for Aurora DSQL at {db_host}")
-                return url, args
-                
-            except Exception as e:
-                print(f"ERROR: Failed to generate IAM token: {e}")
-                # Fallback to password if provided
-                db_password = os.getenv("RDS_PASSWORD", "")
-                url = f"postgresql://{db_user}:{db_password}@{db_host}:{db_port}/{db_database}"
-                args = {"sslmode": "require"}
-                return url, args
-        else:
-            print("WARNING: Insufficient RDS environment variables for Alembic. Falling back to SQLite.")
-            return "sqlite:///./sql_app.db", {}
-
-    else: # Local development
-        db_password = os.getenv("RDS_PASSWORD", "")
-
-        if db_host and db_database and db_user:
-            # Local PostgreSQL connection
-            print("INFO: Connecting to local PostgreSQL for Alembic.")
-            url = f"postgresql://{db_user}:{db_password}@{db_host}:{db_port}/{db_database}"
-            args = {"sslmode": "prefer"}
+    # Use IAM auth for stg and prod environments, regardless of where the script is run
+    if env_name in ["stg", "prod"]:
+        if not all([db_host, db_port, db_database, db_user]):
+            raise ValueError("RDS connection details are missing for the '{env_name}' environment.")
+            
+        print(f"INFO: Using IAM authentication for the '{env_name}' environment.")
+        try:
+            import boto3
+            region = "us-east-2"  # Or your RDS region
+            client = boto3.client("dsql", region_name=region)
+            password = client.generate_db_connect_admin_auth_token(
+                Hostname=db_host,
+                Region=region,
+            )
+            
+            url = f"postgresql://{db_user}:{password}@{db_host}:{db_port}/{db_database}"
+            args = {"sslmode": "require"}
             return url, args
-        else:
-            # Default to SQLite for basic local testing if no PostgreSQL is configured
-            print("INFO: No local PostgreSQL configured. Using SQLite for Alembic.")
-            return "sqlite:///./sql_app.db", {}
+            
+        except Exception as e:
+            print(f"ERROR: Failed to generate IAM token for RDS: {e}")
+            raise
+
+    # For local development against a local database (if needed)
+    db_password = os.getenv("RDS_PASSWORD", "")
+    if db_host and db_user and db_password:
+        print("INFO: Connecting to local PostgreSQL with password for Alembic.")
+        url = f"postgresql://{db_user}:{db_password}@{db_host}:{db_port}/{db_database}"
+        args = {"sslmode": "prefer"}
+        return url, args
+
+    # Fallback to a local SQLite database if no other configuration is found
+    print("INFO: No PostgreSQL configured. Using local SQLite for Alembic.")
+    return "sqlite:///./sql_app.db", {}
 
 
 def run_migrations_offline() -> None:
