@@ -8,24 +8,21 @@ custom:
     app: app.app
   dotenv:
     logging: false
+  # This section correctly configures the plugin to build dependencies in Docker
   pythonRequirements:
+    dockerizePip: true
     noDeploy:
       - pip
       - bin
       - pytest
+  # This section correctly configures the custom domain
   customDomain:
     domainName: ${env:DOMAIN_NAME}
+    stage: ${sls:stage}
+    certificateName: ${env:CERTIFICATE_NAME}
     createRoute53Record: true
-    createRoute53IPv6Record: true
-    certificateName: ${env:CERTIFICATE_NAME}
+    endpointType: 'regional'
     apiType: rest
-    autoDomain: true
-  customCertificate:
-    hostedZoneIds: ${env:HOSTED_ZONE_ID}
-    certificateName: ${env:CERTIFICATE_NAME}
-    region: us-east-1
-    subjectAlternativeNames:
-      - ${env:DOMAIN_NAME}
 
 provider:
   name: aws
@@ -37,7 +34,6 @@ provider:
   iam:
     role:
       statements:
-        # Allow functions to read/write objects in a bucket
         - Effect: Allow
           Action:
             - 's3:GetObject'
@@ -50,7 +46,6 @@ provider:
             - 'dsql:DbConnectAdmin'
           Resource:
             - ${env:AURORA_DSQL_ARN}
-        # Allow functions to send emails via SES
         - Effect: Allow
           Action:
             - 'ses:SendEmail'
@@ -60,7 +55,7 @@ provider:
           Action:
             - 'secretsmanager:GetSecretValue'
           Resource:
-           - 'arn:aws:secretsmanager:us-east-2:762233746762:secret:solhealth/stg/googleCal/credentials-*'
+            - 'arn:aws:secretsmanager:us-east-2:${aws:accountId}:secret:solhealth/stg/googleCal/credentials-*'
 
 package:
   exclude:
@@ -94,7 +89,6 @@ functions:
           rate: rate(2 hours)
           enabled: true
 
-
 resources:
   Resources:
     GatewayResponseDefault4XX:
@@ -112,4 +106,3 @@ plugins:
   - serverless-python-requirements
   - serverless-dotenv-plugin
   - serverless-domain-manager
-  - serverless-certificate-creator

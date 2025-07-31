@@ -24,13 +24,21 @@ def process_typeform_data(db, response_json: dict):
     This version handles both insurance and out-of-pocket payment types,
     including logic for pre-existing insurance clients.
     """
-    response_id = response_json["form_response"]["token"]
+    # ------------------------------------------------------------------
+    # Robust extraction of required fields from Typeform payload
+    # ------------------------------------------------------------------
+    form_response = response_json.get("form_response", {})
+    response_id = form_response.get("token")
 
+    if not response_id:
+        logger.error("Missing 'token' in Typeform payload", extra={"payload": response_json})
+        return  # Exit gracefully so Typeform doesn't retry
+
+    # Check for duplicate submissions early
     if db.query(ClientSignup).filter_by(response_id=response_id).first():
         logger.warning(f"Duplicate Typeform submission received: {response_id}")
         return
 
-    form_response = response_json["form_response"]
     hidden = form_response.get("hidden", {})
 
     # Extract payment_type from hidden field (if present)
@@ -39,19 +47,27 @@ def process_typeform_data(db, response_json: dict):
     # Extract client ID for insurance clients (created during eligibility check)
     existing_client_id = hidden.get("clientId", None)
 
-    questions_json = form_response["definition"]["fields"]
+    # Safely extract the question definitions
+    questions_json = form_response.get("definition", {}).get("fields", [])
+    if not questions_json:
+        logger.warning(f"No 'fields' definition found in Typeform payload for {response_id}")
     questions = dict(map(lambda item: (item["ref"], item), questions_json))
     answers = form_response["answers"]
     json: dict = {}
     for answer in answers:
-        question = questions[answer["field"]["ref"]]
+        field_ref = answer["field"]["ref"]
+        question = questions.get(field_ref)
+        if not question:
+            logger.warning(f"Unknown question ref '{field_ref}' encountered for {response_id}")
+            continue
+
         json[question["id"]] = {
-            "ref": answer["field"]["ref"],
+            "ref": field_ref,
             "answer": answer[answer["type"]]
             if answer["type"] != "multiple_choice"
-            else answer["choices"],
-            "title": question["title"],
-            "type": question["type"],
+            else answer.get("choices"),
+            "title": question.get("title"),
+            "type": question.get("type"),
         }
     data = TypeformData(json, form_response.get("variables"))
 
@@ -114,21 +130,33 @@ def process_typeform_data(db, response_json: dict):
             # Push the changes to IntakeQ
             update_client(updated_client, payment_type="insurance")
 
-            client_json = client_response.json()
+            try:
+                client_json = client_response.json()
+            except ValueError as e:
+                logger.error("Invalid JSON received from IntakeQ (get_client_by_id)", extra={"error": str(e)})
+                client_json = {}
             user_id = existing_client_id
         else:
             # Could not fetch the client – create a new one as a fallback
             response = save_update_client(
                 create_client_model(form).dict(), payment_type=payment_type
             )
-            client_json = response.json()
+            try:
+                client_json = response.json()
+            except ValueError as e:
+                logger.error("Invalid JSON received from IntakeQ (save_update_client fallback)", extra={"error": str(e)})
+                client_json = {}
             user_id = client_json.get("Id") or client_json.get("ClientId") or response_id
     else:
         # Cash-pay and other flows – create a new client record
         response = save_update_client(
             create_client_model(form).dict(), payment_type=payment_type
         )
-        client_json = response.json()
+        try:
+            client_json = response.json()
+        except ValueError as e:
+            logger.error("Invalid JSON received from IntakeQ (save_update_client)", extra={"error": str(e)})
+            client_json = {}
         user_id = client_json.get("Id") or client_json.get("ClientId") or response_id
 
     # Store UTM params against the user/client
