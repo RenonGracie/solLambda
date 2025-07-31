@@ -1,5 +1,5 @@
 # "org" ensures this Service is used with the correct Serverless Framework Access Key.
-org: smileev
+org: solhealth1
 # "service" is the name of this project. This will also be added to your AWS resource names.
 service: SolHealth-BE
  
@@ -56,6 +56,11 @@ provider:
             - 'ses:SendEmail'
             - 'ses:SendRawEmail'
           Resource: '*'
+        - Effect: Allow
+          Action:
+            - 'secretsmanager:GetSecretValue'
+          Resource:
+           - 'arn:aws:secretsmanager:us-east-2:762233746762:secret:solhealth/stg/googleCal/credentials-*'
 
 package:
   exclude:

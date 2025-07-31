@@ -1,61 +1,51 @@
-# migrations/env.py
 import os
 from logging.config import fileConfig
 
 from alembic import context
 from sqlalchemy import create_engine, pool
+from dotenv import load_dotenv
 
-# Import your models here for autogenerate support
-# This is crucial so Alembic can compare your models to the database schema.
-from src.models.db.base import Base # Assuming all your models inherit from this Base
-from src.models.db.signup_form import ClientSignup # Import specific models if needed for autogenerate
-from src.models.db.airtable import AirtableTherapist # Import other models you want Alembic to track
-# Add other model imports as necessary, e.g., from src.models.db.<your_model_file> import YourModel
+# Import your models here to ensure Alembic can see them
+from src.models.db.base import Base
+from src.models.db.signup_form import ClientSignup
+from src.models.db.airtable import AirtableTherapist
+# Add other model imports here if you have them
 
-# this is the Alembic Config object, which provides
-# access to the values within the .ini file in use.
+# This is the Alembic Config object
 config = context.config
- 
-# Interpret the config file for Python logging.
-# This line sets up loggers basically.
+
+# Interpret the config file for Python logging
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
-# add your model's MetaData object here
-# for 'autogenerate' support
-# from myapp import mymodel
-# target_metadata = mymodel.Base.metadata
-target_metadata = Base.metadata # Ensure this points to the Base from which all your models inherit
-
-# other values from the config, defined by the needs of env.py,
-# can be acquired:
-# my_important_option = config.get_main_option("my_important_option")
-# ... etc.
+# Set the target metadata for autogenerate support
+target_metadata = Base.metadata
 
 def get_db_url_and_args_for_alembic():
     """
     Constructs the database URL and connection args for Alembic.
-    Handles IAM authentication for AWS environments and local development against AWS.
+    - Uses IAM authentication for 'stg' and 'prod' environments.
+    - Uses password authentication for 'dev' environment.
+    - Falls back to local SQLite if no other config is found.
     """
-    # Load environment variables if not already loaded
-    from dotenv import load_dotenv
     load_dotenv()
     
     env_name = os.getenv("ENV", "local")
+    
     db_host = os.getenv("RDS_HOST")
     db_port = os.getenv("RDS_PORT", "5432")
     db_database = os.getenv("RDS_DATABASE")
     db_user = os.getenv("RDS_USER")
 
-    # Use IAM auth for stg and prod environments, regardless of where the script is run
+    # --- IAM Authentication for Staging and Production ---
     if env_name in ["stg", "prod"]:
-        if not all([db_host, db_port, db_database, db_user]):
-            raise ValueError("RDS connection details are missing for the '{env_name}' environment.")
-            
-        print(f"INFO: Using IAM authentication for the '{env_name}' environment.")
+        if not all([db_host, db_database, db_user]):
+            raise ValueError(f"Required RDS environment variables are missing for '{env_name}'.")
+
+        print(f"INFO: Using IAM authentication for the '{env_name}' environment at host '{db_host}'.")
         try:
             import boto3
-            region = "us-east-2"  # Or your RDS region
+            region = "us-east-2"
             client = boto3.client("dsql", region_name=region)
             password = client.generate_db_connect_admin_auth_token(
                 Hostname=db_host,
@@ -63,6 +53,7 @@ def get_db_url_and_args_for_alembic():
             )
             
             url = f"postgresql://{db_user}:{password}@{db_host}:{db_port}/{db_database}"
+            # SSL is required for IAM connections
             args = {"sslmode": "require"}
             return url, args
             
@@ -70,65 +61,42 @@ def get_db_url_and_args_for_alembic():
             print(f"ERROR: Failed to generate IAM token for RDS: {e}")
             raise
 
-    # For local development against a local database (if needed)
-    db_password = os.getenv("RDS_PASSWORD", "")
+    # --- Local Development with Password ---
+    db_password = os.getenv("RDS_PASSWORD")
     if db_host and db_user and db_password:
-        print("INFO: Connecting to local PostgreSQL with password for Alembic.")
+        print(f"INFO: Connecting to local PostgreSQL with password (ENV: {env_name}).")
         url = f"postgresql://{db_user}:{db_password}@{db_host}:{db_port}/{db_database}"
+        # SSL is not required for local connections
         args = {"sslmode": "prefer"}
         return url, args
 
-    # Fallback to a local SQLite database if no other configuration is found
-    print("INFO: No PostgreSQL configured. Using local SQLite for Alembic.")
+    # --- Fallback to SQLite ---
+    print("WARNING: No PostgreSQL configuration found. Falling back to SQLite.")
     return "sqlite:///./sql_app.db", {}
 
-
 def run_migrations_offline() -> None:
-    """Run migrations in 'offline' mode.
-
-    This configures the context with just a URL
-    and not an Engine, though an Engine is acceptable
-    here as well.  By skipping the Engine creation
-    we don't even need a DBAPI to be available.
-
-    Calls to context.execute() here emit the given string to the
-    script output.
-
-    """
-    url, args = get_db_url_and_args_for_alembic()
+    url, _ = get_db_url_and_args_for_alembic()
     context.configure(
         url=url,
         target_metadata=target_metadata,
         literal_binds=True,
         dialect_opts={"paramstyle": "named"},
     )
-
     with context.begin_transaction():
         context.run_migrations()
 
-
 def run_migrations_online() -> None:
-    """Run migrations in 'online' mode.
-
-    In this scenario we need to create an Engine
-    and associate a connection with the context.
-
-    """
     url, args = get_db_url_and_args_for_alembic()
-    
     connectable = create_engine(
         url,
-        connect_args=args,  # This includes sslmode settings
-        poolclass=pool.NullPool, # NullPool is often good for short-lived scripts like migrations
-        isolation_level="AUTOCOMMIT"  # Match your main app's setting
+        connect_args=args,
+        poolclass=pool.NullPool,
     )
-
     with connectable.connect() as connection:
         context.configure(
             connection=connection, 
             target_metadata=target_metadata
         )
-
         with context.begin_transaction():
             context.run_migrations()
 
