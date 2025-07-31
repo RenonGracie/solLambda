@@ -113,6 +113,31 @@ def send_intake_form(data: dict, *, auth_key: str | None = None, payment_type: s
     return _intakeq_post("/intakes/send", data, auth_key=auth_key, payment_type=payment_type)
 
 
+# ---------------------------------------------------------------------------
+# New helpers for retrieving and updating clients by ID
+# ---------------------------------------------------------------------------
+
+
+def get_client_by_id(client_id: str, *, auth_key: str | None = None, payment_type: str | None = None):
+    """Fetch a single IntakeQ client by its *client_id*.
+
+    This helper wraps the GET /clients/{client_id} endpoint and applies the
+    same auth-key/payment-type resolution as other helpers in this module.
+    """
+
+    return _intakeq_get(f"/clients/{client_id}", auth_key=auth_key, payment_type=payment_type)
+
+
+def update_client(client: dict, *, auth_key: str | None = None, payment_type: str | None = None):
+    """Update an existing IntakeQ client.
+
+    According to IntakeQ's API, updating a client is done via PUT /clients and
+    requires the *ClientId* field to be present in the payload.
+    """
+
+    return _intakeq_put("/clients", client, auth_key=auth_key, payment_type=payment_type)
+
+
 def intakeq(data: dict, *, auth_key: str | None = None, payment_type: str | None = None):
     try:
         return requests.post(

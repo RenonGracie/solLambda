@@ -4,7 +4,12 @@ from src.models.db.signup_form import ClientSignup, create_from_typeform_data
 from src.utils.event_utils import REGISTRATION_EVENT, USER_EVENT_TYPE, send_ga_event
 from src.utils.intakeq.bot.bot import create_client_model, create_new_form
 from src.utils.logger import get_logger
-from src.utils.request_utils import intakeq, save_update_client
+from src.utils.request_utils import (
+    intakeq,
+    save_update_client,
+    get_client_by_id,
+    update_client,
+)
 from src.utils.settings import settings
 from src.utils.typeform.typeform_parser import TypeformData
 
@@ -29,7 +34,7 @@ def process_typeform_data(db, response_json: dict):
     hidden = form_response.get("hidden", {})
 
     # Extract payment_type from hidden field (if present)
-    payment_type = hidden.get("paymentType")  # May be None, 'insurance', 'cash_pay', or legacy 'out_of_pocket'
+    payment_type = hidden.get("client_type")  # May be None, 'insurance', 'cash_pay', or legacy 'out_of_pocket'
 
     # Extract client ID for insurance clients (created during eligibility check)
     existing_client_id = hidden.get("clientId", None)
@@ -93,13 +98,33 @@ def process_typeform_data(db, response_json: dict):
         db.commit() # Commit and exit early if state is not supported
         return
 
-    # Create / update the IntakeQ client in the relevant account
+    # ------------------------------------------------------------------
+    # Create or update the IntakeQ client record
+    # ------------------------------------------------------------------
+
     if payment_type == "insurance" and existing_client_id:
-        # For insurance clients, we already have the profile, just need to update it
-        client_json = {"Id": existing_client_id, "ClientId": existing_client_id}
-        user_id = existing_client_id
+        # Attempt to fetch the existing client first – if not found we'll fall back to creation
+        client_response = get_client_by_id(existing_client_id, payment_type="insurance")
+
+        if client_response and client_response.status_code == 200:
+            # Prepare the updated client payload (ensure the ClientId is set)
+            updated_client = create_client_model(form).dict()
+            updated_client["ClientId"] = existing_client_id
+
+            # Push the changes to IntakeQ
+            update_client(updated_client, payment_type="insurance")
+
+            client_json = client_response.json()
+            user_id = existing_client_id
+        else:
+            # Could not fetch the client – create a new one as a fallback
+            response = save_update_client(
+                create_client_model(form).dict(), payment_type=payment_type
+            )
+            client_json = response.json()
+            user_id = client_json.get("Id") or client_json.get("ClientId") or response_id
     else:
-        # For out-of-pocket, create new client
+        # Cash-pay and other flows – create a new client record
         response = save_update_client(
             create_client_model(form).dict(), payment_type=payment_type
         )
@@ -119,14 +144,8 @@ def process_typeform_data(db, response_json: dict):
     # Send data to IntakeQ bot for BOTH payment types
     user_data = create_new_form(form)
 
-    # Add additional fields for the bot
+    # Add payment type so the bot can handle both insurance and cash pay flows
     user_data["payment_type"] = payment_type
-    user_data["existing_client_id"] = existing_client_id # Will be None for out-of-pocket
-
-    # Add insurance-specific hidden fields if present
-    if payment_type == "insurance":
-        user_data["insurance_provider"] = hidden.get("insuranceProvider", "")
-        user_data["member_id"] = hidden.get("memberId", "")
 
     intakeq(
         {
@@ -135,7 +154,7 @@ def process_typeform_data(db, response_json: dict):
             "form_url": settings.INTAKEQ_SIGNUP_FORM,
             "env": "live" if settings.ENV == "prod" else settings.ENV,
             "response_id": response_id,
-            "payment_type": payment_type, # Pass payment type to bot
+            "payment_type": payment_type,  # Include in bot payload
         },
         payment_type=payment_type,
     )

@@ -22,10 +22,7 @@ client_signup_api = APIBlueprint(
 )
 
 
-@client_signup_api.get(
-    "", responses={200: SignupForm, 404: Error}, summary="Search clients"
-)
-
+@client_signup_api.get("", responses={200: SignupForm, 404: Error}, summary="Search clients")
 def search_clients(query: ClientSignupQuery):
     form = db.query(ClientSignup).filter_by(response_id=query.response_id).first()
     if form:
@@ -33,16 +30,8 @@ def search_clients(query: ClientSignupQuery):
         data.therapist_specializes_in = form.therapist_specializes_in
         data.lived_experiences = form.lived_experiences
         data.utm = form.utm
-        
-        # Handle payment_type with fallback for staging environments
-        try:
-            data.payment_type = getattr(form, 'payment_type', 'out_of_pocket')
-        except AttributeError:
-            # Fallback for environments where payment_type doesn't exist yet
-            data.payment_type = 'out_of_pocket'
-            
+        data.payment_type = form.payment_type
         return jsonify(data.dict()), 200
-    return jsonify(Error(error="Form not found").dict()), 404
 
 
 @client_signup_api.get(
